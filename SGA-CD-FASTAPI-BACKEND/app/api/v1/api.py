@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 from .endpoints import (
     auth,
+    agent,
     alumnos,
     procesos,
     clases,
@@ -21,6 +22,7 @@ api_router = APIRouter()
 
 # API Routers
 api_router.include_router(auth.router, prefix="/auth", tags=["Authentication"])
+api_router.include_router(agent.router, prefix="/agent", tags=["AI Agent"])
 api_router.include_router(alumnos.router, prefix="/alumnos", tags=["Alumnos"])
 api_router.include_router(procesos.router, prefix="/procesos", tags=["Procesos de Formación"])
 api_router.include_router(clases.router, prefix="/clases", tags=["Clases"])

@@ -66,8 +66,7 @@ class ReservaBase(BaseModel):
     area: Optional[str] = None
 
 class ReservaCreate(ReservaBase):
-    inquilino_id: int
-    usuario_id_reserva: int
+    pass
 
 class ReservaUpdate(BaseModel):
     # Only some fields might be updatable
