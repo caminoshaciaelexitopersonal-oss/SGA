@@ -24,7 +24,24 @@
                 <div id="login-mensaje"></div>
                 <button type="submit">Ingresar</button>
             </form>
-            <p>¿Tu organización aún no está registrada? <a href="register.html">Crea una cuenta</a>.</p>
+
+            <div class="social-login-divider">
+                <span>O inicia sesión con</span>
+            </div>
+
+            <div class="social-login-buttons">
+                <button id="google-login-btn" class="social-btn google">
+                    <i class="fab fa-google"></i> Google
+                </button>
+                <button id="facebook-login-btn" class="social-btn facebook">
+                    <i class="fab fa-facebook-f"></i> Facebook
+                </button>
+                <button id="microsoft-login-btn" class="social-btn microsoft">
+                    <i class="fab fa-microsoft"></i> Microsoft
+                </button>
+            </div>
+
+            <p style="text-align: center; margin-top: 1.5rem;">¿Tu organización aún no está registrada? <a href="register.html">Crea una cuenta</a>.</p>
         </section>
     </main>
 
@@ -36,5 +53,7 @@
     <script src="js/config.js"></script>
     <!-- Lógica de autenticación -->
     <script src="js/auth.js"></script>
+    <!-- Lógica de OAuth -->
+    <script src="js/oauth.js"></script>
 </body>
 </html>

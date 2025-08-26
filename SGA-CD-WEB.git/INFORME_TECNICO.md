@@ -57,3 +57,26 @@ La estructura para manejar los 12 roles está **implementada** en el frontend. L
 La base de la aplicación `SGA-CD-WEB.git` está sólidamente construida. El trabajo restante consiste en "rellenar" las funciones de renderizado de vistas en `js/views.js` para cada una de las opciones del menú de cada rol, conectándolas a sus respectivos endpoints de la API del backend.
 
 **Acción Recomendada:** Continuar el desarrollo siguiendo el patrón establecido en `getGestionarUsuariosView` para implementar las funcionalidades restantes. Se recomienda abordar rol por rol para asegurar una cobertura completa.
+
+---
+*Este informe ha sido actualizado para reflejar el último conjunto de cambios.*
+
+## 4. Implementación de Autenticación Social (OAuth)
+
+*   **Estado:** **IMPLEMENTADO (Lado del Cliente)**
+*   **Descripción:** Se ha modificado la página de `login.html` para incluir botones de inicio de sesión con Google, Facebook y Microsoft. Se creó el archivo `js/oauth.js` que contiene toda la lógica del lado del cliente para el flujo de autenticación social.
+*   **Funcionamiento:**
+    1.  El usuario hace clic en un botón de proveedor (ej. Google).
+    2.  El frontend redirige al usuario a la página de consentimiento de Google.
+    3.  Tras la aprobación, Google redirige de nuevo a `login.html` con un `código` de autorización.
+    4.  El script `js/oauth.js` captura este código y lo envía al backend (ej. `/api/auth/google/callback`).
+    5.  Se espera que el backend intercambie este código por un token de acceso de la aplicación y lo devuelva.
+*   **Dependencias:** Esta funcionalidad requiere que los `client_id` correctos sean configurados en `js/oauth.js` y que el backend tenga los endpoints de callback correspondientes para cada proveedor.
+
+## 5. Implementación de Módulos Adicionales
+
+### 5.1. Módulo de Gestión de Escenarios
+*   **Estado:** **IMPLEMENTADO**
+*   **Descripción:** Se ha implementado la vista principal para la gestión de escenarios, accesible para roles como `jefe_escenarios`.
+*   **Funcionamiento:** La vista `calendario-de-escenarios` realiza una petición al endpoint `/api/v1/escenarios` (asumido) y renderiza una tabla con la lista de escenarios, su estado y acciones disponibles.
+*   **Patrón Establecido:** La implementación de este módulo sirve como un patrón claro y reutilizable para el desarrollo de los módulos restantes (Gestión Académica, Gamificación).
