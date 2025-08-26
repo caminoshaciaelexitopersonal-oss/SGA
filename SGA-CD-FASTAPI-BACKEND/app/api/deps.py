@@ -80,17 +80,15 @@ def get_current_active_user(
 
 def role_required(required_roles: List[str]):
     """
-    A dependency factory that returns a dependency to check for required roles.
-    This version checks the roles present in the JWT token payload,
-    avoiding an extra DB call.
+    A dependency factory that returns a dependency that checks for required roles
+    and returns the user object if the check is successful.
     """
-    def role_checker(token_data: TokenData = Depends(get_token_data)) -> None:
-        user_roles = set(token_data.roles)
+    def role_checker(user: user_model.Usuario = Depends(get_current_active_user)) -> user_model.Usuario:
+        user_roles = set(user.roles) # The roles are attached in get_current_user
         if not user_roles.intersection(set(required_roles)):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail=f"Not authorized. Requires one of the following roles: {required_roles}",
             )
-        return token_data
-
+        return user
     return role_checker
