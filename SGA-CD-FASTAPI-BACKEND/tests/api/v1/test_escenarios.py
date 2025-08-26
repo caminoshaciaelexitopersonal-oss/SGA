@@ -31,7 +31,7 @@ def test_create_reserva_success(client: TestClient, db: Session):
     """
     tenant = create_test_tenant(db)
     parte = create_test_escenario_parte(db, tenant.id)
-    headers = get_auth_headers(client, db, "test_user_reservas")
+    headers = get_auth_headers(client, db, "test_user_reservas", "profesor")
 
     reserva_data = {
         "escenario_parte_id": parte.id,
@@ -55,7 +55,7 @@ def test_create_reserva_conflict(client: TestClient, db: Session):
     """
     tenant = create_test_tenant(db)
     parte = create_test_escenario_parte(db, tenant.id)
-    headers = get_auth_headers(client, db, "test_user_reservas_conflict")
+    headers = get_auth_headers(client, db, "test_user_reservas_conflict", "profesor")
 
     # First reservation
     start_time = datetime.utcnow() + timedelta(days=1)
@@ -91,7 +91,7 @@ def test_create_reserva_no_conflict(client: TestClient, db: Session):
     """
     tenant = create_test_tenant(db)
     parte = create_test_escenario_parte(db, tenant.id)
-    headers = get_auth_headers(client, db, "test_user_reservas_noconflict")
+    headers = get_auth_headers(client, db, "test_user_reservas_noconflict", "profesor")
 
     # A reservation in the future
     start_time_1 = datetime.utcnow() + timedelta(days=2, hours=1)

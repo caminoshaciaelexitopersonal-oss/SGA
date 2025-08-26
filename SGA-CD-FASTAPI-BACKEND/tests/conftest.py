@@ -4,19 +4,17 @@ import pytest
 from typing import Generator
 
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 # Add the directory containing the 'models' package to the Python path.
-# This is a workaround for the monorepo structure where the database models
-# are in a separate project directory.
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'SGA-CD-DB.git')))
 
 from app.main import app
 from app.api import deps
 from models.base import Base
-import models # Import all models to ensure they are registered with the Base
+import models
 
 # --- Test Database Setup ---
 SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"
@@ -28,21 +26,13 @@ engine = create_engine(
 )
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# Create tables in the in-memory database before tests run
-Base.metadata.create_all(bind=engine)
-
 # --- Dependency Override ---
 def override_get_db() -> Generator:
-    """
-    FastAPI dependency that provides a test database session.
-    """
-    db = None
+    db = TestingSessionLocal()
     try:
-        db = TestingSessionLocal()
         yield db
     finally:
-        if db:
-            db.close()
+        db.close()
 
 app.dependency_overrides[deps.get_db] = override_get_db
 
@@ -50,16 +40,61 @@ app.dependency_overrides[deps.get_db] = override_get_db
 @pytest.fixture(scope="function")
 def db() -> Generator:
     """
-    A fixture that provides a test database session for setting up test data.
-    It creates tables before each test and drops them afterwards.
+    A fixture that provides a test database session.
+    It creates all SQLAlchemy model tables AND the custom RBAC tables.
     """
+    # Create tables defined in SQLAlchemy models
     Base.metadata.create_all(bind=engine)
+
+    # Manually create and populate the tables needed for the new RBAC system
+    with engine.connect() as connection:
+        # Create the roles table
+        connection.execute(text("""
+            CREATE TABLE roles (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                nombre VARCHAR(50) UNIQUE NOT NULL,
+                descripcion TEXT
+            )
+        """))
+        # Create the user_roles join table
+        connection.execute(text("""
+            CREATE TABLE user_roles (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                role_id INTEGER NOT NULL,
+                FOREIGN KEY (user_id) REFERENCES usuarios(id),
+                FOREIGN KEY (role_id) REFERENCES roles(id)
+            )
+        """))
+        # Populate the roles table
+        connection.execute(text("""
+            INSERT INTO roles (nombre, descripcion) VALUES
+            ('admin_general', 'Super Administrador del Sistema con acceso total.'),
+            ('admin_empresa', 'Administrador de una empresa/inquilino específico.'),
+            ('jefe_area', 'Jefe de un área específica como Cultura o Deportes.'),
+            ('profesional_area', 'Asistente principal del Jefe de Área.'),
+            ('tecnico_area', 'Soporte operativo para un área.'),
+            ('coordinador', 'Coordina actividades y al personal de instructores.'),
+            ('profesor', 'Instructor o profesor que imparte clases.'),
+            ('alumno', 'Estudiante que recibe la formación.'),
+            ('padre_acudiente', 'Representante legal de uno o más alumnos.'),
+            ('jefe_almacen', 'Gestiona el inventario de materiales y equipos.'),
+            ('jefe_escenarios', 'Gestiona la disponibilidad de los espacios físicos.')
+        """))
+        connection.commit()
+
     db_session = TestingSessionLocal()
     try:
         yield db_session
     finally:
         db_session.close()
+        # Drop all tables after the test
         Base.metadata.drop_all(bind=engine)
+        # Manually drop the custom tables
+        with engine.connect() as connection:
+            connection.execute(text("DROP TABLE user_roles"))
+            connection.execute(text("DROP TABLE roles"))
+            connection.commit()
 
 
 @pytest.fixture(scope="module")

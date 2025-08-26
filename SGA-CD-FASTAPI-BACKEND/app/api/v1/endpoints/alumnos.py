@@ -27,7 +27,7 @@ def create_alumno(
     *,
     db: Session = Depends(deps.get_db),
     alumno_in: schemas.AlumnoCreate,
-    current_user: user_model.Usuario = Depends(deps.RoleRequired(["admin_empresa", "profesor"])),
+    current_user: user_model.Usuario = Depends(deps.role_required(["admin_empresa", "profesor"])),
 ) -> Any:
     """
     Create a new alumno.
@@ -60,7 +60,7 @@ def update_alumno(
     db: Session = Depends(deps.get_db),
     alumno_id: int,
     alumno_in: schemas.AlumnoUpdate,
-    current_user: user_model.Usuario = Depends(deps.RoleRequired(["admin_empresa", "profesor"])),
+    current_user: user_model.Usuario = Depends(deps.role_required(["admin_empresa", "profesor"])),
 ) -> Any:
     """
     Update an alumno.
@@ -76,7 +76,7 @@ def delete_alumno(
     *,
     db: Session = Depends(deps.get_db),
     alumno_id: int,
-    current_user: user_model.Usuario = Depends(deps.RoleRequired(["admin_empresa"])),
+    current_user: user_model.Usuario = Depends(deps.role_required(["admin_empresa"])),
 ) -> Any:
     """
     Delete an alumno. (Restricted to tenant admins)

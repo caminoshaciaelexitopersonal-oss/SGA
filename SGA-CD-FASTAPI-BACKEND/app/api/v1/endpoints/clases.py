@@ -26,7 +26,7 @@ def create_clase(
     *,
     db: Session = Depends(deps.get_db),
     clase_in: schemas.ClaseCreate,
-    current_user: user_model.Usuario = Depends(deps.RoleRequired(["admin_empresa", "profesor"])),
+    current_user: user_model.Usuario = Depends(deps.role_required(["admin_empresa", "profesor"])),
 ) -> Any:
     """
     Create new clase.
@@ -56,7 +56,7 @@ def update_clase(
     db: Session = Depends(deps.get_db),
     clase_id: int,
     clase_in: schemas.ClaseUpdate,
-    current_user: user_model.Usuario = Depends(deps.RoleRequired(["admin_empresa", "profesor"])),
+    current_user: user_model.Usuario = Depends(deps.role_required(["admin_empresa", "profesor"])),
 ) -> Any:
     """
     Update a clase.
