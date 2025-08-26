@@ -9,9 +9,6 @@ class AcademicoLieutenantState(TypedDict):
     final_report: str
     error: str | None
 
-# Puesto de Mando del Teniente: Instancia de su Sargento
-academico_sargento_agent_builder = get_academico_sargento_graph()
-
 # Nodos del Grafo Supervisor del Teniente
 async def delegate_to_sargento(state: AcademicoLieutenantState) -> AcademicoLieutenantState:
     """(NODO ÚNICO DE EJECUCIÓN) Delega la misión completa al Sargento especialista."""
@@ -37,7 +34,27 @@ async def compile_report(state: AcademicoLieutenantState) -> AcademicoLieutenant
     return state
 
 # Ensamblaje del Grafo Supervisor del Teniente
-def get_academico_lieutenant_graph():
+def get_academico_lieutenant_graph(llm: Any):
+    # El teniente obtiene el constructor de su sargento, pasándole el LLM.
+    academico_sargento_agent_builder = get_academico_sargento_graph(llm)
+
+    # El resto de la lógica del teniente no cambia, ya que solo delega.
+    async def delegate_to_sargento(state: AcademicoLieutenantState) -> AcademicoLieutenantState:
+        """(NODO ÚNICO DE EJECUCIÓN) Delega la misión completa al Sargento especialista."""
+        print(f"--- 🫡 TENIENTE ACADÉMICO: Recibida orden. Delegando al Sargento Académico -> '{state['captain_order']}' ---")
+        try:
+            # El Teniente construye y luego invoca al agente sargento
+            sargento_agent = academico_sargento_agent_builder(state)
+            result = await sargento_agent.ainvoke({
+                "teniente_order": state['captain_order'],
+                "app_context": state['app_context']
+            })
+            state["final_report"] = result.get("final_report", "El Sargento completó la misión sin un reporte detallado.")
+        except Exception as e:
+            print(f"--- ❌ TENIENTE ACADÉMICO: El Sargento reportó un error crítico: {e} ---")
+            state["error"] = f"Misión fallida bajo el mando del Sargento Académico. Razón: {e}"
+        return state
+
     workflow = StateGraph(AcademicoLieutenantState)
 
     workflow.add_node("delegate_mission", delegate_to_sargento)

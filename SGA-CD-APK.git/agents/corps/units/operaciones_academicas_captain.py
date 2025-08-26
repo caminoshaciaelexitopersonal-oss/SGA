@@ -1,13 +1,9 @@
 from typing import TypedDict, List, Any
 from langchain_core.pydantic_v1 import BaseModel, Field
 from langgraph.graph import StateGraph, END
-from agent.llm_service import get_llm
-
 from .platoons.academico_teniente import get_academico_lieutenant_graph
 from .platoons.comunicacion_experiencia_teniente import get_comunicacion_experiencia_lieutenant_graph
 from .platoons.gamificacion_teniente import get_gamificacion_lieutenant_graph
-
-llm = get_llm()
 
 class PlatoonTask(BaseModel):
     task_description: str = Field(description="La descripción detallada de la misión para el Teniente.")
@@ -27,11 +23,7 @@ class OperacionesCaptainState(TypedDict):
     final_report: str
     error: str | None
 
-academico_agent = get_academico_lieutenant_graph()
-comunicacion_agent = get_comunicacion_experiencia_lieutenant_graph()
-gamificacion_agent = get_gamificacion_lieutenant_graph()
-
-async def create_platoon_plan(state: OperacionesCaptainState) -> OperacionesCaptainState:
+async def create_platoon_plan(state: OperacionesCaptainState, llm: Any) -> OperacionesCaptainState:
     print("--- 🧠 CAP. OPERACIONES ACADÉMICAS: Creando Plan de Pelotón... ---")
     structured_llm = llm.with_structured_output(PlatoonPlan)
     prompt = f"""
@@ -95,9 +87,37 @@ async def compile_final_report(state: OperacionesCaptainState) -> OperacionesCap
     state["final_report"] = f"Misión de Operaciones Académicas completada. Resumen:\n{report_body}"
     return state
 
-def get_operaciones_academicas_captain_graph():
+def get_operaciones_academicas_captain_graph(llm: Any):
+    academico_agent = get_academico_lieutenant_graph(llm)
+    comunicacion_agent = get_comunicacion_experiencia_lieutenant_graph(llm)
+    gamificacion_agent = get_gamificacion_lieutenant_graph(llm)
+
+    async def academico_node(state: OperacionesCaptainState) -> OperacionesCaptainState:
+        mission = state["task_queue"].pop(0)
+        print(f"--- 🔽 CAPITÁN: Delegando a TTE. ACADÉMICO -> '{mission.task_description}' ---")
+        result = await academico_agent.ainvoke({"captain_order": mission.task_description, "app_context": state.get("app_context")})
+        state["completed_missions"].append({"lieutenant": "Académico", "report": result.get("final_report", "Sin reporte.")})
+        return state
+
+    async def comunicacion_node(state: OperacionesCaptainState) -> OperacionesCaptainState:
+        mission = state["task_queue"].pop(0)
+        print(f"--- 🔽 CAPITÁN: Delegando a TTE. COMUNICACIÓN -> '{mission.task_description}' ---")
+        result = await comunicacion_agent.ainvoke({"captain_order": mission.task_description, "app_context": state.get("app_context")})
+        state["completed_missions"].append({"lieutenant": "Comunicación y Exp.", "report": result.get("final_report", "Sin reporte.")})
+        return state
+
+    async def gamificacion_node(state: OperacionesCaptainState) -> OperacionesCaptainState:
+        mission = state["task_queue"].pop(0)
+        print(f"--- 🔽 CAPITÁN: Delegando a TTE. GAMIFICACIÓN -> '{mission.task_description}' ---")
+        result = await gamificacion_agent.ainvoke({"captain_order": mission.task_description, "app_context": state.get("app_context")})
+        state["completed_missions"].append({"lieutenant": "Gamificación", "report": result.get("final_report", "Sin reporte.")})
+        return state
+
     workflow = StateGraph(OperacionesCaptainState)
-    workflow.add_node("planner", create_platoon_plan)
+
+    planner_node = lambda state: create_platoon_plan(state, llm)
+
+    workflow.add_node("planner", planner_node)
     workflow.add_node("router", lambda s: s)
     workflow.add_node("academico_lieutenant", academico_node)
     workflow.add_node("comunicacion_lieutenant", comunicacion_node)

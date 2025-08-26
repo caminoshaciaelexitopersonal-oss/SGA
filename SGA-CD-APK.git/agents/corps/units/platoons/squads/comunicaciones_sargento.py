@@ -1,7 +1,7 @@
 from .sargento_base_graph import SargentoGraphBuilder, SargentoBaseState
 from tools.herramientas_comunicaciones import ComunicacionesSoldiers
 
-def get_comunicaciones_sargento_graph():
+def get_comunicaciones_sargento_graph(llm: any):
     """
     Construye y devuelve el agente Sargento de Comunicaciones.
 
@@ -16,7 +16,7 @@ def get_comunicaciones_sargento_graph():
         # El Sargento recluta a su escuadra de soldados especialistas en comunicación
         squad = ComunicacionesSoldiers(api_client).get_all_soldiers()
         # Construye el grafo de mando usando la plantilla estandarizada
-        builder = SargentoGraphBuilder(squad, squad_name="Comunicación y Notificaciones")
+        builder = SargentoGraphBuilder(squad, squad_name="Comunicación y Notificaciones", llm=llm)
         return builder.build_graph()
 
     print("✅ Doctrina DEAA-V2.1 aplicada: Sargento de Comunicaciones listo para el despliegue.")

@@ -14,10 +14,16 @@ def initialize_llm(page: ft.Page, config: Dict[str, Any]) -> None:
     """
     Initializes the LLM based on a dynamic configuration dictionary.
     Sets a global status that can be checked by the UI.
+    Allows re-initialization if the previous attempt failed.
     """
     global _llm_instance, _llm_status
-    if _llm_status != "not_initialized":
+    # Allow re-initialization only if not already successfully initialized.
+    if _llm_status == "initialized":
         return
+
+    # Reset status for a new attempt
+    _llm_instance = None
+    _llm_status = "not_initialized"
 
     provider = config.get("llm_preference", "local")
     _llm_status = f"initializing_{provider}"
@@ -39,19 +45,24 @@ def initialize_llm(page: ft.Page, config: Dict[str, Any]) -> None:
             llm = ChatGoogleGenerativeAI(google_api_key=api_key, model="gemini-1.5-flash")
 
     elif provider == "local":
-        platform = page.platform
-        if platform in ["android", "ios"]:
-            model_path = "assets/models/phi-1_5.gguf"
-            if not os.path.exists(model_path):
-                _llm_status = "error_local_model_missing"
-            else:
-                llm = LlamaCpp(model_path=model_path, n_ctx=2048, n_gpu_layers=0, verbose=False)
-        else: # Desktop
+        model_path = config.get("local_model_path")
+        if not model_path or not os.path.exists(model_path):
+            _llm_status = "error_local_model_missing"
+        else:
             try:
-                llm = ChatOllama(model="llama3")
-                llm.invoke("test")
-            except Exception:
-                _llm_status = "error_ollama_not_found"
+                # n_gpu_layers=0 as we assume no GPU acceleration on mobile for now
+                llm = LlamaCpp(model_path=model_path, n_ctx=2048, n_gpu_layers=0, verbose=True)
+                _llm_status = "initialized"
+            except Exception as e:
+                _llm_status = f"error_loading_local_model: {e}"
+
+    elif provider == "rules_based":
+        # This is a placeholder for the non-AI assistant
+        # We can create a dummy class that mimics the LLM interface
+        class RulesBasedAssistant:
+            def invoke(self, *args, **kwargs):
+                return "Esta es una respuesta del asistente basado en reglas."
+        llm = RulesBasedAssistant()
     else:
         _llm_status = "error_unknown_provider"
 

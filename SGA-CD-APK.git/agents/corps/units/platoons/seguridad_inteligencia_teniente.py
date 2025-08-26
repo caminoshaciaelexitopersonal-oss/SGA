@@ -1,12 +1,9 @@
 from typing import TypedDict, Any, List
 from langgraph.graph import StateGraph, END, START
-from agent.llm_service import get_llm
 from langchain_core.pydantic_v1 import BaseModel, Field
 
 from .squads.seguridad_sargento import get_seguridad_sargento_graph
 from .squads.inteligencia_sargento import get_inteligencia_sargento_graph
-
-llm = get_llm()
 
 class SargentoMission(BaseModel):
     task_description: str = Field(description="La descripción específica de la misión para el Sargento.")
@@ -24,10 +21,7 @@ class SecurityIntelligenceState(TypedDict):
     final_report: str
     error: str | None
 
-seguridad_sargento_builder = get_seguridad_sargento_graph()
-inteligencia_sargento_builder = get_inteligencia_sargento_graph()
-
-async def planner_node(state: SecurityIntelligenceState) -> SecurityIntelligenceState:
+async def planner_node(state: SecurityIntelligenceState, llm: Any) -> SecurityIntelligenceState:
     """Decide qué Sargento es necesario para cada fase de la misión."""
     print(f"--- 🤔 TTE. SEG/INT: Creando Plan de Pelotón para '{state['captain_order']}' ---")
     planner = llm.with_structured_output(MissionPlan)
@@ -57,19 +51,6 @@ def router_node(state: SecurityIntelligenceState):
     state["task_queue"].pop(0)
     return "router"
 
-async def seguridad_node(state: SecurityIntelligenceState) -> SecurityIntelligenceState:
-    mission = state["task_queue"].pop(0)
-    sargento_agent = seguridad_sargento_builder(state)
-    result = await sargento_agent.ainvoke({"teniente_order": mission.task_description, "app_context": state["app_context"]})
-    state["completed_missions"].append(f"Reporte del Sgto. de Seguridad: {result.get('final_report', 'Sin reporte.')}")
-    return state
-
-async def inteligencia_node(state: SecurityIntelligenceState) -> SecurityIntelligenceState:
-    mission = state["task_queue"].pop(0)
-    sargento_agent = inteligencia_sargento_builder(state)
-    result = await sargento_agent.ainvoke({"teniente_order": mission.task_description, "app_context": state["app_context"]})
-    state["completed_missions"].append(f"Reporte del Sgto. de Inteligencia: {result.get('final_report', 'Sin reporte.')}")
-    return state
 
 async def compiler_node(state: SecurityIntelligenceState) -> SecurityIntelligenceState:
     if state.get("error"):
@@ -78,9 +59,29 @@ async def compiler_node(state: SecurityIntelligenceState) -> SecurityIntelligenc
         state["final_report"] = "Misión de Seguridad e Inteligencia completada.\n- " + "\n- ".join(state["completed_missions"])
     return state
 
-def get_seguridad_inteligencia_lieutenant_graph():
+def get_seguridad_inteligencia_lieutenant_graph(llm: Any):
+    seguridad_sargento_builder = get_seguridad_sargento_graph(llm)
+    inteligencia_sargento_builder = get_inteligencia_sargento_graph(llm)
+
+    async def seguridad_node(state: SecurityIntelligenceState) -> SecurityIntelligenceState:
+        mission = state["task_queue"].pop(0)
+        sargento_agent = seguridad_sargento_builder(state)
+        result = await sargento_agent.ainvoke({"teniente_order": mission.task_description, "app_context": state["app_context"]})
+        state["completed_missions"].append(f"Reporte del Sgto. de Seguridad: {result.get('final_report', 'Sin reporte.')}")
+        return state
+
+    async def inteligencia_node(state: SecurityIntelligenceState) -> SecurityIntelligenceState:
+        mission = state["task_queue"].pop(0)
+        sargento_agent = inteligencia_sargento_builder(state)
+        result = await sargento_agent.ainvoke({"teniente_order": mission.task_description, "app_context": state["app_context"]})
+        state["completed_missions"].append(f"Reporte del Sgto. de Inteligencia: {result.get('final_report', 'Sin reporte.')}")
+        return state
+
     workflow = StateGraph(SecurityIntelligenceState)
-    workflow.add_node("planner", planner_node)
+
+    planner_node_with_llm = lambda state: planner_node(state, llm)
+
+    workflow.add_node("planner", planner_node_with_llm)
     workflow.add_node("router", lambda s: s)
     workflow.add_node("seguridad_sargento", seguridad_node)
     workflow.add_node("inteligencia_sargento", inteligencia_node)

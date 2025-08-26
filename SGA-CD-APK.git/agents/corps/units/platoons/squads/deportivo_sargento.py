@@ -1,7 +1,7 @@
 from .sargento_base_graph import SargentoGraphBuilder, SargentoBaseState
 from tools.herramientas_deportivo import DeportivoSoldiers
 
-def get_deportivo_sargento_graph():
+def get_deportivo_sargento_graph(llm: any):
     """
     Construye y devuelve el agente Sargento Deportivo.
 
@@ -16,7 +16,7 @@ def get_deportivo_sargento_graph():
         # El Sargento recluta a su escuadra de soldados especialistas
         squad = DeportivoSoldiers(api_client).get_all_soldiers()
         # Construye el grafo de mando usando la plantilla estandarizada
-        builder = SargentoGraphBuilder(squad, squad_name="Deportivo")
+        builder = SargentoGraphBuilder(squad, squad_name="Deportivo", llm=llm)
         return builder.build_graph()
 
     print("✅ Doctrina DEAA-V2.1 aplicada: Sargento Deportivo listo para el despliegue.")
