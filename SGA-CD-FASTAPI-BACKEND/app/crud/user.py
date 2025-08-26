@@ -6,6 +6,7 @@ from models.user import Usuario
 from app.schemas.user import UserCreate
 from app.core.security import get_password_hash
 
+
 def get_user_by_username(db: Session, username: str) -> Usuario | None:
     """
     Fetches a user from the database by their username.
@@ -24,6 +25,7 @@ def get_user_by_username(db: Session, username: str) -> Usuario | None:
         user.roles = [row[0] for row in roles_result]
     return user
 
+
 def create_user(db: Session, user: UserCreate) -> Usuario:
     """
     Creates a new user in the database and assigns them a role.
@@ -37,7 +39,10 @@ def create_user(db: Session, user: UserCreate) -> Usuario:
         correo=user.email,
         password_hash=hashed_password,
         nombre_completo=user.nombre_completo,
-        # rol=user.rol,  -- This is deprecated
+        # NOTE: The 'rol' column is deprecated but still required by the DB model.
+        # We set it to satisfy the NOT NULL constraint. The new RBAC system
+        # uses the 'user_roles' table instead.
+        rol=user.rol,
         inquilino_id=user.inquilino_id,
         activo=True
     )
@@ -52,14 +57,16 @@ def create_user(db: Session, user: UserCreate) -> Usuario:
     if not role_result:
         # This case should ideally not happen if input is validated,
         # but as a safeguard, we can either raise an error or do nothing.
-        # For now, we'll just commit the user without the role.
-        db.rollback() # Rollback user creation if role doesn't exist
+        # For now, we'll just rollback the user creation if role doesn't exist.
+        db.rollback()
         raise ValueError(f"Role '{user.rol}' not found in 'roles' table.")
 
     role_id = role_result[0]
 
     # 2. Insert into the user_roles join table
-    assign_role_query = text("INSERT INTO user_roles (user_id, role_id) VALUES (:user_id, :role_id)")
+    assign_role_query = text(
+        "INSERT INTO user_roles (user_id, role_id) VALUES (:user_id, :role_id)"
+    )
     db.execute(assign_role_query, {"user_id": db_user.id, "role_id": role_id})
     db.commit()
 

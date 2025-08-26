@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app import crud, schemas
-import models
+from models import user as user_model
 from app.api import deps
 
 router = APIRouter()
@@ -15,7 +15,7 @@ def read_escenarios(
     db: Session = Depends(deps.get_db),
     skip: int = 0,
     limit: int = 100,
-    current_user: models.Usuario = Depends(deps.get_current_active_user)
+    current_user: user_model.Usuario = Depends(deps.get_current_active_user)
 ) -> Any:
     """
     Retrieve escenarios for the current tenant.
@@ -30,7 +30,7 @@ def create_escenario(
     *,
     db: Session = Depends(deps.get_db),
     escenario_in: schemas.EscenarioCreate,
-    current_user: models.Usuario = Depends(deps.RoleRequired(["admin_empresa", "jefe_escenarios"]))
+    current_user: user_model.Usuario = Depends(deps.role_required(["admin_empresa", "jefe_escenarios"]))
 ) -> Any:
     """
     Create new escenario. Only accessible to admins and scenario managers.
@@ -48,7 +48,7 @@ def read_reservas_by_part(
     db: Session = Depends(deps.get_db),
     skip: int = 0,
     limit: int = 100,
-    current_user: models.Usuario = Depends(deps.get_current_active_user)
+    current_user: user_model.Usuario = Depends(deps.get_current_active_user)
 ) -> Any:
     """
     Retrieve reservas for a specific escenario part.
@@ -64,7 +64,7 @@ def create_reserva(
     *,
     db: Session = Depends(deps.get_db),
     reserva_in: schemas.ReservaCreate,
-    current_user: models.Usuario = Depends(deps.get_current_active_user)
+    current_user: user_model.Usuario = Depends(deps.get_current_active_user)
 ) -> Any:
     """
     Create a new reserva after checking for scheduling conflicts.

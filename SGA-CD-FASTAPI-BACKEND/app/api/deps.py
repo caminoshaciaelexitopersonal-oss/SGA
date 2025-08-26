@@ -13,7 +13,7 @@ from models import user as user_model
 
 
 reusable_oauth2 = OAuth2PasswordBearer(
-    tokenUrl=f"{settings.API_V1_STR}/auth/login" # Updated to new login URL
+    tokenUrl=f"{settings.API_V1_STR}/auth/login"  # Updated to new login URL
 )
 
 def get_db() -> Generator:
@@ -81,7 +81,7 @@ def get_current_active_user(
 def role_required(required_roles: List[str]):
     """
     A dependency factory that returns a dependency to check for required roles.
-    This new version checks the roles present in the JWT token payload,
+    This version checks the roles present in the JWT token payload,
     avoiding an extra DB call.
     """
     def role_checker(token_data: TokenData = Depends(get_token_data)) -> None:
@@ -91,4 +91,6 @@ def role_required(required_roles: List[str]):
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail=f"Not authorized. Requires one of the following roles: {required_roles}",
             )
+        return token_data
+
     return role_checker
