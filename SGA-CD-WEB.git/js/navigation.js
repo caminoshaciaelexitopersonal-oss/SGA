@@ -6,6 +6,7 @@ const navLinks = {
         { text: 'Dashboard', icon: 'fa-home' },
         { text: 'Gestionar Empresas', icon: 'fa-building' },
         { text: 'Roles y Permisos', icon: 'fa-shield-alt' },
+        { text: 'Verificar Roles BD', icon: 'fa-database' },
         { text: 'Auditoría General', icon: 'fa-history' },
         { text: 'Gestión de Cobros', icon: 'fa-credit-card' },
         { text: 'Promociones', icon: 'fa-tags' }
