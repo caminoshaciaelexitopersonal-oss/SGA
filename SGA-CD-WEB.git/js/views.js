@@ -32,11 +32,18 @@ async function renderContentForView(viewName, token, roleName = 'default') {
                 contentArea.innerHTML = await getEventosSalidasView(token);
                 break;
             case 'gamificación':
-                // Esta vista es diferente para un alumno que para un admin/jefe
+                // La vista de gamificación depende del rol del usuario
                 if (roleName === 'alumno') {
                     contentArea.innerHTML = await getGamificacionAlumnoView(token);
+                    // No se requieren listeners adicionales para la vista del alumno por ahora
+                } else if (['jefe_area', 'profesional_area'].includes(roleName)) {
+                    contentArea.innerHTML = await getGamificacionAdminView(token);
+                    setupGamificacionAdminListeners(token);
+                } else if (roleName === 'profesor') {
+                    contentArea.innerHTML = await getGamificacionProfesorView(token);
+                    setupGamificacionProfesorListeners(token);
                 } else {
-                    contentArea.innerHTML = await getGamificacionView(token);
+                    contentArea.innerHTML = '<h2>Gamificación</h2><p>La vista de gamificación no está configurada para tu rol.</p>';
                 }
                 break;
 
@@ -70,6 +77,14 @@ async function renderContentForView(viewName, token, roleName = 'default') {
             case 'verificar-roles-bd':
                 contentArea.innerHTML = await getVerificarRolesView(token);
                 setupVerificarRolesListeners(token); // Añadir listeners específicos para esta vista
+                break;
+            case 'auditoría-general': // STAR
+                contentArea.innerHTML = await getAuditoriaView(token);
+                break;
+
+            // Vistas genéricas
+            case 'asistente-de-ia': // Agente de IA
+                contentArea.innerHTML = await getAsistenteIAView();
                 break;
 
             // Añadir más casos para otras vistas y roles aquí...
@@ -140,6 +155,85 @@ async function getGestionarUsuariosView(token) {
             </tbody>
         </table>
     `;
+}
+
+// --- Propuestas de Integración para Módulos Faltantes ---
+
+async function getAuditoriaView(token) {
+    // Propuesta para el módulo STAR (Auditoría de Logs)
+    let logsHtml;
+    try {
+        const response = await fetch(`${config.apiBaseUrl}/api/v1/audit-logs`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!response.ok) throw new Error("El endpoint de auditoría no está disponible.");
+
+        const logs = await response.json();
+        logsHtml = logs.map(log => `
+            <tr>
+                <td>${new Date(log.timestamp).toLocaleString()}</td>
+                <td>${log.user.username}</td>
+                <td>${log.action}</td>
+                <td>${log.details}</td>
+            </tr>
+        `).join('');
+
+    } catch (error) {
+        // Mock data en caso de que la API falle (que lo hará, porque no existe)
+        logsHtml = `
+            <tr>
+                <td>${new Date().toLocaleString()}</td>
+                <td>admin_empresa_1</td>
+                <td>UPDATE_USER</td>
+                <td>Se actualizó el rol del usuario 'profesor_2' a 'coordinador'.</td>
+            </tr>
+            <tr>
+                <td>${new Date().toLocaleString()}</td>
+                <td>jefe_area_cultura</td>
+                <td>CREATE_EVENT</td>
+                <td>Se creó el evento 'Festival de Teatro'.</td>
+            </tr>
+        `;
+    }
+
+    return `
+        <h2><i class="fas fa-history"></i> Visor de Auditoría (STAR)</h2>
+        <p>Esta es una propuesta de integración para el módulo de auditoría. Los datos mostrados son de ejemplo.</p>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Fecha y Hora</th>
+                    <th>Usuario</th>
+                    <th>Acción</th>
+                    <th>Detalles</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${logsHtml}
+            </tbody>
+        </table>
+    `;
+}
+
+async function getAsistenteIAView() {
+    // Propuesta para el módulo de Agente de IA (LangChain)
+    return `
+        <h2><i class="fas fa-robot"></i> Asistente de IA</h2>
+        <p>Propuesta de integración para un agente de IA conversacional. La lógica de backend se conectaría a un servicio como LangChain.</p>
+        <div class="chat-container">
+            <div class="chat-box" id="ai-chat-box">
+                <div class="chat-message bot">
+                    <p>Hola, soy el asistente virtual de SGA-CD. ¿Cómo puedo ayudarte hoy?</p>
+                </div>
+            </div>
+            <div class="chat-input">
+                <input type="text" id="ai-chat-input" placeholder="Escribe tu pregunta...">
+                <button id="ai-chat-send">Enviar</button>
+            </div>
+        </div>
+    `;
+    // Nota: Se necesitaría un listener en app.js o aquí mismo para manejar el envío
+    // de mensajes y la recepción de respuestas desde la API.
 }
 
 function setupVerificarRolesListeners(token) {
@@ -1033,29 +1127,210 @@ async function getMisCursosView(token) {
     }
 }
 
-async function getGamificacionView(token) {
-    // Esta es una vista de marcador de posición para el módulo SIGA
-    // En una implementación real, se conectarían a endpoints como /api/v1/gamification/rules o /api/v1/gamification/rankings
-    return `
-        <h2>Módulo de Gamificación (SIGA)</h2>
-        <p>Este módulo gestionará el sistema de puntos, niveles, medallas y rankings para los alumnos.</p>
+async function getGamificacionAdminView(token) {
+    // Vista para Jefe de Área y Profesional para gestionar las reglas del juego.
+    try {
+        const [rulesRes, medalsRes, rankingRes] = await Promise.all([
+            fetch(`${config.apiBaseUrl}/api/v1/gamification/rules`, { headers: { 'Authorization': `Bearer ${token}` } }),
+            fetch(`${config.apiBaseUrl}/api/v1/gamification/medals`, { headers: { 'Authorization': `Bearer ${token}` } }),
+            fetch(`${config.apiBaseUrl}/api/v1/gamification/ranking`, { headers: { 'Authorization': `Bearer ${token}` } })
+        ]);
 
-        <div class="tabs">
-            <button class="tab-button active">Reglas y Puntos</button>
-            <button class="tab-button">Rankings</button>
-            <button class="tab-button">Medallas</button>
-        </div>
+        const rules = await rulesRes.json();
+        const medals = await medalsRes.json();
+        const ranking = await rankingRes.json();
 
-        <div class="tab-content">
-            <h3>Propuesta de Implementación:</h3>
-            <ul>
-                <li><strong>Reglas y Puntos:</strong> El Jefe de Área y el Profesional de Área podrían definir aquí las reglas. (Ej: 'Asistir a clase' = 5 puntos, 'Completar tarea' = 10 puntos).</li>
-                <li><strong>Rankings:</strong> Mostraría una tabla con los alumnos con más puntos, filtrable por curso o disciplina.</li>
-                <li><strong>Medallas:</strong> Un catálogo de medallas disponibles (Ej: 'Asistencia Perfecta', 'Mejor Compañero') que los profesores pueden asignar.</li>
-            </ul>
-            <p><strong>Estado actual:</strong> El módulo no está implementado. Esta es una propuesta visual y funcional. Se requiere desarrollo en backend y frontend.</p>
-        </div>
-    `;
+        const rulesHtml = rules.map(rule => `
+            <tr>
+                <td>${rule.nombre}</td>
+                <td>${rule.puntos}</td>
+                <td>
+                    <button class="btn-editar-regla" data-rule-id="${rule.id}">Editar</button>
+                    <button class="btn-eliminar-regla" data-rule-id="${rule.id}">Eliminar</button>
+                </td>
+            </tr>
+        `).join('') || '<tr><td colspan="3">No hay reglas definidas.</td></tr>';
+
+        const medalsHtml = medals.map(medal => `
+            <div class="medal-card">
+                <h4><i class="fas fa-medal"></i> ${medal.nombre}</h4>
+                <p>${medal.descripcion}</p>
+                <div>
+                    <button class="btn-editar-medalla" data-medal-id="${medal.id}">Editar</button>
+                    <button class="btn-eliminar-medalla" data-medal-id="${medal.id}">Eliminar</button>
+                </div>
+            </div>
+        `).join('') || '<p>No hay medallas creadas.</p>';
+
+        const rankingHtml = ranking.map((r, index) => `
+            <tr>
+                <td>#${index + 1}</td>
+                <td>${r.nombre_completo}</td>
+                <td>${r.puntos}</td>
+            </tr>
+        `).join('') || '<tr><td colspan="3">No hay datos de ranking.</td></tr>';
+
+        return `
+            <h2>Administración de Gamificación (SIGA)</h2>
+            <div class="tabs">
+                <button class="tab-button active" data-tab="reglas">Reglas y Puntos</button>
+                <button class="tab-button" data-tab="medallas">Medallas</button>
+                <button class="tab-button" data-tab="ranking">Ranking General</button>
+            </div>
+            <div id="tab-reglas" class="tab-content active">
+                <h3>Reglas de Puntuación</h3>
+                <button id="btn-crear-regla">Crear Nueva Regla</button>
+                <table class="data-table">
+                    <thead><tr><th>Acción</th><th>Puntos</th><th>Acciones</th></tr></thead>
+                    <tbody>${rulesHtml}</tbody>
+                </table>
+            </div>
+            <div id="tab-medallas" class="tab-content">
+                <h3>Catálogo de Medallas</h3>
+                <button id="btn-crear-medalla">Crear Nueva Medalla</button>
+                <div class="card-container">${medalsHtml}</div>
+            </div>
+            <div id="tab-ranking" class="tab-content">
+                <h3>Ranking de Alumnos</h3>
+                <table class="data-table">
+                    <thead><tr><th>Puesto</th><th>Alumno</th><th>Puntos</th></tr></thead>
+                    <tbody>${rankingHtml}</tbody>
+                </table>
+            </div>
+        `;
+    } catch (error) {
+        return `<h2>Error</h2><p>No se pudo cargar la configuración de gamificación: ${error.message}</p>`;
+    }
+}
+
+function setupGamificacionAdminListeners(token) {
+    // Lógica para cambiar de tabs
+    document.querySelector('.tabs').addEventListener('click', e => {
+        if (e.target.matches('.tab-button')) {
+            document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            e.target.classList.add('active');
+            document.getElementById(`tab-${e.target.dataset.tab}`).classList.add('active');
+        }
+    });
+
+    // Listeners para CRUD de reglas y medallas (similar a cursos o áreas)
+    // ... aquí iría la lógica para abrir modales, enviar datos a la API y refrescar la vista ...
+    // Por simplicidad, se omite el código detallado de los modales, ya que sigue el patrón de otras vistas.
+    console.log("Listeners de Gamificación Admin cargados. La lógica CRUD completa se implementaría aquí.");
+}
+
+async function getGamificacionProfesorView(token) {
+    // Vista para que el profesor otorgue puntos o medallas a sus alumnos.
+    try {
+        const [alumnos, medallas, reglas] = await Promise.all([
+            fetch(`${config.apiBaseUrl}/api/v1/profesor/alumnos`, { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()),
+            fetch(`${config.apiBaseUrl}/api/v1/gamification/medals`, { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()),
+            fetch(`${config.apiBaseUrl}/api/v1/gamification/rules`, { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json())
+        ]);
+
+        const alumnosOptions = alumnos.map(a => `<option value="${a.id}">${a.nombre_completo}</option>`).join('');
+        const medallasOptions = medallas.map(m => `<option value="${m.id}">${m.nombre}</option>`).join('');
+        const reglasOptions = reglas.map(r => `<option value="${r.id}">${r.nombre} (${r.puntos} pts)</option>`).join('');
+
+        return `
+            <h2>Otorgar Recompensas (Gamificación)</h2>
+            <div class="form-container">
+                <h3>Seleccionar Alumno</h3>
+                <select id="select-alumno-gamificacion" required>
+                    <option value="">Seleccione un alumno...</option>
+                    ${alumnosOptions}
+                </select>
+            </div>
+
+            <div id="gamificacion-actions-container" style="display: none;">
+                <div class="form-container">
+                    <h4>Otorgar Puntos</h4>
+                    <select id="select-regla-puntos">
+                        <option value="">Seleccione una regla...</option>
+                        ${reglasOptions}
+                    </select>
+                    <button id="btn-otorgar-puntos">Otorgar Puntos</button>
+                </div>
+                <hr>
+                <div class="form-container">
+                    <h4>Otorgar Medalla</h4>
+                    <select id="select-medalla">
+                        <option value="">Seleccione una medalla...</option>
+                        ${medallasOptions}
+                    </select>
+                    <button id="btn-otorgar-medalla">Otorgar Medalla</button>
+                </div>
+            </div>
+            <div id="gamificacion-feedback" class="message-info" style="display:none;"></div>
+        `;
+    } catch (error) {
+        return `<h2>Error</h2><p>No se pudo cargar la vista de gamificación para profesores: ${error.message}</p>`;
+    }
+}
+
+function setupGamificacionProfesorListeners(token) {
+    const selectAlumno = document.getElementById('select-alumno-gamificacion');
+    const actionsContainer = document.getElementById('gamificacion-actions-container');
+    const feedbackDiv = document.getElementById('gamificacion-feedback');
+
+    selectAlumno.addEventListener('change', () => {
+        if (selectAlumno.value) {
+            actionsContainer.style.display = 'block';
+        } else {
+            actionsContainer.style.display = 'none';
+        }
+    });
+
+    document.getElementById('btn-otorgar-puntos').addEventListener('click', async () => {
+        const alumnoId = selectAlumno.value;
+        const reglaId = document.getElementById('select-regla-puntos').value;
+        if (!alumnoId || !reglaId) {
+            alert('Debe seleccionar un alumno y una regla.');
+            return;
+        }
+
+        feedbackDiv.textContent = 'Otorgando puntos...';
+        feedbackDiv.style.display = 'block';
+        try {
+            const response = await fetch(`${config.apiBaseUrl}/api/v1/gamification/award`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ alumno_id: alumnoId, rule_id: reglaId })
+            });
+            if (!response.ok) throw new Error('El servidor rechazó la solicitud.');
+            feedbackDiv.className = 'message-success';
+            feedbackDiv.textContent = '¡Puntos otorgados con éxito!';
+        } catch (error) {
+            feedbackDiv.className = 'message-error';
+            feedbackDiv.textContent = `Error: ${error.message}`;
+        }
+    });
+
+    document.getElementById('btn-otorgar-medalla').addEventListener('click', async () => {
+        const alumnoId = selectAlumno.value;
+        const medallaId = document.getElementById('select-medalla').value;
+        if (!alumnoId || !medallaId) {
+            alert('Debe seleccionar un alumno y una medalla.');
+            return;
+        }
+
+        feedbackDiv.textContent = 'Otorgando medalla...';
+        feedbackDiv.style.display = 'block';
+        try {
+            const response = await fetch(`${config.apiBaseUrl}/api/v1/gamification/award`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ alumno_id: alumnoId, medal_id: medallaId })
+            });
+            if (!response.ok) throw new Error('El servidor rechazó la solicitud.');
+            feedbackDiv.className = 'message-success';
+            feedbackDiv.textContent = '¡Medalla otorgada con éxito!';
+        } catch (error) {
+            feedbackDiv.className = 'message-error';
+            feedbackDiv.textContent = `Error: ${error.message}`;
+        }
+    });
 }
 
 async function getGamificacionAlumnoView(token) {

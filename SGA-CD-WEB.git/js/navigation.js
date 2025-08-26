@@ -9,7 +9,8 @@ const navLinks = {
         { text: 'Verificar Roles BD', icon: 'fa-database' },
         { text: 'Auditoría General', icon: 'fa-history' },
         { text: 'Gestión de Cobros', icon: 'fa-credit-card' },
-        { text: 'Promociones', icon: 'fa-tags' }
+        { text: 'Promociones', icon: 'fa-tags' },
+        { text: 'Asistente de IA', icon: 'fa-robot' }
     ],
     // Rol 2: Admin de Empresa
     admin_empresa: [
@@ -17,7 +18,8 @@ const navLinks = {
         { text: 'Gestionar Usuarios', icon: 'fa-users-cog' },
         { text: 'Gestionar Áreas', icon: 'fa-sitemap' },
         { text: 'Reportes', icon: 'fa-chart-bar' },
-        { text: 'Auditoría de Empresa', icon: 'fa-history' }
+        { text: 'Auditoría de Empresa', icon: 'fa-history' },
+        { text: 'Asistente de IA', icon: 'fa-robot' }
     ],
     // Rol 3: Jefe de Área
     jefe_area: [
@@ -27,7 +29,8 @@ const navLinks = {
         { text: 'Disciplinas/Modalidades', icon: 'fa-project-diagram' },
         { text: 'Inscripciones', icon: 'fa-user-plus' },
         { text: 'Gamificación', icon: 'fa-gamepad' },
-        { text: 'Reportes de Área', icon: 'fa-chart-pie' }
+        { text: 'Reportes de Área', icon: 'fa-chart-pie' },
+        { text: 'Asistente de IA', icon: 'fa-robot' }
     ],
     // Rol 4: Profesional de Área
     profesional_area: [
@@ -59,7 +62,8 @@ const navLinks = {
         { text: 'Registrar Asistencia', icon: 'fa-user-check' },
         { text: 'Calificaciones', icon: 'fa-marker' },
         { text: 'Solicitudes', icon: 'fa-envelope-open-text' },
-        { text: 'Gamificación', icon: 'fa-trophy' }
+        { text: 'Gamificación', icon: 'fa-trophy' },
+        { text: 'Asistente de IA', icon: 'fa-robot' }
     ],
     // Rol 8: Alumno
     alumno: [
