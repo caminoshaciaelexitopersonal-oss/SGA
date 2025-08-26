@@ -1,18 +1,19 @@
 document.addEventListener('DOMContentLoaded', () => {
     const token = localStorage.getItem('accessToken');
     const logoutBtn = document.getElementById('logout-btn');
+    let currentUser = null;
 
     // -- 1. Proteger la ruta --
-    // Si no hay token, redirigir a la página de login
     if (!token) {
         window.location.href = 'login.html';
-        return; // Detener la ejecución del script
+        return;
     }
 
     // -- 2. Configurar el botón de cierre de sesión --
     if (logoutBtn) {
         logoutBtn.addEventListener('click', () => {
             localStorage.removeItem('accessToken');
+            currentUser = null;
             window.location.href = 'login.html';
         });
     }
@@ -20,23 +21,21 @@ document.addEventListener('DOMContentLoaded', () => {
     // -- 3. Cargar datos del usuario y renderizar la aplicación --
     async function initializeApp() {
         try {
-            const user = await fetchCurrentUser(token);
-            renderUserInfo(user);
-            // La API devuelve el rol como un objeto, necesitamos el nombre.
-            const roleName = user.rol ? user.rol.nombre : 'default';
+            currentUser = await fetchCurrentUser(token);
+            renderUserInfo(currentUser);
+            const roleName = currentUser.rol ? currentUser.rol.nombre : 'default';
             renderNavigation(roleName);
-            setupEventListeners(token);
+            setupEventListeners(token, roleName); // Pasar roleName a los listeners
             // Cargar la vista inicial (dashboard) por defecto
-            renderContentForView('dashboard', token);
+            renderContentForView('dashboard', token, roleName);
         } catch (error) {
             console.error('Error al inicializar la aplicación:', error);
-            // Si el token es inválido (ej. expiró), desloguear
             localStorage.removeItem('accessToken');
             window.location.href = 'login.html';
         }
     }
 
-    function setupEventListeners(token) {
+    function setupEventListeners(token, roleName) {
         const navContainer = document.getElementById('app-nav');
         if (navContainer) {
             navContainer.addEventListener('click', (e) => {
@@ -44,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (link && link.dataset.view) {
                     e.preventDefault();
                     const viewName = link.dataset.view;
-                    renderContentForView(viewName, token);
+                    renderContentForView(viewName, token, roleName);
                 }
             });
         }

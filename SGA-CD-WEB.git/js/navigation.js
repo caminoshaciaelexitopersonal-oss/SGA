@@ -54,7 +54,7 @@ const navLinks = {
     ],
     // Rol 7: Profesor
     profesor: [
-        { text: 'Mi Cronograma', icon: 'fa-calendar-week' },
+        { text: 'Gestionar Cursos', icon: 'fa-chalkboard-teacher' },
         { text: 'Gestionar Alumnos', icon: 'fa-user-graduate' },
         { text: 'Registrar Asistencia', icon: 'fa-user-check' },
         { text: 'Calificaciones', icon: 'fa-marker' },
