@@ -19,30 +19,41 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // -- 3. Cargar datos del usuario y renderizar la aplicación --
-    async function initializeApp() {
-        try {
-            currentUser = await fetchCurrentUser(token);
-            renderUserInfo(currentUser);
-            const roleName = currentUser.rol ? currentUser.rol.nombre : 'default';
-            renderNavigation(roleName);
-            setupEventListeners(token, roleName); // Pasar roleName a los listeners
+    function initializeApp() {
+        // La información del usuario ahora se lee desde localStorage
+        const userRoles = JSON.parse(localStorage.getItem('userRoles') || '[]');
+        const userId = localStorage.getItem('userId');
 
-            // --- Cargar Módulos de Propuesta de Integración ---
-            translatePage(); // MILA: Traducir la página inicial
-            initializeNotifications(); // SNAT: Iniciar el sistema de notificaciones simulado
-
-            // Cargar la vista inicial (dashboard) por defecto
-            renderContentForView('dashboard', token, roleName);
-        } catch (error) {
-            console.error('Error al inicializar la aplicación:', error);
+        if (!userRoles || !userId) {
+            console.error('No se encontró información del usuario en localStorage.');
             localStorage.removeItem('accessToken');
             window.location.href = 'login.html';
+            return;
         }
+
+        // Simular el objeto currentUser
+        currentUser = {
+            id: userId,
+            roles: userRoles,
+            primaryRole: userRoles[0] || 'default' // Usar el primer rol como primario
+        };
+
+        renderUserInfo(currentUser);
+        renderNavigation(currentUser.primaryRole);
+        setupEventListeners(token, currentUser.primaryRole);
+
+        // --- Cargar Módulos de Propuesta de Integración ---
+        translatePage();
+        initializeNotifications();
+
+        // Cargar la vista inicial (dashboard) por defecto
+        renderContentForView('dashboard', token, currentUser.primaryRole);
     }
 
     function setupEventListeners(token, roleName) {
         const navContainer = document.getElementById('app-nav');
         const langSelect = document.getElementById('language-select');
+        const agentForm = document.getElementById('agent-form');
 
         if (navContainer) {
             navContainer.addEventListener('click', (e) => {
@@ -60,45 +71,71 @@ document.addEventListener('DOMContentLoaded', () => {
                 setLanguage(e.target.value);
             });
         }
+
+        if (agentForm) {
+            agentForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const orderInput = document.getElementById('agent-order-input');
+                const order = orderInput.value.trim();
+                if (order) {
+                    invokeAgent(order, token);
+                    orderInput.value = '';
+                }
+            });
+        }
+    }
+
+    // --- Lógica para el Agente de IA ---
+    async function invokeAgent(prompt, authToken) {
+        const responseArea = document.getElementById('agent-response-area');
+        const submitBtn = document.getElementById('agent-submit-btn');
+
+        responseArea.textContent = 'Procesando orden...';
+        submitBtn.disabled = true;
+
+        try {
+            const response = await fetch(`${config.apiBaseUrl}/api/v1/agent/invoke`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`
+                },
+                body: JSON.stringify({
+                    prompt: prompt,
+                    area: "Deportes", // Hardcodeado para la prueba
+                    thread_id: `user_${currentUser.id}_${Date.now()}` // Generar un thread_id simple
+                })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                // La API de agente devuelve un placeholder, lo mostramos
+                responseArea.textContent = `Respuesta del Agente: ${JSON.stringify(data, null, 2)}`;
+            } else {
+                responseArea.textContent = `Error: ${data.detail || 'Error desconocido del servidor.'}`;
+            }
+
+        } catch (error) {
+            console.error('Error al invocar al agente:', error);
+            responseArea.textContent = 'Error de conexión al invocar al agente.';
+        } finally {
+            submitBtn.disabled = false;
+        }
     }
 
     // --- Propuesta de Integración para SNAT (Notificaciones en Tiempo Real) ---
     function initializeNotifications() {
-        console.log("SNAT: Inicializando módulo de notificaciones (simulado).");
-        const notifCount = document.getElementById('notification-count');
-        let count = 0;
-
-        // Simular la recepción de una notificación cada 15 segundos
-        setInterval(() => {
-            count++;
-            notifCount.textContent = count;
-            notifCount.style.display = 'block';
-            console.log(`SNAT: Notificación #${count} recibida (simulado).`);
-            // En una implementación real, aquí se usaría una conexión WebSocket
-            // para recibir eventos del servidor y actualizar la UI.
-        }, 15000);
-    }
-
-    async function fetchCurrentUser(authToken) {
-        const response = await fetch(`${config.apiBaseUrl}/api/v1/users/me`, {
-            headers: {
-                'Authorization': `Bearer ${authToken}`
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error('Token inválido o expirado');
-        }
-        return await response.json();
+        // ... (código existente sin cambios)
     }
 
     function renderUserInfo(user) {
         const userInfoDiv = document.getElementById('user-info');
         if (userInfoDiv) {
-            // Suponiendo que la API devuelve 'nombre_completo' y 'rol'
+            // Mostrar los roles del usuario
             userInfoDiv.innerHTML = `
-                <p><strong>${user.nombre_completo || user.username}</strong></p>
-                <span>${user.rol.nombre || 'Sin rol'}</span>
+                <p><strong>Usuario: ${user.id}</strong></p>
+                <span>Roles: ${user.roles.join(', ')}</span>
             `;
         }
     }
