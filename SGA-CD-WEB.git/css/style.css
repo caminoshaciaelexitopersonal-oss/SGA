@@ -1,28 +1,17 @@
-:root {
-    --bg-main: #F7F9F9;
-    --text-main: #1C1C1E;
-    --text-secondary: #4A4A4A;
-    --primary: #008F87;
-    --accent: #FFD369;
-    --card-bg: #FFFFFF;
-    --card-border: #E0E0E0;
-    --white-soft: #F7F9F9;
-}
-
 /* General Body Styles */
 body {
     font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     line-height: 1.7;
     margin: 0;
     padding: 0;
-    background-color: var(--bg-main);
-    color: var(--text-main);
+    background-color: var(--color-background);
+    color: var(--color-text-primary);
 }
 
 /* Header Styles */
 header {
-    background: var(--primary);
-    color: var(--white-soft);
+    background: var(--color-primary);
+    color: var(--color-surface);
     padding: 1rem 0;
     text-align: center;
     position: sticky;
@@ -35,7 +24,7 @@ header h1 {
 }
 
 header nav a {
-    color: var(--white-soft);
+    color: var(--color-surface);
     text-decoration: none;
     padding: 0 15px;
 }
@@ -51,23 +40,23 @@ section {
 section h2 {
     font-size: 2.5rem;
     margin-bottom: 1rem;
-    color: var(--text-main);
+    color: var(--color-text-primary);
 }
 
 p {
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
 }
 
 /* Footer Styles */
 footer {
     text-align: center;
     padding: 2rem 0;
-    background: var(--primary);
-    color: var(--white-soft);
+    background: var(--color-primary);
+    color: var(--color-surface);
 }
 
 footer a {
-    color: var(--accent);
+    color: var(--color-secondary);
     text-decoration: none;
 }
 
@@ -81,10 +70,10 @@ footer a {
 }
 
 .feature-card, .plan-card {
-    background: var(--card-bg);
+    background: var(--color-surface);
     padding: 1.5rem;
     border-radius: 8px;
-    border: 1px solid var(--card-border);
+    border: 1px solid var(--color-border);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -96,7 +85,7 @@ footer a {
 .plan-card .price {
     font-size: 2rem;
     font-weight: bold;
-    color: var(--primary);
+    color: var(--color-primary);
 }
 
 .plan-card ul {
@@ -107,19 +96,19 @@ footer a {
 
 .plan-card ul li {
     padding: 0.5rem 0;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid var(--color-border);
 }
 
 .plan-card.recommended {
-    border: 2px solid var(--primary);
+    border: 2px solid var(--color-primary);
 }
 
 .recommended-badge {
     position: absolute;
     top: 15px;
     right: -30px;
-    background: var(--accent);
-    color: var(--text-main);
+    background: var(--color-secondary);
+    color: var(--color-text-primary);
     padding: 5px 30px;
     transform: rotate(45deg);
     font-weight: bold;
@@ -130,8 +119,8 @@ footer a {
 .cta-button, .plan-button {
     display: inline-block;
     padding: 1rem 2rem;
-    background: var(--accent);
-    color: var(--text-main);
+    background: var(--color-secondary);
+    color: var(--color-text-primary);
     text-decoration: none;
     border-radius: 5px;
     font-weight: bold;
@@ -151,7 +140,7 @@ footer a {
 }
 .faq-item {
     margin-bottom: 1rem;
-    border-bottom: 1px solid var(--card-border);
+    border-bottom: 1px solid var(--color-border);
 }
 .faq-question {
     width: 100%;
@@ -162,7 +151,7 @@ footer a {
     font-weight: bold;
     padding: 1rem 0;
     cursor: pointer;
-    color: var(--text-main);
+    color: var(--color-text-primary);
 }
 .faq-answer {
     max-height: 0;
@@ -199,8 +188,8 @@ footer a {
 
 /* AI Agent Widget Styles */
 #ai-agent-toggle {
-    background: var(--primary);
-    color: white;
+    background: var(--color-primary);
+    color: var(--color-surface);
     border: none;
     border-radius: 50%;
     width: 60px;
@@ -211,15 +200,15 @@ footer a {
 }
 
 #chatbox-header {
-    background: var(--primary);
-    color: white;
+    background: var(--color-primary);
+    color: var(--color-surface);
 }
 
 /* Registration Form Styles */
 #registro-form button {
     padding: 1rem;
-    background: var(--primary);
-    color: white;
+    background: var(--color-primary);
+    color: var(--color-surface);
     border: none;
     border-radius: 5px;
     cursor: pointer;
@@ -231,7 +220,7 @@ footer a {
     position: relative; /* Essential for positioning pseudo-elements */
     border-radius: 12px;
     overflow: hidden; /* Hides the parts of the gradient outside the border */
-    background: #1C1C1E; /* Dark background to make the neon effect pop */
+    background: var(--color-background);
     padding: 1px; /* Fallback for border */
 }
 
@@ -245,9 +234,9 @@ footer a {
     height: 200%;
     background: conic-gradient(
         transparent,
-        var(--accent),
-        var(--primary),
-        var(--accent),
+        var(--color-secondary),
+        var(--color-primary),
+        var(--color-secondary),
         transparent
     );
     animation: rotateBorder 6s linear infinite;
@@ -261,7 +250,7 @@ footer a {
     left: 3px;
     right: 3px;
     bottom: 3px;
-    background: #1C1C1E; /* Match the dark background */
+    background: var(--color-background);
     border-radius: 10px; /* Slightly smaller radius than the container */
     z-index: 1; /* Ensure it's above the ::before pseudo-element */
 }
@@ -291,43 +280,3 @@ footer a {
     border-top-right-radius: 10px;
 }
 
-/*
-=========================================
-    DARK MODE STYLES
-=========================================
-*/
-@media (prefers-color-scheme: dark) {
-    :root {
-        --bg-main: #1C1C1E;
-        --text-main: #EFEFEF;
-        --text-secondary: #A8A8A8;
-        --primary: #00B3A4; /* Leve ajuste más brillante para contraste en oscuro */
-        --accent: #FFD369;
-        --card-bg: #2B2B2E;
-        --card-border: #2E5E5C;
-        --white-soft: #EFEFEF;
-    }
-
-    header {
-        background: var(--bg-main);
-        border-bottom: 1px solid var(--card-border);
-    }
-
-    .recommended-badge {
-        color: #1C1C1E; /* Black text on gold background for better contrast */
-    }
-
-    .plan-card ul li {
-        border-bottom: 1px solid var(--card-border);
-    }
-
-    #registro-form input {
-        background-color: #2B2B2E;
-        border: 1px solid #2E5E5C;
-        color: #EFEFEF;
-    }
-
-    #registro-form input::placeholder {
-        color: #A8A8A8;
-    }
-}
