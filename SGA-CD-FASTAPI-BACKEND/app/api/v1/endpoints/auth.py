@@ -6,13 +6,13 @@ from sqlalchemy import text
 from jose import jwt, JWTError
 from pydantic import ValidationError
 
-from app import crud, schemas
-from models import user as user_model
+from app import crud, schemas, models
 from app.api import deps
 from app.core import security
 from app.core.config import settings
 
 router = APIRouter()
+
 
 @router.post("/login", response_model=schemas.Token)
 def login(
@@ -31,13 +31,13 @@ def login(
     if not user.activo:
         raise HTTPException(status_code=400, detail="Inactive user")
 
-    # The user object from crud.get_user_by_username now has a `roles` attribute
+    # El objeto user de crud.get_user_by_username ya trae los roles
     access_token_data = {
         "sub": str(user.id),
         "roles": user.roles,
         "inquilino_id": user.inquilino_id
     }
-    # Refresh token only needs the user_id
+    # Refresh token solo necesita el user_id
     refresh_token_data = {"sub": str(user.id)}
 
     return {
@@ -45,6 +45,7 @@ def login(
         "refresh_token": security.create_refresh_token(data=refresh_token_data),
         "token_type": "bearer",
     }
+
 
 @router.post("/refresh", response_model=schemas.Token)
 def refresh_token(
@@ -70,13 +71,13 @@ def refresh_token(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    user = db.query(user_model.Usuario).filter(user_model.Usuario.id == token_data.sub).first()
+    user = db.query(models.user.Usuario).filter(models.user.Usuario.id == token_data.sub).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     if not user.activo:
         raise HTTPException(status_code=400, detail="Inactive user")
 
-    # Manually fetch roles since the user object from a direct query doesn't have them
+    # Como el objeto de la query no trae roles, los buscamos manualmente
     query = text("SELECT r.nombre FROM roles r JOIN user_roles ur ON r.id = ur.role_id WHERE ur.user_id = :user_id")
     roles_result = db.execute(query, {"user_id": user.id}).fetchall()
     user_roles = [row[0] for row in roles_result]
@@ -89,7 +90,7 @@ def refresh_token(
 
     return {
         "access_token": security.create_access_token(data=access_token_data),
-        "refresh_token": refresh_token, # Return the same refresh token
+        "refresh_token": refresh_token,  # devolvemos el mismo refresh token
         "token_type": "bearer",
     }
 
