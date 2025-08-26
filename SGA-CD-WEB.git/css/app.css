@@ -25,78 +25,9 @@
 }
 
 /* ==========================================================================
-   2. Estilos para la sección de login y registro
+   2. Estilos generales de la aplicación
    ========================================================================== */
 
-#login-section, #registro-form {
-    max-width: 400px;
-    margin: 2rem auto;
-    padding: 2rem;
-    background: var(--color-surface);
-    color: var(--color-text-primary);
-    border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    border: 1px solid var(--color-border);
-}
-
-#login-section h2, #registro-form h2 {
-    text-align: center;
-    margin-bottom: 1.5rem;
-    color: var(--color-text-primary);
-}
-
-#login-form input, #form-registro input {
-    width: 100%;
-    padding: 0.8rem;
-    margin-bottom: 1rem;
-    border: 1px solid var(--color-border);
-    background-color: var(--color-background);
-    color: var(--color-text-primary);
-    border-radius: 4px;
-}
-
-#login-form button, #form-registro button {
-    width: 100%;
-    padding: 0.9rem;
-    background-color: var(--color-primary);
-    color: #FFFFFF; /* El texto de los botones primarios suele ser blanco */
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 1rem;
-    transition: background-color 0.3s;
-}
-
-#login-form button:hover, #form-registro button:hover {
-    filter: brightness(1.1);
-}
-
-.message-error {
-    color: #D8000C;
-    background-color: #FFD2D2;
-    padding: 10px;
-    margin-bottom: 1rem;
-    border-radius: 4px;
-}
-
-.message-success {
-    color: #4F8A10;
-    background-color: #DFF2BF;
-    padding: 10px;
-    margin-bottom: 1rem;
-    border-radius: 4px;
-}
-
-.message-info {
-    color: #00529B;
-    background-color: #BDE5F8;
-    padding: 10px;
-    margin-bottom: 1rem;
-    border-radius: 4px;
-}
-
-
-/* Estilos para la aplicación principal (app.html) */
 body, html {
     margin: 0;
     padding: 0;
@@ -123,7 +54,7 @@ body, html {
 .sidebar-header {
     padding: 1.5rem;
     text-align: center;
-    background-color: rgba(0,0,0,0.2); /* Un poco más oscuro para dar profundidad */
+    background-color: rgba(0,0,0,0.2);
 }
 
 .app-nav {
@@ -199,7 +130,81 @@ body, html {
     flex-grow: 1;
 }
 
-/* Estilos para Login Social */
+/* ==========================================================================
+   3. Estilos para login y registro
+   ========================================================================== */
+
+#login-section, #registro-form {
+    max-width: 400px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: var(--color-surface);
+    color: var(--color-text-primary);
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    border: 1px solid var(--color-border);
+}
+
+#login-section h2, #registro-form h2 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: var(--color-text-primary);
+}
+
+#login-form input, #form-registro input {
+    width: 100%;
+    padding: 0.8rem;
+    margin-bottom: 1rem;
+    border: 1px solid var(--color-border);
+    background-color: var(--color-background);
+    color: var(--color-text-primary);
+    border-radius: 4px;
+}
+
+#login-form button, #form-registro button {
+    width: 100%;
+    padding: 0.9rem;
+    background-color: var(--color-primary);
+    color: #FFFFFF;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s;
+}
+
+#login-form button:hover, #form-registro button:hover {
+    filter: brightness(1.1);
+}
+
+.message-error {
+    color: #D8000C;
+    background-color: #FFD2D2;
+    padding: 10px;
+    margin-bottom: 1rem;
+    border-radius: 4px;
+}
+
+.message-success {
+    color: #4F8A10;
+    background-color: #DFF2BF;
+    padding: 10px;
+    margin-bottom: 1rem;
+    border-radius: 4px;
+}
+
+.message-info {
+    color: #00529B;
+    background-color: #BDE5F8;
+    padding: 10px;
+    margin-bottom: 1rem;
+    border-radius: 4px;
+}
+
+/* ==========================================================================
+   4. Estilos Login Social
+   ========================================================================== */
+
 .social-login-divider {
     display: flex;
     align-items: center;
@@ -253,7 +258,10 @@ body, html {
     font-size: 1.2rem;
 }
 
-/* Estilos para el Modal Genérico */
+/* ==========================================================================
+   5. Estilos para Modal Genérico
+   ========================================================================== */
+
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -309,7 +317,10 @@ body, html {
     to { opacity: 1; }
 }
 
-/* Estilos para la vista de Gamificación del Alumno */
+/* ==========================================================================
+   6. Estilos Gamificación Alumno
+   ========================================================================== */
+
 .gamificacion-alumno {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -358,7 +369,10 @@ body, html {
     margin-top: 1rem;
 }
 
-/* Estilos para la Interfaz del Agente IA */
+/* ==========================================================================
+   7. Estilos Interfaz Agente IA
+   ========================================================================== */
+
 .agent-interface-container {
     margin-top: 2rem;
     padding: 1.5rem;
@@ -389,7 +403,7 @@ body, html {
     padding: 1rem;
     margin-bottom: 1rem;
     background-color: var(--color-background);
-    white-space: pre-wrap; /* Para conservar los saltos de línea */
+    white-space: pre-wrap;
     color: var(--color-text-secondary);
 }
 
@@ -429,7 +443,7 @@ body, html {
 }
 
 /* ==========================================================================
-   Estilos para el Theme Switcher
+   8. Theme Switcher
    ========================================================================== */
 
 .theme-switcher {
@@ -497,9 +511,8 @@ input:checked + .slider:before {
     border-radius: 50%;
 }
 
-
 /* ==========================================================================
-   Estilos para el Icono de Agente Flotante
+   9. Icono Agente Flotante
    ========================================================================== */
 
 .floating-agent-icon {
@@ -515,8 +528,8 @@ input:checked + .slider:before {
     font-size: 1.8rem;
     cursor: pointer;
     z-index: 1001;
-    overflow: hidden; /* Para contener la animación del borde */
-    padding: 3px; /* Espacio para el borde animado */
+    overflow: hidden;
+    padding: 3px;
     background: var(--color-surface);
     color: var(--color-primary);
     box-shadow: 0 5px 15px rgba(0,0,0,0.2);
@@ -557,12 +570,7 @@ input:checked + .slider:before {
     background-color: var(--color-primary);
 }
 
-
 @keyframes rotateBorder {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
 }

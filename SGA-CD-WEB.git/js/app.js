@@ -20,7 +20,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // -- 3. Cargar datos del usuario y renderizar la aplicación --
     function initializeApp() {
-        // La información del usuario ahora se lee desde localStorage
         const userRoles = JSON.parse(localStorage.getItem('userRoles') || '[]');
         const userId = localStorage.getItem('userId');
 
@@ -31,22 +30,18 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Simular el objeto currentUser
         currentUser = {
             id: userId,
             roles: userRoles,
-            primaryRole: userRoles[0] || 'default' // Usar el primer rol como primario
+            primaryRole: userRoles[0] || 'default'
         };
 
         renderUserInfo(currentUser);
         renderNavigation(currentUser.primaryRole);
         setupEventListeners(token, currentUser.primaryRole);
 
-        // --- Cargar Módulos de Propuesta de Integración ---
         translatePage();
         initializeNotifications();
-
-        // Cargar la vista inicial (dashboard) por defecto
         renderContentForView('dashboard', token, currentUser.primaryRole);
     }
 
@@ -72,10 +67,8 @@ document.addEventListener('DOMContentLoaded', () => {
             themeToggle.addEventListener('change', toggleTheme);
         }
 
-        // Apply saved theme on startup
         const savedTheme = localStorage.getItem('theme') || 'light';
         applyTheme(savedTheme);
-
 
         if (navContainer) {
             navContainer.addEventListener('click', (e) => {
@@ -124,15 +117,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 },
                 body: JSON.stringify({
                     prompt: prompt,
-                    area: "Deportes", // Hardcodeado para la prueba
-                    thread_id: `user_${currentUser.id}_${Date.now()}` // Generar un thread_id simple
+                    area: "Deportes",
+                    thread_id: `user_${currentUser.id}_${Date.now()}`
                 })
             });
 
             const data = await response.json();
 
             if (response.ok) {
-                // La API de agente devuelve un placeholder, lo mostramos
                 responseArea.textContent = `Respuesta del Agente: ${JSON.stringify(data, null, 2)}`;
             } else {
                 responseArea.textContent = `Error: ${data.detail || 'Error desconocido del servidor.'}`;
@@ -154,12 +146,47 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderUserInfo(user) {
         const userInfoDiv = document.getElementById('user-info');
         if (userInfoDiv) {
-            // Mostrar los roles del usuario
             userInfoDiv.innerHTML = `
                 <p><strong>Usuario: ${user.id}</strong></p>
                 <span>Roles: ${user.roles.join(', ')}</span>
             `;
         }
+    }
+
+    function renderNavigation(roleName) {
+        const navDiv = document.getElementById('app-nav');
+        if (navDiv) {
+            // Renderización simple basada en roles
+            const links = [];
+            if (roleName === 'admin') {
+                links.push({ name: 'Dashboard', view: 'dashboard' });
+                links.push({ name: 'Usuarios', view: 'users' });
+            } else {
+                links.push({ name: 'Dashboard', view: 'dashboard' });
+            }
+            navDiv.innerHTML = links.map(link => `<a href="#" data-view="${link.view}">${link.name}</a>`).join(' | ');
+        }
+    }
+
+    function renderContentForView(viewName, token, roleName) {
+        const contentDiv = document.getElementById('app-content');
+        if (!contentDiv) return;
+
+        switch(viewName) {
+            case 'dashboard':
+                contentDiv.innerHTML = `<h2>Bienvenido al Dashboard, ${roleName}</h2>`;
+                break;
+            case 'users':
+                contentDiv.innerHTML = `<h2>Gestión de Usuarios</h2>`;
+                break;
+            default:
+                contentDiv.innerHTML = `<h2>Vista no encontrada</h2>`;
+        }
+    }
+
+    function setLanguage(lang) {
+        console.log('Idioma seleccionado:', lang);
+        // Aquí iría la lógica para cambiar idioma
     }
 
     initializeApp();
