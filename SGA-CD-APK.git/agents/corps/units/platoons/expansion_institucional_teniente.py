@@ -8,9 +8,7 @@ class ExpansionLieutenantState(TypedDict):
     final_report: str
     error: str | None
 
-institucional_sargento_builder = get_institucional_sargento_graph()
-
-async def delegate_to_sargento(state: ExpansionLieutenantState) -> ExpansionLieutenantState:
+async def delegate_to_sargento(state: ExpansionLieutenantState, institucional_sargento_builder: callable) -> ExpansionLieutenantState:
     """Delega la misión de gestión institucional completa a su Sargento especialista."""
     order = state['captain_order']
     print(f"--- 🫡 TENIENTE DE EXPANSIÓN: Recibida orden. Delegando misión al Sargento -> '{order}' ---")
@@ -36,10 +34,14 @@ async def compile_report(state: ExpansionLieutenantState) -> ExpansionLieutenant
     print("--- 📄 TENIENTE DE EXPANSIÓN: Informe para el Capitán de Estrategia listo. ---")
     return state
 
-def get_expansion_institucional_lieutenant_graph():
+def get_expansion_institucional_lieutenant_graph(llm: Any):
     """Construye el agente LangGraph para el Teniente de Expansión Institucional."""
+    institucional_sargento_builder = get_institucional_sargento_graph(llm)
+
+    delegate_node = lambda state: delegate_to_sargento(state, institucional_sargento_builder)
+
     workflow = StateGraph(ExpansionLieutenantState)
-    workflow.add_node("delegate_mission_to_sargento", delegate_to_sargento)
+    workflow.add_node("delegate_mission_to_sargento", delegate_node)
     workflow.add_node("compile_final_report", compile_report)
     workflow.set_entry_point("delegate_mission_to_sargento")
     workflow.add_edge("delegate_mission_to_sargento", "compile_final_report")

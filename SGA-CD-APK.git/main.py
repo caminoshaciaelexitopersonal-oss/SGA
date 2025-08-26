@@ -8,6 +8,10 @@ from utils.i18n_service import Translator
 from agent.llm_service import initialize_llm, get_llm_status
 from utils.database_manager import initialize_local_database
 # --- View Imports ---
+from views.selection_view import selection_view
+from views.setup_online_mode_view import setup_online_mode_view
+from views.setup_api_key_view import setup_api_key_view
+from views.setup_local_model_view import setup_local_model_view
 from views.login import login_view
 from views.shared.dashboard_view import dashboard_view
 from views.jefe_area.jefe_area_principal import jefe_area_principal_view
@@ -15,49 +19,11 @@ from views.profesor_principal import profesor_principal
 from views.admin_principal import admin_principal
 # ... etc.
 
-def check_llm_status(page: ft.Page):
-    """
-    Checks the LLM status and shows an alert dialog if there's a dependency issue.
-    """
-    status = get_llm_status()
-
-    if status == "error_ollama_not_found":
-        dlg = ft.AlertDialog(
-            modal=True,
-            title=ft.Text("Ollama no encontrado"),
-            content=ft.Column([
-                ft.Text("Para usar la IA en modo local en su escritorio, necesita tener Ollama instalado y en ejecución."),
-                ft.Markdown("Puede descargarlo desde [el sitio web oficial de Ollama](https://ollama.com)."),
-            ]),
-            actions=[ft.TextButton("Entendido", on_click=lambda _: page.close(dlg))],
-        )
-        page.dialog = dlg
-        dlg.open = True
-        page.update()
-
-    elif status == "error_local_model_missing":
-        dlg = ft.AlertDialog(
-            modal=True,
-            title=ft.Text("Fichero de Modelo no Encontrado"),
-            content=ft.Text("El fichero del modelo de IA local no fue encontrado. La aplicación debe ser reinstalada desde una fuente completa."),
-            actions=[ft.TextButton("Entendido", on_click=lambda _: page.close(dlg))],
-        )
-        page.dialog = dlg
-        dlg.open = True
-        page.update()
-
 def main(page: ft.Page):
     # --- Inicialización de Servicios Críticos ---
     initialize_local_database(page)
 
-    # La inicialización del LLM ahora requiere la configuración del inquilino,
-    # que se obtendría después del login. Por ahora, usamos una config por defecto.
-    # TODO: Mover la inicialización del LLM para después del login.
-    default_config = {"llm_preference": "local"}
-    initialize_llm(page, default_config)
-
-    # Comprobar el estado del LLM y mostrar alertas si es necesario.
-    check_llm_status(page)
+    # La inicialización del LLM se moverá a después de que el usuario haga su selección.
 
     page.title = "SGA-CD: Sistema de Gestión Académica"
 
@@ -89,14 +55,33 @@ def main(page: ft.Page):
     # --- Main Router Logic ---
     def route_change(route):
         page.views.clear()
+
+        # Primero, comprobar si el modo ha sido seleccionado.
+        mode_selected = page.session.get("mode_selected")
+        if not mode_selected:
+            page.views.append(selection_view(page))
+            if page.route != "/selection":
+                page.go("/selection")
+            page.update()
+            return
+
+        # Si el modo ya está seleccionado, proceder con la lógica normal.
         user_id = page.session.get("user_id")
 
-        if page.route == "/" or page.route == "/login":
+        # Rutas de configuración que no requieren login
+        if page.route == "/setup/online_mode":
+            page.views.append(setup_online_mode_view(page))
+        elif page.route == "/setup/api_key":
+            page.views.append(setup_api_key_view(page))
+        elif page.route == "/setup/local_model":
+            page.views.append(setup_local_model_view(page))
+        elif page.route == "/login":
             page.views.append(login_view(page, None, None))
-
         elif user_id is None:
+            # Si no hay usuario y no es una ruta de setup/login, ir a login
             page.go("/login")
         else:
+            # Lógica de enrutamiento para usuarios autenticados
             user_role = page.session.get("user_role")
             tenant_id = page.session.get("tenant_id")
 
@@ -124,6 +109,7 @@ def main(page: ft.Page):
                         route_found = True
                         break
             if not route_found:
+                # Si la ruta no se encuentra y el usuario está logueado, ir al dashboard.
                 page.go('/dashboard')
         page.update()
 
@@ -134,7 +120,9 @@ def main(page: ft.Page):
 
     page.on_route_change = route_change
     page.on_view_pop = view_pop
-    page.go(page.route if page.route else "/")
+
+    # Iniciar la aplicación en la ruta de selección.
+    page.go("/selection")
 
 if __name__ == "__main__":
     ft.app(target=main, assets_dir="assets")

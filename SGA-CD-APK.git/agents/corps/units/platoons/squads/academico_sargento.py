@@ -1,7 +1,7 @@
 from .sargento_base_graph import SargentoGraphBuilder, SargentoBaseState
 from tools.herramientas_academico import AcademicoSoldiers
 
-def get_academico_sargento_graph():
+def get_academico_sargento_graph(llm: any):
     """
     Construye y devuelve el agente Sargento Académico.
 
@@ -16,7 +16,7 @@ def get_academico_sargento_graph():
         # El Sargento recluta a su escuadra de soldados especialistas
         squad = AcademicoSoldiers(api_client).get_all_soldiers()
         # Construye el grafo de mando usando la plantilla estandarizada
-        builder = SargentoGraphBuilder(squad, squad_name="Académico")
+        builder = SargentoGraphBuilder(squad, squad_name="Académico", llm=llm)
         return builder.build_graph()
 
     print("✅ Doctrina DEAA-V2.1 aplicada: Sargento Académico listo para el despliegue.")
