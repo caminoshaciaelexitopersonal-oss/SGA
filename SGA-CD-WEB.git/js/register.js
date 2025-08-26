@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const { latitude, longitude } = position.coords;
 
             try {
-                const response = await fetch(`/api/empresas_cercanas?lat=${latitude}&lon=${longitude}`);
+                const response = await fetch(`${config.apiBaseUrl}/api/empresas_cercanas?lat=${latitude}&lon=${longitude}`);
                 const tenants = await response.json();
 
                 if (response.ok) {
@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
         showMessage('Registrando, por favor espera...', 'info');
 
         try {
-            const response = await fetch('/api/register_tenant', {
+            const response = await fetch(`${config.apiBaseUrl}/api/register_tenant`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData),
