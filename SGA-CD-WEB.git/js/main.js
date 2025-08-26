@@ -3,7 +3,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 1. Load All Dynamic Content from the API ---
     async function loadAndRenderContent() {
         try {
-            const response = await fetch('/api/website/content');
+            // Use the configured API base URL
+            const response = await fetch(`${config.apiBaseUrl}/api/website/content`);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -297,7 +298,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         async function sendMessageToAgent(message) {
-            const API_ENDPOINT = '/api/sales_agent';
+            const API_ENDPOINT = `${config.apiBaseUrl}/api/sales_agent`;
             addMessage('agent', '...');
             try {
                 const response = await fetch(API_ENDPOINT, {
