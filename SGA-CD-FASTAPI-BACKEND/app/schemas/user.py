@@ -12,10 +12,13 @@ class UserCreate(UserBase):
     rol: str
     inquilino_id: int
 
+from typing import List
+
 # Properties to return to client
 class User(UserBase):
     id: int
     activo: bool
+    roles: List[str] = []
 
     class Config:
         from_attributes = True
