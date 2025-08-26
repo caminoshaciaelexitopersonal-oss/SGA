@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 def create_test_users():
     """
-    Creates a test user for each of the 11 official roles in the system.
+    Creates a test user for each of the 12 official roles in the system.
     This script is idempotent; it will not create users that already exist.
     """
     db = SessionLocal()
@@ -32,6 +32,7 @@ def create_test_users():
         ("alumno",          "alumno_test",          "alumno@sga.com"),
         ("padre_acudiente", "padre_acudiente_test", "padre_acudiente@sga.com"),
         ("jefe_almacen",    "jefe_almacen_test",    "jefe_almacen@sga.com"),
+        ("almacenista",     "almacenista_test",     "almacenista@sga.com"),
         ("jefe_escenarios", "jefe_escenarios_test", "jefe_escenarios@sga.com"),
     ]
 
