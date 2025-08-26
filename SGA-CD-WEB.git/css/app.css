@@ -156,3 +156,71 @@ body, html {
     overflow-y: auto;
     flex-grow: 1;
 }
+
+/* Estilos para Login Social */
+.social-login-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 1.5rem 0;
+    color: #888;
+}
+
+.social-login-divider::before,
+.social-login-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid #ddd;
+}
+
+.social-login-divider:not(:empty)::before {
+    margin-right: .5em;
+}
+
+.social-login-divider:not(:empty)::after {
+    margin-left: .5em;
+}
+
+.social-login-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.social-btn {
+    padding: 0.75rem;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.social-btn .fab {
+    font-size: 1.2rem;
+}
+
+.social-btn.google {
+    background-color: #DB4437;
+}
+.social-btn.google:hover {
+    background-color: #c33d2e;
+}
+
+.social-btn.facebook {
+    background-color: #4267B2;
+}
+.social-btn.facebook:hover {
+    background-color: #3a5a9e;
+}
+
+.social-btn.microsoft {
+    background-color: #2F2F2F;
+}
+.social-btn.microsoft:hover {
+    background-color: #1f1f1f;
+}

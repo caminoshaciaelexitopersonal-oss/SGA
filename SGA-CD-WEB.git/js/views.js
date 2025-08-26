@@ -24,6 +24,18 @@ async function renderContentForView(viewName, token) {
             case 'reportes':
                 contentArea.innerHTML = '<h2>Reportes</h2><p>Aquí se mostrarán los reportes de la empresa.</p>';
                 break;
+
+            // Vistas para jefe_escenarios
+            case 'calendario-de-escenarios':
+                contentArea.innerHTML = await getCalendarioEscenariosView(token);
+                break;
+            case 'asignar-espacios':
+                contentArea.innerHTML = '<h2>Asignar Espacios</h2><p>Aquí se gestionará la asignación de espacios a eventos y profesores.</p>';
+                break;
+            case 'mantenimiento':
+                contentArea.innerHTML = '<h2>Mantenimiento de Escenarios</h2><p>Aquí se registrará y dará seguimiento al mantenimiento de los escenarios.</p>';
+                break;
+
             // Añadir más casos para otras vistas y roles aquí...
 
             default:
@@ -96,3 +108,52 @@ async function getGestionarUsuariosView(token) {
 
 // Aquí se agregarán más funciones para cada vista...
 // ej. getGestionarEventosView, getMisCursosView, etc.
+
+async function getCalendarioEscenariosView(token) {
+    // Asumo un endpoint /api/v1/escenarios para obtener la lista de escenarios
+    const response = await fetch(`${config.apiBaseUrl}/api/v1/escenarios`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (!response.ok) throw new Error('No se pudo obtener la lista de escenarios.');
+
+    const escenarios = await response.json();
+
+    let escenarioRows = '';
+    if (escenarios && escenarios.length > 0) {
+        escenarioRows = escenarios.map(escenario => `
+            <tr>
+                <td>${escenario.id}</td>
+                <td>${escenario.nombre}</td>
+                <td>${escenario.tipo}</td>
+                <td>${escenario.capacidad || 'N/A'}</td>
+                <td><span class="status-${escenario.estado.toLowerCase()}">${escenario.estado}</span></td>
+                <td>
+                    <button>Ver Horario</button>
+                    <button>Editar</button>
+                </td>
+            </tr>
+        `).join('');
+    } else {
+        escenarioRows = '<tr><td colspan="6">No se encontraron escenarios.</td></tr>';
+    }
+
+    return `
+        <h2>Calendario y Gestión de Escenarios</h2>
+        <button>Añadir Nuevo Escenario</button>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Tipo</th>
+                    <th>Capacidad</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${escenarioRows}
+            </tbody>
+        </table>
+    `;
+}
