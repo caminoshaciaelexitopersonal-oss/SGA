@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 from typing import List
+from datetime import datetime
 
 from models.academic import Escenario, EscenarioParte, Reserva
 from app.schemas.escenario import EscenarioCreate, EscenarioUpdate, ReservaCreate, ReservaUpdate
@@ -20,8 +21,8 @@ def get_escenarios_by_tenant(
         .all()
     )
 
-def create_escenario(db: Session, *, obj_in: EscenarioCreate) -> Escenario:
-    db_obj = Escenario(**obj_in.model_dump())
+def create_escenario(db: Session, *, obj_in: EscenarioCreate, inquilino_id: int) -> Escenario:
+    db_obj = Escenario(**obj_in.model_dump(), inquilino_id=inquilino_id)
     db.add(db_obj)
     db.commit()
     db.refresh(db_obj)
@@ -40,8 +41,30 @@ def get_reservas_by_escenario_parte(
         .all()
     )
 
-def create_reserva(db: Session, *, obj_in: ReservaCreate) -> Reserva:
-    db_obj = Reserva(**obj_in.model_dump())
+def get_reservas_en_horario(
+    db: Session, *, escenario_parte_id: int, fecha_inicio: datetime, fecha_fin: datetime
+) -> List[Reserva]:
+    """
+    Busca reservas que se solapen con el intervalo de tiempo dado para un escenario específico.
+    El solapamiento ocurre si (StartA <= EndB) and (EndA >= StartB).
+    """
+    return (
+        db.query(Reserva)
+        .filter(
+            Reserva.escenario_parte_id == escenario_parte_id,
+            Reserva.fecha_inicio < fecha_fin,
+            Reserva.fecha_fin > fecha_inicio,
+            Reserva.estado != 'Cancelada'  # No considerar reservas canceladas
+        )
+        .all()
+    )
+
+def create_reserva(db: Session, *, obj_in: ReservaCreate, inquilino_id: int, usuario_id: int) -> Reserva:
+    db_obj = Reserva(
+        **obj_in.model_dump(),
+        inquilino_id=inquilino_id,
+        usuario_id_reserva=usuario_id
+    )
     db.add(db_obj)
     db.commit()
     db.refresh(db_obj)

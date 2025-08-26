@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app import crud, schemas
+import models
 from app.api import deps
 
 router = APIRouter()
@@ -12,14 +13,13 @@ def read_audit_logs(
     db: Session = Depends(deps.get_db),
     skip: int = 0,
     limit: int = 100,
-    # current_user = Depends(deps.get_current_active_user) # TODO: Add admin role check
+    current_user: models.Usuario = Depends(deps.RoleRequired(["admin_empresa", "admin_general"]))
 ) -> Any:
     """
     Retrieve audit logs for the current user's tenant.
-    This should be restricted to admin users.
+    This is restricted to users with 'admin_empresa' or 'admin_general' roles.
     """
-    tenant_id = 1 # Placeholder for current_user.inquilino_id
     logs = crud.audit.get_audit_logs_by_tenant(
-        db, inquilino_id=tenant_id, skip=skip, limit=limit
+        db, inquilino_id=current_user.inquilino_id, skip=skip, limit=limit
     )
     return logs

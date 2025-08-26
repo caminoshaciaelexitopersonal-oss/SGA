@@ -69,7 +69,7 @@ def RoleRequired(required_roles: List[str]):
             self.required_roles = required_roles
 
         def __call__(self, user: user_model.Usuario = Depends(get_current_active_user)):
-            if user.rol not in self.required_roles:
+            if user.rol.value not in self.required_roles:
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
                     detail=f"User role '{user.rol}' is not authorized. Requires one of: {self.required_roles}.",

@@ -1,10 +1,21 @@
 fastapi
 uvicorn[standard]
 sqlalchemy
-pydantic
+pydantic[email]
 pydantic-settings
 python-dotenv
 passlib[bcrypt]
 python-jose[cryptography]
+python-multipart
 alembic
 psycopg2-binary
+
+# LangChain dependencies for AI Agents
+langchain
+langgraph
+langchain-openai
+langchain-community
+
+# Testing dependencies
+pytest
+httpx
