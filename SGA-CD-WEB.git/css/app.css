@@ -1,0 +1,341 @@
+/* Estilos para la sección de login y registro */
+#login-section, #registro-form {
+    max-width: 400px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+#login-section h2, #registro-form h2 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+#login-form input, #form-registro input {
+    width: 100%;
+    padding: 0.8rem;
+    margin-bottom: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+#login-form button, #form-registro button {
+    width: 100%;
+    padding: 0.9rem;
+    background-color: #00A651;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+#login-form button:hover, #form-registro button:hover {
+    background-color: #008a43;
+}
+
+.message-error {
+    color: #D8000C;
+    background-color: #FFD2D2;
+    padding: 10px;
+    margin-bottom: 1rem;
+    border-radius: 4px;
+}
+
+.message-success {
+    color: #4F8A10;
+    background-color: #DFF2BF;
+    padding: 10px;
+    margin-bottom: 1rem;
+    border-radius: 4px;
+}
+
+.message-info {
+    color: #00529B;
+    background-color: #BDE5F8;
+    padding: 10px;
+    margin-bottom: 1rem;
+    border-radius: 4px;
+}
+
+
+/* Estilos para la aplicación principal (app.html) */
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f7f6;
+}
+
+.app-layout {
+    display: flex;
+    height: 100vh;
+}
+
+.sidebar {
+    width: 250px;
+    background-color: #2c3e50;
+    color: white;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-header {
+    padding: 1.5rem;
+    text-align: center;
+    background-color: #1a242f;
+}
+
+.app-nav {
+    flex-grow: 1;
+    padding: 1rem 0;
+}
+
+.app-nav a {
+    display: block;
+    color: white;
+    padding: 1rem 1.5rem;
+    text-decoration: none;
+    transition: background-color 0.3s;
+}
+
+.app-nav a:hover {
+    background-color: #34495e;
+}
+
+.sidebar-footer {
+    padding: 1rem;
+    text-align: center;
+}
+
+#logout-btn {
+    width: 100%;
+    padding: 0.75rem;
+    background: #e74c3c;
+    border: none;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#logout-btn:hover {
+    background: #c0392b;
+}
+
+.main-content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background: #fff;
+    border-bottom: 1px solid #ddd;
+}
+
+#user-info {
+    text-align: right;
+}
+
+#user-info p {
+    margin: 0;
+}
+#user-info span {
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.content-area {
+    padding: 2rem;
+    overflow-y: auto;
+    flex-grow: 1;
+}
+
+/* Estilos para Login Social */
+.social-login-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 1.5rem 0;
+    color: #888;
+}
+
+.social-login-divider::before,
+.social-login-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid #ddd;
+}
+
+.social-login-divider:not(:empty)::before {
+    margin-right: .5em;
+}
+
+.social-login-divider:not(:empty)::after {
+    margin-left: .5em;
+}
+
+.social-login-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.social-btn {
+    padding: 0.75rem;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.social-btn .fab {
+    font-size: 1.2rem;
+}
+
+.social-btn.google {
+    background-color: #DB4437;
+}
+.social-btn.google:hover {
+    background-color: #c33d2e;
+}
+
+.social-btn.facebook {
+    background-color: #4267B2;
+}
+.social-btn.facebook:hover {
+    background-color: #3a5a9e;
+}
+
+.social-btn.microsoft {
+    background-color: #2F2F2F;
+}
+.social-btn.microsoft:hover {
+    background-color: #1f1f1f;
+}
+
+/* Estilos para Modales */
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    position: relative;
+}
+
+.modal-close-btn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 1.5rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+/* Estilos para Gamificación */
+.gamification-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+}
+
+@media (min-width: 768px) {
+    .gamification-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .main-profile-section {
+        grid-column: 1 / -1; /* Span full width */
+    }
+}
+
+.gamification-profile-card, .medallas-section, .ranking-section {
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.progress-bar-container {
+    width: 100%;
+    background-color: #e0e0e0;
+    border-radius: 10px;
+    margin: 1rem 0;
+}
+
+.progress-bar {
+    height: 20px;
+    background-color: #4caf50;
+    border-radius: 10px;
+    text-align: center;
+    color: white;
+}
+
+.medallas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 1rem;
+}
+
+.medalla-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem;
+    border-radius: 8px;
+    background: #f5f5f5;
+    color: #bdbdbd;
+    text-align: center;
+}
+
+.medalla-card.obtenida {
+    background: #fffbe6;
+    color: #fbc02d;
+}
+
+.ranking-list {
+    list-style: none;
+    padding: 0;
+}
+
+.ranking-list li {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #eee;
+}
+
+.ranking-list .rank {
+    font-weight: bold;
+    color: #333;
+}
+.ranking-list .points {
+    color: #00A651;
+    font-weight: bold;
+}

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plataforma SGA-CD</title>
+    <link rel="stylesheet" href="css/app.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#00A651">
+    <!-- Font Awesome para los iconos del menú -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <div class="app-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>SGA-CD</h2>
+            </div>
+            <nav id="app-nav" class="app-nav">
+                <!-- Los enlaces de navegación se insertarán aquí dinámicamente -->
+            </nav>
+            <div class="sidebar-footer">
+                <button id="logout-btn" data-i18n="app_logout">Cerrar Sesión</button>
+            </div>
+        </aside>
+        <main class="main-content">
+            <header class="main-header">
+                <h1 id="main-title" data-i18n="app_welcome">Bienvenido</h1>
+                <div class="header-controls">
+                    <div id="user-info">
+                        <!-- La información del usuario se insertará aquí -->
+                    </div>
+                    <div class="language-switcher">
+                        <button data-lang="es">ES</button>
+                        <button data-lang="en">EN</button>
+                    </div>
+                </div>
+            </header>
+            <section id="content-area" class="content-area">
+                <!-- El contenido dinámico de cada módulo se cargará aquí -->
+                <p>Selecciona una opción del menú para comenzar.</p>
+            </section>
+        </main>
+    </div>
+
+    <!-- Archivo de configuración global -->
+    <script src="js/config.js"></script>
+    <!-- i18n -->
+    <script src="js/i18n.js"></script>
+    <!-- Lógica de navegación -->
+    <script src="js/navigation.js"></script>
+    <!-- Lógica para renderizar vistas -->
+    <script src="js/views.js"></script>
+    <!-- Lógica principal de la aplicación -->
+    <script src="js/app.js"></script>
+</body>
+</html>
