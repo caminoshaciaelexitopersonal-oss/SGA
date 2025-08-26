@@ -1,7 +1,7 @@
 from .sargento_base_graph import SargentoGraphBuilder, SargentoBaseState
 from tools.herramientas_seguridad import SeguridadSoldiers
 
-def get_seguridad_sargento_graph():
+def get_seguridad_sargento_graph(llm: any):
     """
     Construye y devuelve el agente Sargento de Seguridad y Auditoría.
 
@@ -15,7 +15,7 @@ def get_seguridad_sargento_graph():
         # El Sargento recluta a su escuadra de soldados especialistas
         squad = SeguridadSoldiers(api_client).get_all_soldiers()
         # Construye el grafo de mando usando la plantilla estandarizada
-        builder = SargentoGraphBuilder(squad, squad_name="Seguridad y Auditoría")
+        builder = SargentoGraphBuilder(squad, squad_name="Seguridad y Auditoría", llm=llm)
         return builder.build_graph()
 
     print("✅ Doctrina DEAA-V2.1 aplicada: Sargento de Seguridad listo para el despliegue.")

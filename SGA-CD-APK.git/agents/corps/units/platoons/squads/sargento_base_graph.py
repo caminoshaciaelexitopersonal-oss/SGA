@@ -3,7 +3,6 @@ import operator
 from langchain_core.messages import BaseMessage, HumanMessage
 from langgraph.graph import StateGraph, END, START
 from langgraph.prebuilt import ToolNode
-from agent.llm_service import get_llm
 from langchain_core.tools import BaseTool
 
 class SargentoBaseState(TypedDict):
@@ -16,10 +15,10 @@ class SargentoBaseState(TypedDict):
 
 class SargentoGraphBuilder:
     """Constructor estandarizado para todos los agentes Sargento."""
-    def __init__(self, squad: List[BaseTool], squad_name: str):
+    def __init__(self, squad: List[BaseTool], squad_name: str, llm: Any):
         self.squad_executor = ToolNode(squad)
         self.squad_name = squad_name
-        self.model = get_llm().bind_tools(squad)
+        self.model = llm.bind_tools(squad)
 
     def get_sargento_brain(self, state: SargentoBaseState):
         """El cerebro del Sargento. Analiza el estado y decide la siguiente acción para su escuadra."""

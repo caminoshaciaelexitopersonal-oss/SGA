@@ -1,7 +1,7 @@
 from .sargento_base_graph import SargentoGraphBuilder, SargentoBaseState
 from tools.herramientas_inteligencia import InteligenciaSoldiers
 
-def get_inteligencia_sargento_graph():
+def get_inteligencia_sargento_graph(llm: any):
     """
     Construye y devuelve el agente Sargento de Inteligencia.
 
@@ -15,7 +15,7 @@ def get_inteligencia_sargento_graph():
         # El Sargento recluta a su escuadra de soldados especialistas en datos e IA
         squad = InteligenciaSoldiers(api_client).get_all_soldiers()
         # Construye el grafo de mando usando la plantilla estandarizada
-        builder = SargentoGraphBuilder(squad, squad_name="Inteligencia y Apoyo")
+        builder = SargentoGraphBuilder(squad, squad_name="Inteligencia y Apoyo", llm=llm)
         return builder.build_graph()
 
     print("✅ Doctrina DEAA-V2.1 aplicada: Sargento de Inteligencia listo para el despliegue.")

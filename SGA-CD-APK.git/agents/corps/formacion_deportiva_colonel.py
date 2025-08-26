@@ -1,6 +1,6 @@
 import sqlite3
 from langgraph.graph import StateGraph, END
-from langgraph.checkpoints.sqlite import SqliteSaver
+from langgraph.checkpoint.sqlite import SqliteSaver
 from typing import Any, TypedDict, List
 from langchain_core.pydantic_v1 import BaseModel, Field
 
@@ -22,9 +22,6 @@ class FormacionDeportivaColonelState(TypedDict):
     completed_missions: list
     final_report: str
     error: str | None
-operaciones_deportivas_agent = get_operaciones_deportivas_captain_graph()
-estrategia_plataforma_agent = get_estrategia_plataforma_captain_graph()
-
 async def create_tactical_plan(state: FormacionDeportivaColonelState, llm: Any) -> FormacionDeportivaColonelState:
     structured_llm = llm.with_structured_output(TacticalPlan)
     prompt = f"""
@@ -85,9 +82,30 @@ async def compile_final_report(state: FormacionDeportivaColonelState) -> Formaci
     return state
 
 def get_formacion_deportiva_colonel_graph(db_path: str, llm: Any):
+    operaciones_deportivas_agent = get_operaciones_deportivas_captain_graph(llm)
+    estrategia_plataforma_agent = get_estrategia_plataforma_captain_graph(llm)
+
+    async def operaciones_deportivas_node(state: FormacionDeportivaColonelState) -> FormacionDeportivaColonelState:
+        mission = state["task_queue"].pop(0)
+        result = await operaciones_deportivas_agent.ainvoke({"coronel_order": mission.task_description, "app_context": state.get("app_context")})
+        state["completed_missions"].append({
+            "captain": "Operaciones Deportivas", "mission": mission.task_description, "report": result.get("final_report", "Sin reporte.")
+        })
+        return state
+
+    async def estrategia_plataforma_node(state: FormacionDeportivaColonelState) -> FormacionDeportivaColonelState:
+        mission = state["task_queue"].pop(0)
+        result = await estrategia_plataforma_agent.ainvoke({"coronel_order": mission.task_description, "app_context": state.get("app_context")})
+        state["completed_missions"].append({
+            "captain": "Estrategia y Plataforma", "mission": mission.task_description, "report": result.get("final_report", "Sin reporte.")
+        })
+        return state
+
     memory = SqliteSaver.from_conn_string(db_path)
     workflow = StateGraph(FormacionDeportivaColonelState)
+
     planner_node = lambda state: create_tactical_plan(state, llm)
+
     workflow.add_node("planner", planner_node)
     workflow.add_node("router", lambda state: state)
     workflow.add_node("operaciones_deportivas_captain", operaciones_deportivas_node)

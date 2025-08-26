@@ -1,12 +1,9 @@
 from typing import TypedDict, List, Any
 from langchain_core.pydantic_v1 import BaseModel, Field
 from langgraph.graph import StateGraph, END
-from agent.llm_service import get_llm
 
 from .platoons.seguridad_inteligencia_teniente import get_seguridad_inteligencia_lieutenant_graph
 from .platoons.expansion_institucional_teniente import get_expansion_institucional_lieutenant_graph
-
-llm = get_llm()
 
 class PlatformTask(BaseModel):
     task_description: str = Field(description="La descripción de la misión para el Teniente.")
@@ -26,10 +23,7 @@ class EstrategiaCaptainState(TypedDict):
     final_report: str
     error: str | None
 
-seguridad_agent = get_seguridad_inteligencia_lieutenant_graph()
-expansion_agent = get_expansion_institucional_lieutenant_graph()
-
-async def create_platform_plan(state: EstrategiaCaptainState) -> EstrategiaCaptainState:
+async def create_platform_plan(state: EstrategiaCaptainState, llm: Any) -> EstrategiaCaptainState:
     print("--- 🧠 CAP. ESTRATEGIA Y PLATAFORMA: Creando Plan de Plataforma... ---")
     structured_llm = llm.with_structured_output(PlatformPlan)
     prompt = f"""
@@ -59,20 +53,6 @@ def route_to_lieutenant(state: EstrategiaCaptainState):
     state["task_queue"].pop(0)
     return "route_to_lieutenant"
 
-async def seguridad_node(state: EstrategiaCaptainState) -> EstrategiaCaptainState:
-    mission = state["task_queue"].pop(0)
-    print(f"--- 🔽 CAPITÁN: Delegando a TTE. SEGURIDAD E INTELIGENCIA -> '{mission.task_description}' ---")
-    result = await seguridad_agent.ainvoke({"captain_order": mission.task_description, "app_context": state.get("app_context")})
-    state["completed_missions"].append({"lieutenant": "Seguridad e Inteligencia", "report": result.get("final_report", "Sin reporte.")})
-    return state
-
-async def expansion_node(state: EstrategiaCaptainState) -> EstrategiaCaptainState:
-    mission = state["task_queue"].pop(0)
-    print(f"--- 🔽 CAPITÁN: Delegando a TTE. EXPANSIÓN INSTITUCIONAL -> '{mission.task_description}' ---")
-    result = await expansion_agent.ainvoke({"captain_order": mission.task_description, "app_context": state.get("app_context")})
-    state["completed_missions"].append({"lieutenant": "Expansión Institucional", "report": result.get("final_report", "Sin reporte.")})
-    return state
-
 async def compile_final_report(state: EstrategiaCaptainState) -> EstrategiaCaptainState:
     print("--- 📄 CAP. ESTRATEGIA: Compilando Informe Estratégico para el Coronel... ---")
     if state.get("error"):
@@ -82,9 +62,29 @@ async def compile_final_report(state: EstrategiaCaptainState) -> EstrategiaCapta
     state["final_report"] = f"Misión de Estrategia y Plataforma completada. Resumen:\n{report_body}"
     return state
 
-def get_estrategia_plataforma_captain_graph():
+def get_estrategia_plataforma_captain_graph(llm: Any):
+    seguridad_agent = get_seguridad_inteligencia_lieutenant_graph(llm)
+    expansion_agent = get_expansion_institucional_lieutenant_graph(llm)
+
+    async def seguridad_node(state: EstrategiaCaptainState) -> EstrategiaCaptainState:
+        mission = state["task_queue"].pop(0)
+        print(f"--- 🔽 CAPITÁN: Delegando a TTE. SEGURIDAD E INTELIGENCIA -> '{mission.task_description}' ---")
+        result = await seguridad_agent.ainvoke({"captain_order": mission.task_description, "app_context": state.get("app_context")})
+        state["completed_missions"].append({"lieutenant": "Seguridad e Inteligencia", "report": result.get("final_report", "Sin reporte.")})
+        return state
+
+    async def expansion_node(state: EstrategiaCaptainState) -> EstrategiaCaptainState:
+        mission = state["task_queue"].pop(0)
+        print(f"--- 🔽 CAPITÁN: Delegando a TTE. EXPANSIÓN INSTITUCIONAL -> '{mission.task_description}' ---")
+        result = await expansion_agent.ainvoke({"captain_order": mission.task_description, "app_context": state.get("app_context")})
+        state["completed_missions"].append({"lieutenant": "Expansión Institucional", "report": result.get("final_report", "Sin reporte.")})
+        return state
+
     workflow = StateGraph(EstrategiaCaptainState)
-    workflow.add_node("planner", create_platform_plan)
+
+    planner_node = lambda state: create_platform_plan(state, llm)
+
+    workflow.add_node("planner", planner_node)
     workflow.add_node("router", lambda s: s)
     workflow.add_node("seguridad_inteligencia_lieutenant", seguridad_node)
     workflow.add_node("expansion_institucional_lieutenant", expansion_node)

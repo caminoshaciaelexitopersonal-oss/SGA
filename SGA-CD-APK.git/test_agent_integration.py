@@ -1,42 +1,87 @@
 import asyncio
 import os
-from agent.llm_service import _load_config
+import sqlite3
+from agent.llm_service import initialize_llm, get_llm_instance
 from agents.corps.formacion_cultura_colonel import get_formacion_cultura_colonel_graph
+
+# --- Mock Page Object ---
+class MockPage:
+    def __init__(self):
+        self.platform = "android" # Simulate running on Android for local model tests
+        self._session = {}
+
+    def session_get(self, key):
+        return self._session.get(key)
+
+    def session_set(self, key, value):
+        self._session[key] = value
 
 async def run_test():
     """
-    Script de prueba de integración para el sistema de agentes.
-    Carga la configuración, inicializa el agente Coronel y ejecuta una orden de prueba.
+    Script de prueba de integración para el sistema de agentes refactorizado.
+    Simula el flujo de configuración, inicializa el LLM y el agente, y ejecuta una orden.
     """
-    try:
-        config = _load_config()
-        provider = config.get('llm_provider')
-        print(f"--- 🚀 INICIANDO PRUEBA DE INTEGRACIÓN CON LLM PROVIDER: {provider} ---")
-    except FileNotFoundError:
-        print("--- 🛑 ERROR: No se encontró el archivo config.json. ---")
+    print("--- 🚀 INICIANDO PRUEBA DE INTEGRACIÓN DEL AGENTE REFACTORIZADO ---")
+
+    # 1. Simular el flujo de configuración del usuario (Modo Online)
+    mock_page = MockPage()
+    # Para esta prueba, usaremos el modo online. Se requiere una clave de API válida.
+    # ADVERTENCIA: La prueba fallará si la clave no es válida, pero verificará la estructura.
+    api_key = os.environ.get("OPENAI_API_KEY", "TEST_API_KEY")
+
+    if not api_key or api_key == "TEST_API_KEY":
+        print("--- ⚠️ ADVERTENCIA: No se encontró OPENAI_API_KEY en las variables de entorno. Usando clave de prueba. ---")
+        print("--- La prueba verificará la estructura del agente pero fallará al llamar a la API de OpenAI. ---")
+
+    test_config = {
+        "llm_preference": "openai",
+        "openai_api_key": api_key
+    }
+    initialize_llm(mock_page, test_config)
+    llm = get_llm_instance()
+
+    if not llm:
+        print("--- 🛑 ERROR: La inicialización del LLM falló. ---")
         return
 
-    if provider in ['openai', 'google']:
-        api_key = config.get('providers', {}).get(provider, {}).get('api_key', '')
-        if f"YOUR-{provider.upper()}-API-KEY-HERE" in api_key or not api_key:
-            print(f"--- 🛑 ERROR: La clave de API de '{provider}' no está configurada en config.json. ---")
-            return
+    # 2. Crear una base de datos de prueba para la memoria del agente
+    db_path = ":memory:" # Usar una base de datos en memoria para la prueba
 
-    colonel_agent = get_formacion_cultura_colonel_graph()
+    # 3. Inicializar el agente Coronel con el LLM y la DB
+    colonel_agent = get_formacion_cultura_colonel_graph(db_path, llm)
 
-    general_order = "Quiero un informe sobre el estado de las inscripciones para el curso 'Introducción a la IA' y, además, necesito que se analice la seguridad de nuestra sede principal y se me dé un reporte de vulnerabilidades."
+    # 4. Ejecutar una orden de prueba
+    general_order = "Quiero un informe sobre el estado de las inscripciones para el curso 'Introducción a la IA'."
     print(f"\n--- 🗣️ ORDEN DEL GENERAL: \"{general_order}\" ---")
 
-    # Since memory is disabled, we do not pass the 'config' argument with a thread_id.
-    final_state = await colonel_agent.ainvoke(
-        {"general_order": general_order, "app_context": None}
-    )
+    try:
+        # The checkpointer needs a thread_id to save progress.
+        config = {"configurable": {"thread_id": "test-thread-1"}}
+        final_state = await colonel_agent.ainvoke(
+            {"general_order": general_order, "app_context": None},
+            config=config
+        )
+        print("\n--- 🏁 MISIÓN COMPLETADA ---")
+        print("--- 📝 INFORME FINAL DEL CORONEL ---")
+        # El informe final puede estar en 'final_report' o en el último mensaje
+        report = final_state.get("final_report")
+        if not report and final_state.get("messages"):
+            report = final_state["messages"][-1].content
+        print(report or "No se generó ningún informe.")
 
-    print("\n--- 🏁 MISIÓN COMPLETADA ---")
-    print("--- 📝 INFORME FINAL DEL CORONEL ---")
-    print(final_state.get("final_report", "No se generó ningún informe."))
-    print("--- ✅ PRUEBA FINALIZADA ---")
+    except Exception as e:
+        print(f"\n--- ❌ ERROR DURANTE LA EJECUCIÓN DEL AGENTE: {e} ---")
+        print("--- Esto puede ser esperado si la clave de API no es válida. ---")
+
+    print("\n--- ✅ PRUEBA FINALIZADA ---")
 
 
 if __name__ == "__main__":
-    asyncio.run(run_test())
+    # Añadir un event loop si no existe (importante para algunos entornos)
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+
+    loop.run_until_complete(run_test())

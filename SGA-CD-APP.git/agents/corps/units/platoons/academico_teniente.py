@@ -9,11 +9,8 @@ class AcademicoLieutenantState(TypedDict):
     final_report: str
     error: str | None
 
-# Puesto de Mando del Teniente: Instancia de su Sargento
-academico_sargento_agent_builder = get_academico_sargento_graph()
-
 # Nodos del Grafo Supervisor del Teniente
-async def delegate_to_sargento(state: AcademicoLieutenantState) -> AcademicoLieutenantState:
+async def delegate_to_sargento(state: AcademicoLieutenantState, academico_sargento_agent_builder: callable) -> AcademicoLieutenantState:
     """(NODO ÚNICO DE EJECUCIÓN) Delega la misión completa al Sargento especialista."""
     print(f"--- 🫡 TENIENTE ACADÉMICO: Recibida orden. Delegando al Sargento Académico -> '{state['captain_order']}' ---")
     try:
@@ -37,13 +34,18 @@ async def compile_report(state: AcademicoLieutenantState) -> AcademicoLieutenant
     return state
 
 # Ensamblaje del Grafo Supervisor del Teniente
-def get_academico_lieutenant_graph():
+def get_academico_lieutenant_graph(llm: Any):
+    # El teniente obtiene el constructor de su sargento, pasándole el LLM.
+    academico_sargento_agent_builder = get_academico_sargento_graph(llm)
+
+    delegate_node = lambda state: delegate_to_sargento(state, academico_sargento_agent_builder)
+
     workflow = StateGraph(AcademicoLieutenantState)
 
-    workflow.add_node("delegate_mission", delegate_to_sargento)
+    workflow.add_node("delegate_mission", delegate_node)
     workflow.add_node("compile_report", compile_report)
 
-    workflow.set_entry_point("delegate_mission")
+    workflow.add_edge(START, "delegate_mission")
     workflow.add_edge("delegate_mission", "compile_report")
     workflow.add_edge("compile_report", END)
 

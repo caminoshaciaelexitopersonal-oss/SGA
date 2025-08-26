@@ -8,9 +8,7 @@ class DeportivoLieutenantState(TypedDict):
     final_report: str
     error: str | None
 
-deportivo_sargento_builder = get_deportivo_sargento_graph()
-
-async def delegate_to_sargento(state: DeportivoLieutenantState) -> DeportivoLieutenantState:
+async def delegate_to_sargento(state: DeportivoLieutenantState, deportivo_sargento_builder: callable) -> DeportivoLieutenantState:
     """Delega la misión completa al Sargento especialista en deportes."""
     order = state['captain_order']
     print(f"--- 🫡 TENIENTE DEPORTIVO: Recibida orden. Delegando misión al Sargento -> '{order}' ---")
@@ -36,10 +34,14 @@ async def compile_report(state: DeportivoLieutenantState) -> DeportivoLieutenant
     print("--- 📄 TENIENTE DEPORTIVO: Informe para el Capitán de Operaciones Deportivas listo. ---")
     return state
 
-def get_deportivo_lieutenant_graph():
+def get_deportivo_lieutenant_graph(llm: Any):
     """Construye el agente LangGraph para el Teniente Deportivo."""
+    deportivo_sargento_builder = get_deportivo_sargento_graph(llm)
+
+    delegate_node = lambda state: delegate_to_sargento(state, deportivo_sargento_builder)
+
     workflow = StateGraph(DeportivoLieutenantState)
-    workflow.add_node("delegate_mission_to_sargento", delegate_to_sargento)
+    workflow.add_node("delegate_mission_to_sargento", delegate_node)
     workflow.add_node("compile_final_report", compile_report)
     workflow.set_entry_point("delegate_mission_to_sargento")
     workflow.add_edge("delegate_mission_to_sargento", "compile_final_report")

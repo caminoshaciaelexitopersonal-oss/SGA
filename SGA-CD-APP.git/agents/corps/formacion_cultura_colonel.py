@@ -2,8 +2,7 @@ from typing import TypedDict, List, Any
 from langchain_core.pydantic_v1 import BaseModel, Field
 import sqlite3
 from langgraph.graph import StateGraph, END
-from langgraph.checkpoints.sqlite import SqliteSaver
-from typing import Any
+from langgraph.checkpoint.sqlite import SqliteSaver
 
 from .units.operaciones_academicas_captain import get_operaciones_academicas_captain_graph
 from .units.estrategia_plataforma_captain import get_estrategia_plataforma_captain_graph
@@ -28,9 +27,6 @@ class FormacionCulturaColonelState(TypedDict):
     completed_missions: list
     final_report: str
     error: str | None
-
-operaciones_academicas_agent = get_operaciones_academicas_captain_graph()
-estrategia_plataforma_agent = get_estrategia_plataforma_captain_graph()
 
 async def create_tactical_plan(state: FormacionCulturaColonelState, llm: Any) -> FormacionCulturaColonelState:
     """Analiza la orden del General y la descompone en un plan táctico."""
@@ -60,7 +56,7 @@ async def create_tactical_plan(state: FormacionCulturaColonelState, llm: Any) ->
 
 def route_to_captain(state: FormacionCulturaColonelState):
     """Enruta la siguiente misión al Capitán correspondiente."""
-    if state.get("error") or not state["task_queue"]:
+    if state.get("error") or not state.get("task_queue"):
         return "compile_report"
 
     next_mission = state["task_queue"][0]
@@ -76,28 +72,6 @@ def route_to_captain(state: FormacionCulturaColonelState):
         state["error"] = f"Planificación defectuosa: Capitán desconocido '{captain_unit}'."
         state["task_queue"].pop(0)
         return "route_to_captain"
-
-async def operaciones_academicas_node(state: FormacionCulturaColonelState) -> FormacionCulturaColonelState:
-    mission = state["task_queue"].pop(0)
-    print(f"--- 🔽 CORONEL: Delegando a CAP. OPERACIONES ACADÉMICAS -> '{mission.task_description}' ---")
-    result = await operaciones_academicas_agent.ainvoke({"coronel_order": mission.task_description, "app_context": state.get("app_context")})
-    state["completed_missions"].append({
-        "captain": "Operaciones Academicas",
-        "mission": mission.task_description,
-        "report": result.get("final_report", "Sin reporte.")
-    })
-    return state
-
-async def estrategia_plataforma_node(state: FormacionCulturaColonelState) -> FormacionCulturaColonelState:
-    mission = state["task_queue"].pop(0)
-    print(f"--- 🔽 CORONEL: Delegando a CAP. ESTRATEGIA Y PLATAFORMA -> '{mission.task_description}' ---")
-    result = await estrategia_plataforma_agent.ainvoke({"coronel_order": mission.task_description, "app_context": state.get("app_context")})
-    state["completed_missions"].append({
-        "captain": "Estrategia y Plataforma",
-        "mission": mission.task_description,
-        "report": result.get("final_report", "Sin reporte.")
-    })
-    return state
 
 async def compile_final_report(state: FormacionCulturaColonelState) -> FormacionCulturaColonelState:
     """Sintetiza todos los reportes en un informe consolidado para el General."""
@@ -116,10 +90,34 @@ def get_formacion_cultura_colonel_graph(db_path: str, llm: Any):
     Construye y compila el agente LangGraph para el Coronel de Formación y Cultura.
     La compilación incluye un checkpointer que apunta a la base de datos local del usuario.
     """
+    operaciones_academicas_agent = get_operaciones_academicas_captain_graph(llm)
+    estrategia_plataforma_agent = get_estrategia_plataforma_captain_graph(llm)
+
+    async def operaciones_academicas_node(state: FormacionCulturaColonelState) -> FormacionCulturaColonelState:
+        mission = state["task_queue"].pop(0)
+        print(f"--- 🔽 CORONEL: Delegando a CAP. OPERACIONES ACADÉMICAS -> '{mission.task_description}' ---")
+        result = await operaciones_academicas_agent.ainvoke({"coronel_order": mission.task_description, "app_context": state.get("app_context")})
+        state["completed_missions"].append({
+            "captain": "Operaciones Academicas",
+            "mission": mission.task_description,
+            "report": result.get("final_report", "Sin reporte.")
+        })
+        return state
+
+    async def estrategia_plataforma_node(state: FormacionCulturaColonelState) -> FormacionCulturaColonelState:
+        mission = state["task_queue"].pop(0)
+        print(f"--- 🔽 CORONEL: Delegando a CAP. ESTRATEGIA Y PLATAFORMA -> '{mission.task_description}' ---")
+        result = await estrategia_plataforma_agent.ainvoke({"coronel_order": mission.task_description, "app_context": state.get("app_context")})
+        state["completed_missions"].append({
+            "captain": "Estrategia y Plataforma",
+            "mission": mission.task_description,
+            "report": result.get("final_report", "Sin reporte.")
+        })
+        return state
+
     memory = SqliteSaver.from_conn_string(db_path)
     workflow = StateGraph(FormacionCulturaColonelState)
 
-    # El LLM ahora se pasa a los nodos que lo necesitan.
     planner_node = lambda state: create_tactical_plan(state, llm)
     workflow.add_node("planner", planner_node)
     workflow.add_node("router", lambda state: state)

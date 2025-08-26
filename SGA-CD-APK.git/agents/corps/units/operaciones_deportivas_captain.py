@@ -1,13 +1,9 @@
 from typing import TypedDict, List, Any
 from langchain_core.pydantic_v1 import BaseModel, Field
 from langgraph.graph import StateGraph, END
-from agent.llm_service import get_llm
-
 from .platoons.deportivo_teniente import get_deportivo_lieutenant_graph
 from .platoons.comunicacion_experiencia_teniente import get_comunicacion_experiencia_lieutenant_graph
 from .platoons.gamificacion_teniente import get_gamificacion_lieutenant_graph
-
-llm = get_llm()
 
 class PlatoonTask(BaseModel):
     task_description: str = Field(description="La descripción detallada de la misión para el Teniente.")
@@ -27,11 +23,7 @@ class OperacionesDeportivasCaptainState(TypedDict):
     final_report: str
     error: str | None
 
-deportivo_agent = get_deportivo_lieutenant_graph()
-comunicacion_agent = get_comunicacion_experiencia_lieutenant_graph()
-gamificacion_agent = get_gamificacion_lieutenant_graph()
-
-async def create_platoon_plan(state: OperacionesDeportivasCaptainState) -> OperacionesDeportivasCaptainState:
+async def create_platoon_plan(state: OperacionesDeportivasCaptainState, llm: Any) -> OperacionesDeportivasCaptainState:
     print("--- 🧠 CAP. OPERACIONES DEPORTIVAS: Creando Plan de Pelotón... ---")
     structured_llm = llm.with_structured_output(PlatoonPlan)
     prompt = f"""
@@ -65,26 +57,6 @@ def route_to_lieutenant(state: OperacionesDeportivasCaptainState):
     state["task_queue"].pop(0)
     return "route_to_lieutenant"
 
-async def deportivo_node(state: OperacionesDeportivasCaptainState) -> OperacionesDeportivasCaptainState:
-    mission = state["task_queue"].pop(0)
-    print(f"--- 🔽 CAPITÁN: Delegando a TTE. DEPORTIVO -> '{mission.task_description}' ---")
-    result = await deportivo_agent.ainvoke({"captain_order": mission.task_description, "app_context": state.get("app_context")})
-    state["completed_missions"].append({"lieutenant": "Deportivo", "report": result.get("final_report", "Sin reporte.")})
-    return state
-
-async def comunicacion_node(state: OperacionesDeportivasCaptainState) -> OperacionesDeportivasCaptainState:
-    mission = state["task_queue"].pop(0)
-    print(f"--- 🔽 CAPITÁN: Delegando a TTE. COMUNICACIÓN -> '{mission.task_description}' ---")
-    result = await comunicacion_agent.ainvoke({"captain_order": mission.task_description, "app_context": state.get("app_context")})
-    state["completed_missions"].append({"lieutenant": "Comunicación y Exp.", "report": result.get("final_report", "Sin reporte.")})
-    return state
-
-async def gamificacion_node(state: OperacionesDeportivasCaptainState) -> OperacionesDeportivasCaptainState:
-    mission = state["task_queue"].pop(0)
-    print(f"--- 🔽 CAPITÁN: Delegando a TTE. GAMIFICACIÓN -> '{mission.task_description}' ---")
-    result = await gamificacion_agent.ainvoke({"captain_order": mission.task_description, "app_context": state.get("app_context")})
-    state["completed_missions"].append({"lieutenant": "Gamificación", "report": result.get("final_report", "Sin reporte.")})
-    return state
 
 async def compile_final_report(state: OperacionesDeportivasCaptainState) -> OperacionesDeportivasCaptainState:
     print("--- 📄 CAP. OPERACIONES DEPORTIVAS: Compilando Informe Táctico para el Coronel... ---")
@@ -95,9 +67,37 @@ async def compile_final_report(state: OperacionesDeportivasCaptainState) -> Oper
     state["final_report"] = f"Misión de Operaciones Deportivas completada. Resumen:\n{report_body}"
     return state
 
-def get_operaciones_deportivas_captain_graph():
+def get_operaciones_deportivas_captain_graph(llm: Any):
+    deportivo_agent = get_deportivo_lieutenant_graph(llm)
+    comunicacion_agent = get_comunicacion_experiencia_lieutenant_graph(llm)
+    gamificacion_agent = get_gamificacion_lieutenant_graph(llm)
+
+    async def deportivo_node(state: OperacionesDeportivasCaptainState) -> OperacionesDeportivasCaptainState:
+        mission = state["task_queue"].pop(0)
+        print(f"--- 🔽 CAPITÁN: Delegando a TTE. DEPORTIVO -> '{mission.task_description}' ---")
+        result = await deportivo_agent.ainvoke({"captain_order": mission.task_description, "app_context": state.get("app_context")})
+        state["completed_missions"].append({"lieutenant": "Deportivo", "report": result.get("final_report", "Sin reporte.")})
+        return state
+
+    async def comunicacion_node(state: OperacionesDeportivasCaptainState) -> OperacionesDeportivasCaptainState:
+        mission = state["task_queue"].pop(0)
+        print(f"--- 🔽 CAPITÁN: Delegando a TTE. COMUNICACIÓN -> '{mission.task_description}' ---")
+        result = await comunicacion_agent.ainvoke({"captain_order": mission.task_description, "app_context": state.get("app_context")})
+        state["completed_missions"].append({"lieutenant": "Comunicación y Exp.", "report": result.get("final_report", "Sin reporte.")})
+        return state
+
+    async def gamificacion_node(state: OperacionesDeportivasCaptainState) -> OperacionesDeportivasCaptainState:
+        mission = state["task_queue"].pop(0)
+        print(f"--- 🔽 CAPITÁN: Delegando a TTE. GAMIFICACIÓN -> '{mission.task_description}' ---")
+        result = await gamificacion_agent.ainvoke({"captain_order": mission.task_description, "app_context": state.get("app_context")})
+        state["completed_missions"].append({"lieutenant": "Gamificación", "report": result.get("final_report", "Sin reporte.")})
+        return state
+
     workflow = StateGraph(OperacionesDeportivasCaptainState)
-    workflow.add_node("planner", create_platoon_plan)
+
+    planner_node = lambda state: create_platoon_plan(state, llm)
+
+    workflow.add_node("planner", planner_node)
     workflow.add_node("router", lambda s: s)
     workflow.add_node("deportivo_lieutenant", deportivo_node)
     workflow.add_node("comunicacion_lieutenant", comunicacion_node)

@@ -3,38 +3,31 @@ import flet as ft
 from agents.corps.formacion_cultura_colonel import get_formacion_cultura_colonel_graph
 from agents.corps.formacion_deportiva_colonel import get_formacion_deportiva_colonel_graph
 from utils.database_manager import get_db_path
-from utils.api_client import ApiClient
-from agent.llm_service import get_llm
+from agent.llm_service import get_llm_instance
 
-async def invoke_agent_for_area(page: ft.Page, area: str, user_input: str, user_id: int, tenant_id: int, tenant_api_key: str) -> str:
+async def invoke_agent_for_area(page: ft.Page, area: str, user_input: str, user_id: int, tenant_id: int) -> str:
     """
     Invokes the correct top-level agent (Colonel) based on the area context.
-    This is the main orchestration function.
+    This is the main orchestration function. It uses the globally initialized LLM.
     """
     print(f"--- 📞 Interfaz de Agente: Recibida solicitud para el área '{area}' ---")
 
-    # 1. Instanciar el cliente de API
-    # TODO: La URL base debería venir de una configuración, no estar hardcodeada.
-    api_client = ApiClient(base_url="http://127.0.0.1:5001", tenant_api_key=tenant_api_key)
-
-    # 2. Obtener la configuración de LLM para este inquilino
-    llm_config = api_client.get_llm_config()
-    if not llm_config:
-        return "Error: No se pudo obtener la configuración de IA del servidor."
-
-    # 3. Obtener la instancia de LLM correcta basada en la configuración del inquilino
-    llm = get_llm(llm_config)
+    # 1. Obtener la instancia de LLM global, que fue configurada en el flujo de setup.
+    llm = get_llm_instance()
     if not llm:
-        return "Error: No se pudo inicializar el modelo de lenguaje (LLM) para este inquilino."
+        # Esto no debería ocurrir si el flujo de setup es correcto.
+        return "Error Crítico: El modelo de lenguaje (LLM) no ha sido inicializado."
 
-    # 4. Obtener la ruta a la base de datos local del usuario para la memoria del agente
+    # 2. Obtener la ruta a la base de datos local del usuario para la memoria del agente
     db_path = get_db_path(page)
 
-    # 5. Seleccionar y compilar el grafo del agente correcto, pasando el LLM y la DB path
+    # 3. Seleccionar y compilar el grafo del agente correcto, pasando el LLM y la DB path
     agent_graph = None
     if area == 'Cultura':
         agent_graph = get_formacion_cultura_colonel_graph(db_path, llm)
     elif area == 'Deportes':
+        # Asumiendo que formacion_deportiva_colonel sigue el mismo patrón de refactorización.
+        # TODO: Refactorizar formacion_deportiva_colonel.py
         agent_graph = get_formacion_deportiva_colonel_graph(db_path, llm)
     else:
         return "Error: Área de asistente no reconocida."
@@ -42,11 +35,13 @@ async def invoke_agent_for_area(page: ft.Page, area: str, user_input: str, user_
     if agent_graph is None:
         return "Error: No se pudo construir el grafo del asistente de IA."
 
-    # 6. Preparar el input y la configuración para la invocación
-    graph_input = {"general_order": user_input, "app_context": {"user_id": user_id, "tenant_id": tenant_id}}
+    # 4. Preparar el input y la configuración para la invocación
+    # TODO: El app_context ahora necesita el ApiClient, que ya no se instancia aquí.
+    # Por ahora, se pasa un contexto simplificado.
+    graph_input = {"general_order": user_input, "app_context": {"user_id": user_id, "tenant_id": tenant_id, "api": None}}
     config = {"configurable": {"thread_id": f"user_{user_id}"}}
 
-    # 7. Invocar al agente
+    # 5. Invocar al agente
     try:
         print(f"--- 🚀 Invocando al Coronel de '{area}' con la orden: '{user_input[:50]}...' ---")
         final_state = await agent_graph.ainvoke(graph_input, config=config)
