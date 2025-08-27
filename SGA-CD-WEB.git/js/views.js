@@ -1,4 +1,4 @@
-// --- Funciones para Renderizar Vistas Específicas ---
+ // --- Funciones para Renderizar Vistas Específicas ---
 
 // Esta función actuará como un enrutador del lado del cliente
 async function renderContentForView(viewName, token, roleName = 'default') {
@@ -35,7 +35,12 @@ async function renderContentForView(viewName, token, roleName = 'default') {
             case 'reportes':
                 contentArea.innerHTML = '<h2>Reportes</h2><p>Aquí se mostrarán los reportes de la empresa.</p>';
                 break;
-
+        }
+    } catch (error) {
+        console.error('Error al renderizar la vista:', error);
+        contentArea.innerHTML = '<h2>Error al cargar la vista</h2>';
+    }
+}
             // Vistas para jefe_area
             case 'eventos-y-salidas':
                 contentArea.innerHTML = await getEventosSalidasView(token);

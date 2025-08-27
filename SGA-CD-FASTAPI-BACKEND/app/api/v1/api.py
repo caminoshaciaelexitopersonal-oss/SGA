@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+ from fastapi import APIRouter
 from .endpoints import (
     auth,
     admin,
@@ -18,8 +18,8 @@ from .endpoints import (
     notificaciones,
     audit,
     tenancy,
-    profesor,
-    jefe_area,
+    profesor,   # profesor ya estaba en main y en la feature
+    jefe_area,  # agregado desde feat/implement-roles-and-agent-ui
 )
 
 api_router = APIRouter()
@@ -45,3 +45,4 @@ api_router.include_router(inscripciones_asistencias.router, prefix="/academic", 
 api_router.include_router(dropdowns.router, prefix="/dropdowns", tags=["Dropdown Management"])
 api_router.include_router(notificaciones.router, prefix="/notificaciones", tags=["Notificaciones"])
 api_router.include_router(audit.router, prefix="/audit", tags=["Audit Log"])
+ 
