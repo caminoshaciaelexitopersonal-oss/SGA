@@ -3,6 +3,7 @@ from .endpoints import (
     auth,
     admin,
     agent,
+    agent_voice,
     alumnos,
     procesos,
     clases,
@@ -31,6 +32,7 @@ api_router.include_router(profesor.router, prefix="/profesor", tags=["Profesor"]
 api_router.include_router(jefe_area.router, prefix="/jefe_area", tags=["Jefe de Área"])
 api_router.include_router(admin.router, prefix="/admin", tags=["Admin"])
 api_router.include_router(agent.router, prefix="/agent", tags=["AI Agent"])
+api_router.include_router(agent_voice.router, prefix="/agent", tags=["AI Agent Voice"]) # Using same prefix
 api_router.include_router(alumnos.router, prefix="/alumnos", tags=["Alumnos"])
 api_router.include_router(procesos.router, prefix="/procesos", tags=["Procesos de Formación"])
 api_router.include_router(clases.router, prefix="/clases", tags=["Clases"])
