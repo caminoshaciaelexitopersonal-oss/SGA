@@ -47,8 +47,10 @@ document.addEventListener('DOMContentLoaded', () => {
                             localStorage.setItem('userRoles', JSON.stringify(decodedPayload.roles || []));
                             localStorage.setItem('userId', decodedPayload.sub);
                             localStorage.setItem('userInquilinoId', decodedPayload.inquilino_id);
+                            localStorage.setItem('userName', decodedPayload.nombre_completo || '');
 
                             console.log('Roles de usuario:', decodedPayload.roles);
+                            console.log('Nombre de usuario:', decodedPayload.nombre_completo);
 
                         } catch (e) {
                             console.error('Error decodificando el token:', e);
