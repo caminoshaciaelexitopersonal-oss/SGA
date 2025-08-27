@@ -70,7 +70,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const langSelect = document.getElementById('language-select');
         const themeToggle = document.getElementById('theme-toggle');
 
-        if (navContainer) navContainer.addEventListener('click', (e) => { /* ... */ });
+        if (navContainer) {
+            navContainer.addEventListener('click', (e) => {
+                const link = e.target.closest('a[data-view]');
+                if (link) {
+                    e.preventDefault();
+                    const viewName = link.dataset.view;
+                    if (viewName) {
+                        console.log(`Navigating to view: ${viewName}`);
+                        renderContentForView(viewName, token, roleName);
+                    }
+                }
+            });
+        }
         if (langSelect) langSelect.addEventListener('change', (e) => setLanguage(e.target.value));
 
         // Lógica del Theme Switcher

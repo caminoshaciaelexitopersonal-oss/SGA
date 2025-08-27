@@ -24,7 +24,7 @@ async function renderAdminEmpresaView(token) {
         if (!areasResponse.ok) throw new Error('No se pudo obtener la lista de áreas.');
 
         const users = await usersResponse.json();
-        const areas = await areasResponse.json();
+        const areas = await areasResponse.json(); // Corrected from response.json()
 
         // Render the tables
         const dashboardContent = document.getElementById('admin-dashboard-content');
