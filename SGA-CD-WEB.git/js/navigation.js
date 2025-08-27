@@ -21,14 +21,9 @@ const navLinks = {
     ],
     // Rol 3: Jefe de Área
     jefe_area: [
-        { text: 'Dashboard de Área', icon: 'fa-tachometer-alt' },
-        { text: 'Gestionar Personal', icon: 'fa-users' },
-        { text: 'Eventos y Salidas', icon: 'fa-calendar-alt' },
-        { text: 'Disciplinas/Modalidades', icon: 'fa-project-diagram' },
-        { text: 'Inscripciones', icon: 'fa-user-plus' },
-        { text: 'Gamificación', icon: 'fa-gamepad' },
-        { text: 'Reportes de Área', icon: 'fa-chart-pie' },
-        { text: 'Asistente de IA', icon: 'fa-robot' }
+        { text: 'Panel de Área', view: 'panel-area', icon: 'fa-tachometer-alt' },
+        { text: 'Reportes', view: 'reportes-area', icon: 'fa-chart-pie' },
+        { text: 'Configuración', view: 'config-area', icon: 'fa-cog' }
     ],
     // Rol 4: Profesional de Área
     profesional_area: [
