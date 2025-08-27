@@ -14,23 +14,16 @@ const navLinks = {
     ],
     // Rol 2: Admin de Empresa
     admin_empresa: [
-        { text: 'Dashboard', icon: 'fa-tachometer-alt' },
-        { text: 'Gestionar Usuarios', icon: 'fa-users-cog' },
-        { text: 'Gestionar Áreas', icon: 'fa-sitemap' },
-        { text: 'Reportes', icon: 'fa-chart-bar' },
-        { text: 'Auditoría de Empresa', icon: 'fa-history' },
-        { text: 'Asistente de IA', icon: 'fa-robot' }
+        { text: 'Panel de Empresa', view: 'panel-empresa', icon: 'fa-tachometer-alt' },
+        { text: 'Reportes', view: 'reportes-empresa', icon: 'fa-chart-bar' },
+        { text: 'Auditoría', view: 'auditoria-empresa', icon: 'fa-history' },
+        { text: 'Configuración', view: 'config-empresa', icon: 'fa-cog' }
     ],
     // Rol 3: Jefe de Área
     jefe_area: [
-        { text: 'Dashboard de Área', icon: 'fa-tachometer-alt' },
-        { text: 'Gestionar Personal', icon: 'fa-users' },
-        { text: 'Eventos y Salidas', icon: 'fa-calendar-alt' },
-        { text: 'Disciplinas/Modalidades', icon: 'fa-project-diagram' },
-        { text: 'Inscripciones', icon: 'fa-user-plus' },
-        { text: 'Gamificación', icon: 'fa-gamepad' },
-        { text: 'Reportes de Área', icon: 'fa-chart-pie' },
-        { text: 'Asistente de IA', icon: 'fa-robot' }
+        { text: 'Panel de Área', view: 'panel-area', icon: 'fa-tachometer-alt' },
+        { text: 'Reportes', view: 'reportes-area', icon: 'fa-chart-pie' },
+        { text: 'Configuración', view: 'config-area', icon: 'fa-cog' }
     ],
     // Rol 4: Profesional de Área
     profesional_area: [
@@ -95,9 +88,9 @@ const navLinks = {
     ],
     // Rol 12: Jefe de Escenarios
     jefe_escenarios: [
-        { text: 'Calendario de Escenarios', icon: 'fa-calendar-alt' },
-        { text: 'Asignar Espacios', icon: 'fa-map-marker-alt' },
-        { text: 'Mantenimiento', icon: 'fa-tools' }
+        { text: 'Gestionar Escenarios', view: 'panel-escenarios', icon: 'fa-map-marked-alt' },
+        { text: 'Reservas', view: 'reservas-escenarios', icon: 'fa-calendar-check' },
+        { text: 'Reportes', view: 'reportes-escenarios', icon: 'fa-file-alt' }
     ],
     // Rol por defecto si no se encuentra uno
     default: [
@@ -113,8 +106,9 @@ function renderNavigation(roleName) {
 
     let navHtml = '';
     links.forEach(link => {
-        // El atributo data-view será usado para cargar el contenido dinámicamente
-        navHtml += `<a href="#" data-view="${link.text.toLowerCase().replace(/ /g, '-')}">
+        // Usar la propiedad 'view' si existe, si no, generar desde el texto
+        const viewName = link.view || link.text.toLowerCase().replace(/ /g, '-');
+        navHtml += `<a href="#" data-view="${viewName}">
                         <i class="fas ${link.icon}"></i>
                         <span>${link.text}</span>
                     </a>`;

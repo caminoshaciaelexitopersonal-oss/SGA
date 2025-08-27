@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 
-from app import schemas
+from app import schemas, crud
 from models import user as user_model
 from app.api import deps
 
@@ -58,3 +58,23 @@ def get_users_by_empresa(
         user.roles = [row[0] for row in roles_result]
 
     return users
+
+
+@router.get("/areas", response_model=List[schemas.area.Area], summary="List areas by company")
+def get_areas_by_empresa(
+    db: Session = Depends(deps.get_db),
+    current_user: user_model.Usuario = Depends(deps.get_current_active_user)
+):
+    """
+    Get all areas belonging to the current user's empresa (inquilino).
+    Accessible by admin_empresa.
+    """
+    # Role check
+    if "admin_empresa" not in current_user.roles and "admin_general" not in current_user.roles:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized. Requires 'admin_empresa' or 'admin_general' role.",
+        )
+
+    areas = crud.area.get_areas_by_tenant(db=db, inquilino_id=current_user.inquilino_id)
+    return areas

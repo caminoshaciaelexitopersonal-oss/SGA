@@ -27,6 +27,18 @@ def create_evento(db: Session, *, obj_in: EventoCreate) -> Evento:
     db.refresh(db_obj)
     return db_obj
 
+def get_eventos_by_area_ids(db: Session, *, area_ids: List[int], skip: int = 0, limit: int = 100) -> List[Evento]:
+    """
+    Retrieve all eventos (events) for a specific list of area IDs.
+    """
+    return (
+        db.query(Evento)
+        .filter(Evento.area_id.in_(area_ids))
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
+
 # --- CRUD for EventoParticipante ---
 
 def add_participante_to_evento(db: Session, *, obj_in: EventoParticipanteCreate) -> EventoParticipante:
