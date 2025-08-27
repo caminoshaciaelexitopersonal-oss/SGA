@@ -17,12 +17,14 @@ from .endpoints import (
     dropdowns,
     notificaciones,
     audit,
+    tenancy,
 )
 
 api_router = APIRouter()
 
 # API Routers
 api_router.include_router(auth.router, prefix="/auth", tags=["Authentication"])
+api_router.include_router(tenancy.router, prefix="/tenants", tags=["Tenants"])
 api_router.include_router(admin.router, prefix="/admin", tags=["Admin"])
 api_router.include_router(agent.router, prefix="/agent", tags=["AI Agent"])
 api_router.include_router(alumnos.router, prefix="/alumnos", tags=["Alumnos"])
