@@ -43,11 +43,44 @@ async function renderPadreAcudienteView(token) {
         `;
 
         // Añadir listener para los botones de "Ver Progreso"
-        document.getElementById('padre-alumnos-container').addEventListener('click', (e) => {
+        document.getElementById('padre-alumnos-container').addEventListener('click', async (e) => {
             if (e.target.classList.contains('btn-ver-progreso')) {
                 const alumnoId = e.target.dataset.alumnoId;
-                // Aquí se podría abrir un modal con la información detallada del alumno
-                openModal('Progreso del Alumno', `<p>Mostrando progreso para el alumno con ID: ${alumnoId}. Esta funcionalidad se implementará en detalle.</p>`);
+                const alumnoNombre = e.target.closest('.card').querySelector('h3').textContent;
+
+                openModal(`Progreso de ${alumnoNombre}`, '<p>Cargando progreso...</p>');
+
+                try {
+                    const response = await fetch(`${config.apiBaseUrl}/api/v1/alumnos/${alumnoId}/progreso`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (!response.ok) {
+                        throw new Error('No se pudo obtener el progreso del alumno.');
+                    }
+                    const progreso = await response.json();
+
+                    const progresoHtml = `
+                        <h4>Asistencia General: <span class="asistencia-${progreso.asistencia_status}">${progreso.asistencia_porcentaje}%</span></h4>
+
+                        <h5>Calificaciones Recientes</h5>
+                        <ul>
+                            ${progreso.calificaciones_recientes.map(c => `<li>${c.materia}: <span class="nota">${c.nota}</span></li>`).join('')}
+                        </ul>
+
+                        <h5>Logros de Gamificación</h5>
+                        <ul>
+                            ${progreso.logros_gamificacion.map(l => `<li><i class="fas fa-trophy"></i> ${l.nombre}</li>`).join('')}
+                        </ul>
+                    `;
+
+                    // Actualizar el cuerpo del modal con los datos reales
+                    const modalBody = document.getElementById('modal-body');
+                    if(modalBody) modalBody.innerHTML = progresoHtml;
+
+                } catch (error) {
+                    const modalBody = document.getElementById('modal-body');
+                    if(modalBody) modalBody.innerHTML = `<p class="message-error">Error al cargar el progreso: ${error.message}</p>`;
+                }
             }
         });
 
