@@ -56,9 +56,52 @@ async function renderMiHorarioView(token) {
     const contentArea = document.getElementById('content-area');
     contentArea.innerHTML = '<h2><i class="fas fa-clock"></i> Mi Horario</h2><p>Cargando horario...</p>';
 
-    // Implementación futura: Llamar a /api/v1/alumno/horario y renderizar un calendario.
-    // Por ahora, se muestra un mensaje.
-    contentArea.innerHTML += `<p>La visualización del horario en formato calendario se implementará próximamente.</p>`;
+    try {
+        const response = await fetch(`${config.apiBaseUrl}/api/v1/alumno/horario`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!response.ok) {
+            throw new Error('No se pudo obtener el horario.');
+        }
+
+        const horario = await response.json();
+
+        let horarioRows = '<tr><td colspan="5">No tienes un horario asignado.</td></tr>';
+        if (horario && horario.length > 0) {
+            horarioRows = horario.map(clase => `
+                <tr>
+                    <td>${clase.dia}</td>
+                    <td>${clase.hora_inicio} - ${clase.hora_fin}</td>
+                    <td>${clase.materia}</td>
+                    <td>${clase.profesor}</td>
+                    <td>${clase.escenario}</td>
+                </tr>
+            `).join('');
+        }
+
+        contentArea.innerHTML = `
+            <div class="view-header">
+                <h2><i class="fas fa-clock"></i> Mi Horario</h2>
+            </div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Día</th>
+                        <th>Hora</th>
+                        <th>Materia</th>
+                        <th>Profesor</th>
+                        <th>Escenario</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${horarioRows}
+                </tbody>
+            </table>
+        `;
+    } catch (error) {
+        contentArea.innerHTML += `<p class="message-error">Error al cargar el horario: ${error.message}</p>`;
+    }
 }
 
 /**
@@ -68,7 +111,47 @@ async function renderMisCalificacionesView(token) {
     const contentArea = document.getElementById('content-area');
     contentArea.innerHTML = '<h2><i class="fas fa-star"></i> Mis Calificaciones</h2><p>Cargando calificaciones...</p>';
 
-    // Implementación futura: Llamar a /api/v1/alumno/calificaciones y mostrar una tabla.
-    // Por ahora, se muestra un mensaje.
-     contentArea.innerHTML += `<p>La visualización de calificaciones detalladas se implementará próximamente.</p>`;
+    try {
+        const response = await fetch(`${config.apiBaseUrl}/api/v1/alumno/calificaciones`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!response.ok) {
+            throw new Error('No se pudo obtener el listado de calificaciones.');
+        }
+
+        const calificaciones = await response.json();
+
+        let calificacionesRows = '<tr><td colspan="3">No se encontraron calificaciones.</td></tr>';
+        if (calificaciones && calificaciones.length > 0) {
+            calificacionesRows = calificaciones.map(cal => `
+                <tr>
+                    <td>${cal.materia}</td>
+                    <td><span class="nota">${cal.nota_final}</span></td>
+                    <td>${cal.detalle || 'Sin detalle'}</td>
+                </tr>
+            `).join('');
+        }
+
+        contentArea.innerHTML = `
+            <div class="view-header">
+                <h2><i class="fas fa-star"></i> Mis Calificaciones</h2>
+            </div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Materia</th>
+                        <th>Nota Final</th>
+                        <th>Detalle</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${calificacionesRows}
+                </tbody>
+            </table>
+        `;
+
+    } catch (error) {
+        contentArea.innerHTML += `<p class="message-error">Error al cargar las calificaciones: ${error.message}</p>`;
+    }
 }
