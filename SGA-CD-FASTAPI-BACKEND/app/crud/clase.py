@@ -27,6 +27,18 @@ def create_proceso(db: Session, *, obj_in: ProcesoFormacionCreate) -> ProcesoFor
     db.refresh(db_obj)
     return db_obj
 
+def get_clases_by_profesor(db: Session, *, profesor_id: int, skip: int = 0, limit: int = 100) -> List[Clase]:
+    """
+    Retrieve all clases (courses) for a specific profesor.
+    """
+    return (
+        db.query(Clase)
+        .filter(Clase.profesor_id == profesor_id)
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
+
 def update_proceso(db: Session, *, db_obj: ProcesoFormacion, obj_in: ProcesoFormacionUpdate) -> ProcesoFormacion:
     update_data = obj_in.model_dump(exclude_unset=True)
     for field in update_data:

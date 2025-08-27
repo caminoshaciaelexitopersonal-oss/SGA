@@ -18,6 +18,7 @@ from .endpoints import (
     notificaciones,
     audit,
     tenancy,
+    profesor,  # agregado desde feat/implement-roles-and-agent-ui
 )
 
 api_router = APIRouter()
@@ -25,6 +26,7 @@ api_router = APIRouter()
 # API Routers
 api_router.include_router(auth.router, prefix="/auth", tags=["Authentication"])
 api_router.include_router(tenancy.router, prefix="/tenants", tags=["Tenants"])
+api_router.include_router(profesor.router, prefix="/profesor", tags=["Profesor"])  # agregado desde feat/implement-roles-and-agent-ui
 api_router.include_router(admin.router, prefix="/admin", tags=["Admin"])
 api_router.include_router(agent.router, prefix="/agent", tags=["AI Agent"])
 api_router.include_router(alumnos.router, prefix="/alumnos", tags=["Alumnos"])
