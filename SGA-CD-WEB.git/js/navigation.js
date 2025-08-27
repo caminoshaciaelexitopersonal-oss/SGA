@@ -14,12 +14,10 @@ const navLinks = {
     ],
     // Rol 2: Admin de Empresa
     admin_empresa: [
-        { text: 'Dashboard', icon: 'fa-tachometer-alt' },
-        { text: 'Gestionar Usuarios', icon: 'fa-users-cog' },
-        { text: 'Gestionar Áreas', icon: 'fa-sitemap' },
-        { text: 'Reportes', icon: 'fa-chart-bar' },
-        { text: 'Auditoría de Empresa', icon: 'fa-history' },
-        { text: 'Asistente de IA', icon: 'fa-robot' }
+        { text: 'Panel de Empresa', view: 'panel-empresa', icon: 'fa-tachometer-alt' },
+        { text: 'Reportes', view: 'reportes-empresa', icon: 'fa-chart-bar' },
+        { text: 'Auditoría', view: 'auditoria-empresa', icon: 'fa-history' },
+        { text: 'Configuración', view: 'config-empresa', icon: 'fa-cog' }
     ],
     // Rol 3: Jefe de Área
     jefe_area: [
@@ -113,8 +111,9 @@ function renderNavigation(roleName) {
 
     let navHtml = '';
     links.forEach(link => {
-        // El atributo data-view será usado para cargar el contenido dinámicamente
-        navHtml += `<a href="#" data-view="${link.text.toLowerCase().replace(/ /g, '-')}">
+        // Usar la propiedad 'view' si existe, si no, generar desde el texto
+        const viewName = link.view || link.text.toLowerCase().replace(/ /g, '-');
+        navHtml += `<a href="#" data-view="${viewName}">
                         <i class="fas ${link.icon}"></i>
                         <span>${link.text}</span>
                     </a>`;

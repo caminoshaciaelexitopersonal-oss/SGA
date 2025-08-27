@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS roles (
 \echo 'Tabla `roles` creada o ya existente.'
 
 -- Paso 2: Poblar la tabla `roles` con los 11 roles oficiales del sistema.
+-- Paso 2: Poblar la tabla `roles` con los 12 roles oficiales del sistema.
 -- Se utiliza `ON CONFLICT (nombre) DO NOTHING` para evitar errores si los roles ya existen.
 INSERT INTO roles (nombre, descripcion) VALUES
 ('admin_general', 'Super Administrador del Sistema con acceso total.'),
@@ -38,10 +39,11 @@ INSERT INTO roles (nombre, descripcion) VALUES
 ('alumno', 'Estudiante que recibe la formación.'),
 ('padre_acudiente', 'Representante legal de uno o más alumnos.'),
 ('jefe_almacen', 'Gestiona el inventario de materiales y equipos.'),
+('almacenista', 'Asistente de almacén, reporta al Jefe de Almacén.'),
 ('jefe_escenarios', 'Gestiona la disponibilidad de los espacios físicos.')
 ON CONFLICT (nombre) DO NOTHING;
 
-\echo 'Tabla `roles` poblada con los 11 roles oficiales.'
+\echo 'Tabla `roles` poblada con los 12 roles oficiales.'
 
 -- Paso 3: Crear la tabla `user_roles` para la relación muchos-a-muchos.
 -- Esto permite que un usuario pueda tener múltiples roles.
