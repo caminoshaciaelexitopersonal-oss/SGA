@@ -25,9 +25,78 @@
 }
 
 /* ==========================================================================
-   2. Estilos generales de la aplicación
+   2. Estilos para la sección de login y registro
    ========================================================================== */
 
+#login-section, #registro-form {
+    max-width: 400px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: var(--color-surface);
+    color: var(--color-text-primary);
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    border: 1px solid var(--color-border);
+}
+
+#login-section h2, #registro-form h2 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: var(--color-text-primary);
+}
+
+#login-form input, #form-registro input {
+    width: 100%;
+    padding: 0.8rem;
+    margin-bottom: 1rem;
+    border: 1px solid var(--color-border);
+    background-color: var(--color-background);
+    color: var(--color-text-primary);
+    border-radius: 4px;
+}
+
+#login-form button, #form-registro button {
+    width: 100%;
+    padding: 0.9rem;
+    background-color: var(--color-primary);
+    color: #FFFFFF; /* El texto de los botones primarios suele ser blanco */
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s;
+}
+
+#login-form button:hover, #form-registro button:hover {
+    filter: brightness(1.1);
+}
+
+.message-error {
+    color: #D8000C;
+    background-color: #FFD2D2;
+    padding: 10px;
+    margin-bottom: 1rem;
+    border-radius: 4px;
+}
+
+.message-success {
+    color: #4F8A10;
+    background-color: #DFF2BF;
+    padding: 10px;
+    margin-bottom: 1rem;
+    border-radius: 4px;
+}
+
+.message-info {
+    color: #00529B;
+    background-color: #BDE5F8;
+    padding: 10px;
+    margin-bottom: 1rem;
+    border-radius: 4px;
+}
+
+
+/* Estilos para la aplicación principal (app.html) */
 body, html {
     margin: 0;
     padding: 0;
@@ -54,7 +123,7 @@ body, html {
 .sidebar-header {
     padding: 1.5rem;
     text-align: center;
-    background-color: rgba(0,0,0,0.2);
+    background-color: rgba(0,0,0,0.2); /* Un poco más oscuro para dar profundidad */
 }
 
 .app-nav {
@@ -130,81 +199,7 @@ body, html {
     flex-grow: 1;
 }
 
-/* ==========================================================================
-   3. Estilos para login y registro
-   ========================================================================== */
-
-#login-section, #registro-form {
-    max-width: 400px;
-    margin: 2rem auto;
-    padding: 2rem;
-    background: var(--color-surface);
-    color: var(--color-text-primary);
-    border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    border: 1px solid var(--color-border);
-}
-
-#login-section h2, #registro-form h2 {
-    text-align: center;
-    margin-bottom: 1.5rem;
-    color: var(--color-text-primary);
-}
-
-#login-form input, #form-registro input {
-    width: 100%;
-    padding: 0.8rem;
-    margin-bottom: 1rem;
-    border: 1px solid var(--color-border);
-    background-color: var(--color-background);
-    color: var(--color-text-primary);
-    border-radius: 4px;
-}
-
-#login-form button, #form-registro button {
-    width: 100%;
-    padding: 0.9rem;
-    background-color: var(--color-primary);
-    color: #FFFFFF;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 1rem;
-    transition: background-color 0.3s;
-}
-
-#login-form button:hover, #form-registro button:hover {
-    filter: brightness(1.1);
-}
-
-.message-error {
-    color: #D8000C;
-    background-color: #FFD2D2;
-    padding: 10px;
-    margin-bottom: 1rem;
-    border-radius: 4px;
-}
-
-.message-success {
-    color: #4F8A10;
-    background-color: #DFF2BF;
-    padding: 10px;
-    margin-bottom: 1rem;
-    border-radius: 4px;
-}
-
-.message-info {
-    color: #00529B;
-    background-color: #BDE5F8;
-    padding: 10px;
-    margin-bottom: 1rem;
-    border-radius: 4px;
-}
-
-/* ==========================================================================
-   4. Estilos Login Social
-   ========================================================================== */
-
+/* Estilos para Login Social */
 .social-login-divider {
     display: flex;
     align-items: center;
@@ -258,10 +253,7 @@ body, html {
     font-size: 1.2rem;
 }
 
-/* ==========================================================================
-   5. Estilos para Modal Genérico
-   ========================================================================== */
-
+/* Estilos para el Modal Genérico */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -317,10 +309,7 @@ body, html {
     to { opacity: 1; }
 }
 
-/* ==========================================================================
-   6. Estilos Gamificación Alumno
-   ========================================================================== */
-
+/* Estilos para la vista de Gamificación del Alumno */
 .gamificacion-alumno {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -369,10 +358,7 @@ body, html {
     margin-top: 1rem;
 }
 
-/* ==========================================================================
-   7. Estilos Interfaz Agente IA
-   ========================================================================== */
-
+/* Estilos para la Interfaz del Agente IA */
 .agent-interface-container {
     margin-top: 2rem;
     padding: 1.5rem;
@@ -403,7 +389,7 @@ body, html {
     padding: 1rem;
     margin-bottom: 1rem;
     background-color: var(--color-background);
-    white-space: pre-wrap;
+    white-space: pre-wrap; /* Para conservar los saltos de línea */
     color: var(--color-text-secondary);
 }
 
@@ -443,7 +429,7 @@ body, html {
 }
 
 /* ==========================================================================
-   8. Theme Switcher
+   Estilos para el Theme Switcher
    ========================================================================== */
 
 .theme-switcher {
@@ -511,8 +497,9 @@ input:checked + .slider:before {
     border-radius: 50%;
 }
 
+
 /* ==========================================================================
-   9. Icono Agente Flotante
+   Estilos para el Icono de Agente Flotante
    ========================================================================== */
 
 .floating-agent-icon {
@@ -528,8 +515,8 @@ input:checked + .slider:before {
     font-size: 1.8rem;
     cursor: pointer;
     z-index: 1001;
-    overflow: hidden;
-    padding: 3px;
+    overflow: hidden; /* Para contener la animación del borde */
+    padding: 3px; /* Espacio para el borde animado */
     background: var(--color-surface);
     color: var(--color-primary);
     box-shadow: 0 5px 15px rgba(0,0,0,0.2);
@@ -570,7 +557,125 @@ input:checked + .slider:before {
     background-color: var(--color-primary);
 }
 
+
 @keyframes rotateBorder {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes vibrate {
+    0% { transform: translate(0); }
+    20% { transform: translate(-1px, 1px); }
+    40% { transform: translate(-1px, -1px); }
+    60% { transform: translate(1px, 1px); }
+    80% { transform: translate(1px, -1px); }
+    100% { transform: translate(0); }
+}
+
+.floating-agent-icon.is-speaking .fas {
+    animation: vibrate 0.2s linear infinite;
+}
+
+/* ==========================================================================
+   Estilos para la Interfaz de Chat del Agente
+   ========================================================================== */
+
+.agent-chat-container {
+    position: fixed;
+    bottom: 100px;
+    right: 30px;
+    width: 370px;
+    max-height: 500px;
+    background: var(--color-surface);
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    display: flex;
+    flex-direction: column;
+    z-index: 1000;
+    border: 1px solid var(--color-border);
+}
+
+.chat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    background: var(--color-primary);
+    color: var(--color-surface);
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+}
+
+.chat-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.chat-close-btn {
+    background: none;
+    border: none;
+    color: var(--color-surface);
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.chat-log {
+    flex-grow: 1;
+    padding: 1rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.chat-message {
+    padding: 0.6rem 1rem;
+    border-radius: 18px;
+    max-width: 80%;
+    line-height: 1.4;
+}
+
+.chat-message.agent {
+    background-color: var(--color-primary);
+    color: var(--color-surface);
+    align-self: flex-start;
+    border-bottom-left-radius: 4px;
+}
+
+.chat-message.user {
+    background-color: var(--color-secondary);
+    color: var(--color-text-primary);
+    align-self: flex-end;
+    border-bottom-right-radius: 4px;
+}
+
+.chat-form {
+    display: flex;
+    border-top: 1px solid var(--color-border);
+    padding: 0.5rem;
+}
+
+.chat-form input {
+    flex-grow: 1;
+    border: none;
+    padding: 0.75rem;
+    background: transparent;
+    color: var(--color-text-primary);
+}
+
+.chat-form input:focus {
+    outline: none;
+}
+
+.chat-form button {
+    background: none;
+    border: none;
+    color: var(--color-primary);
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0 0.75rem;
 }

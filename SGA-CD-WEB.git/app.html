@@ -55,16 +55,18 @@
                 <!-- El contenido dinámico de cada módulo se cargará aquí -->
                 <p>Selecciona una opción del menú para comenzar.</p>
 
-                <!-- Interfaz del Agente de IA -->
-                <div id="agent-interface" class="agent-interface-container">
-                    <h3><i class="fas fa-robot"></i> Puesto de Mando del Agente IA</h3>
-                    <p>Envíe una orden a su Coronel de IA para recibir un análisis o ejecutar una acción.</p>
-                    <div id="agent-response-area" class="agent-response">
-                        <!-- Las respuestas del agente se mostrarán aquí -->
+                <!-- Interfaz de Chat del Agente de IA -->
+                <div id="agent-chat-container" class="agent-chat-container" style="display: none;">
+                    <div class="chat-header">
+                        <h3><i class="fas fa-robot"></i> Asistente IA</h3>
+                        <button id="close-chat-btn" class="chat-close-btn">&times;</button>
                     </div>
-                    <form id="agent-form" class="agent-form">
-                        <textarea id="agent-order-input" placeholder="Escribe tu orden aquí... (ej: 'Analiza el rendimiento de los alumnos de natación este mes')" required></textarea>
-                        <button type="submit" id="agent-submit-btn">Enviar Orden</button>
+                    <div id="chat-log" class="chat-log">
+                        <!-- Los mensajes del chat se insertarán aquí -->
+                    </div>
+                    <form id="chat-form" class="chat-form">
+                        <input type="text" id="chat-input" placeholder="Escribe tu mensaje..." autocomplete="off" required>
+                        <button type="submit" id="chat-submit-btn"><i class="fas fa-paper-plane"></i></button>
                     </form>
                 </div>
 
