@@ -12,6 +12,15 @@ async function renderContentForView(viewName, token, roleName = 'default') {
         // Un gran switch para manejar todas las vistas
         switch (viewName) {
             // Vistas para admin_empresa
+            case 'panel-empresa':
+                await renderAdminEmpresaView(token);
+                break;
+
+            // Vistas para jefe_area
+            case 'panel-area':
+                await renderJefeAreaView(token);
+                break;
+
             case 'dashboard':
                 contentArea.innerHTML = await getDashboardView();
                 break;
@@ -31,6 +40,12 @@ async function renderContentForView(viewName, token, roleName = 'default') {
             case 'eventos-y-salidas':
                 contentArea.innerHTML = await getEventosSalidasView(token);
                 break;
+
+            // Vistas para profesor
+            case 'gestionar-cursos':
+                await renderProfesorView(token);
+                break;
+
             case 'gamificación':
                 // La vista de gamificación depende del rol del usuario
                 if (roleName === 'alumno') {

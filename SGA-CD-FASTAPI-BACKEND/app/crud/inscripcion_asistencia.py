@@ -1,7 +1,8 @@
 from sqlalchemy.orm import Session
 from typing import List
 
-from models.academic import Inscripcion, Asistencia
+from app.models.academic import Inscripcion, Asistencia
+from app.models.user import Usuario
 from app.schemas.inscripcion_asistencia import InscripcionCreate, AsistenciaCreate
 
 # --- CRUD for Inscripcion ---
@@ -15,6 +16,17 @@ def create_inscripcion(db: Session, *, obj_in: InscripcionCreate) -> Inscripcion
     db.commit()
     db.refresh(db_obj)
     return db_obj
+
+def get_alumnos_by_clase(db: Session, *, clase_id: int) -> List[Usuario]:
+    """
+    Retrieve all student users enrolled in a specific clase (course).
+    """
+    return (
+        db.query(Usuario)
+        .join(Inscripcion, Usuario.id == Inscripcion.alumno_id)
+        .filter(Inscripcion.clase_id == clase_id)
+        .all()
+    )
 
 # --- CRUD for Asistencia ---
 
