@@ -12,6 +12,9 @@ async function renderContentForView(viewName, token, roleName = 'default') {
         // Un gran switch para manejar todas las vistas
         switch (viewName) {
             // Vistas para admin_empresa
+            case 'panel-empresa':
+                await renderAdminEmpresaView(token);
+                break;
             case 'dashboard':
                 contentArea.innerHTML = await getDashboardView();
                 break;

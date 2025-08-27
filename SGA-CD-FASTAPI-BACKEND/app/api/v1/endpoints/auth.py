@@ -35,7 +35,8 @@ def login(
     access_token_data = {
         "sub": str(user.id),
         "roles": user.roles,
-        "inquilino_id": user.inquilino_id
+        "inquilino_id": user.inquilino_id,
+        "nombre_completo": user.nombre_completo
     }
     # Refresh token solo necesita el user_id
     refresh_token_data = {"sub": str(user.id)}
@@ -86,6 +87,7 @@ def refresh_token(
         "sub": str(user.id),
         "roles": user_roles,
         "inquilino_id": user.inquilino_id,
+        "nombre_completo": user.nombre_completo,
     }
 
     return {

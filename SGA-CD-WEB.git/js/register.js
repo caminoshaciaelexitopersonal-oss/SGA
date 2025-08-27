@@ -51,54 +51,41 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Registration Form Logic ---
     registrationForm.addEventListener('submit', async (e) => {
-        e.preventDefault(); // Prevent default form submission
+        e.preventDefault();
 
-        // Collect form data
-        const formData = {
+        // Collect form data based on the new backend schema
+        const tenantData = {
             nombre_empresa: document.getElementById('nombre_empresa').value,
-            nombre_admin: document.getElementById('nombre_admin').value,
-            correo_admin: document.getElementById('correo_admin').value,
-            usuario_admin: document.getElementById('usuario_admin').value,
-            password_admin: document.getElementById('password_admin').value,
-            plan: document.querySelector('input[name="plan"]:checked').value,
+            admin_nombre_completo: document.getElementById('nombre_admin').value,
+            admin_email: document.getElementById('correo_admin').value,
+            admin_password: document.getElementById('password_admin').value,
         };
 
         // Basic validation
-        if (Object.values(formData).some(val => val.trim() === '')) {
-            showMessage('Por favor, completa todos los campos.', 'error');
+        if (!tenantData.nombre_empresa || !tenantData.admin_nombre_completo || !tenantData.admin_email || !tenantData.admin_password) {
+            showMessage('Por favor, completa todos los campos requeridos.', 'error');
             return;
         }
 
-        showMessage('Registrando, por favor espera...', 'info');
+        showMessage('Registrando tu organización...', 'info');
 
         try {
-            const response = await fetch(`${config.apiBaseUrl}/api/register_tenant`, {
+            // Call the new, correct endpoint
+            const response = await fetch(`${config.apiBaseUrl}/api/v1/tenants/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData),
+                body: JSON.stringify(tenantData),
             });
 
             const result = await response.json();
 
             if (response.ok) {
-                // The backend now sends a URL to redirect to.
-                if (result.checkout_url) {
-                    // This is a paid plan, redirect to Stripe Checkout
-                    showMessage('¡Registro casi completo! Serás redirigido a nuestra pasarela de pago segura para finalizar la suscripción.', 'success');
-                    setTimeout(() => {
-                        window.location.href = result.checkout_url;
-                    }, 3000);
-                } else if (result.redirect_url) {
-                    // This is a free trial, redirect to the login page
-                    showMessage('¡Registro de prueba exitoso! Serás redirigido a la página de inicio de sesión.', 'success');
-                     setTimeout(() => {
-                        window.location.href = result.redirect_url;
-                    }, 3000);
-                } else {
-                     showMessage('Respuesta inesperada del servidor.', 'error');
-                }
+                showMessage('¡Organización registrada con éxito! Serás redirigido a la página de inicio de sesión.', 'success');
+                setTimeout(() => {
+                    window.location.href = 'login.html'; // Redirect to login page on success
+                }, 3000);
             } else {
-                showMessage(result.error || 'Ocurrió un error desconocido.', 'error');
+                showMessage(result.detail || 'Ocurrió un error durante el registro.', 'error');
             }
         } catch (error) {
             console.error('Error en el registro:', error);
