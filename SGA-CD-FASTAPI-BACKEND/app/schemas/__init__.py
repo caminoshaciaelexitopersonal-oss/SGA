@@ -9,8 +9,16 @@ from .curriculum import PlanCurricular, PlanCurricularCreate, PlanCurricularUpda
 from .dropdown import Dropdown, DropdownCreate, DropdownUpdate
 from .escenario import Escenario, EscenarioCreate, EscenarioUpdate, EscenarioParte, EscenarioParteCreate, EscenarioParteUpdate, Reserva, ReservaCreate, ReservaUpdate
 from .evento import Evento, EventoCreate, EventoUpdate, EventoParticipante, EventoParticipanteCreate
-from .gamification import GamificacionAccion, GamificacionAccionCreate, GamificacionAccionUpdate, GamificacionPuntosLog, GamificacionPuntosLogCreate, GamificacionMedalla, GamificacionMedallaCreate, GamificacionMedallaUpdate, GamificacionMedallaObtenida, GamificacionMedallaObtenidaCreate
+from .gamification import (
+    GamificacionAccion, GamificacionAccionCreate, GamificacionAccionUpdate,
+    GamificacionPuntosLog, GamificacionPuntosLogCreate,
+    GamificacionMedalla, GamificacionMedallaCreate, GamificacionMedallaUpdate,
+    GamificacionMedallaObtenida, GamificacionMedallaObtenidaCreate,
+    GamificacionMision, GamificacionMisionCreate, GamificacionMisionUpdate,
+    GamificacionMercadoItem, GamificacionMercadoItemCreate, GamificacionMercadoItemUpdate
+)
 from .inscripcion_asistencia import Inscripcion, InscripcionCreate, Asistencia, AsistenciaCreate
 from .inventory import Elemento, ElementoCreate, ElementoUpdate, Prestamo, PrestamoCreate, PrestamoUpdate
 from .notificacion import Notificacion, NotificacionCreate, NotificacionUpdate
 from .agent import AgentInput
+from .area import Area, AreaCreate, AreaUpdate

@@ -1,5 +1,5 @@
 from .sargento_base_graph import SargentoGraphBuilder, SargentoBaseState
-from tools.herramientas_inteligencia import InteligenciaSoldiers
+from app.tools.herramientas_inteligencia import InteligenciaSoldiers
 
 def get_inteligencia_sargento_graph(llm: any):
     """

@@ -91,3 +91,54 @@ class GamificacionMedallaObtenidaInDBBase(GamificacionMedallaObtenidaBase):
 
 class GamificacionMedallaObtenida(GamificacionMedallaObtenidaInDBBase):
     pass
+
+
+# --- GamificacionMision Schemas ---
+
+class GamificacionMisionBase(BaseModel):
+    nombre: str
+    descripcion: Optional[str] = None
+    puntos_recompensa: int = 0
+    medalla_recompensa_key: Optional[str] = None
+    es_grupal: bool = False
+    fecha_limite: Optional[datetime] = None
+
+class GamificacionMisionCreate(GamificacionMisionBase):
+    inquilino_id: int
+
+class GamificacionMisionUpdate(GamificacionMisionBase):
+    pass
+
+class GamificacionMisionInDBBase(GamificacionMisionBase):
+    id: int
+    inquilino_id: int
+    class Config:
+        from_attributes = True
+
+class GamificacionMision(GamificacionMisionInDBBase):
+    pass
+
+
+# --- GamificacionMercadoItem Schemas ---
+
+class GamificacionMercadoItemBase(BaseModel):
+    nombre: str
+    descripcion: Optional[str] = None
+    costo_puntos: int
+    stock: int = -1
+    tipo: str = "virtual"
+
+class GamificacionMercadoItemCreate(GamificacionMercadoItemBase):
+    inquilino_id: int
+
+class GamificacionMercadoItemUpdate(GamificacionMercadoItemBase):
+    pass
+
+class GamificacionMercadoItemInDBBase(GamificacionMercadoItemBase):
+    id: int
+    inquilino_id: int
+    class Config:
+        from_attributes = True
+
+class GamificacionMercadoItem(GamificacionMercadoItemInDBBase):
+    pass

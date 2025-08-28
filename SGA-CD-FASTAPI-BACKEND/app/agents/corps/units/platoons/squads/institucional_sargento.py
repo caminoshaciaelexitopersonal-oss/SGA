@@ -1,5 +1,5 @@
 from .sargento_base_graph import SargentoGraphBuilder, SargentoBaseState
-from tools.herramientas_institucional import InstitucionalSoldiers
+from app.tools.herramientas_institucional import InstitucionalSoldiers
 
 def get_institucional_sargento_graph(llm: any):
     """

@@ -1,6 +1,7 @@
 pyproject.toml
 models/__init__.py
 models/academic.py
+models/area.py
 models/base.py
 models/billing.py
 models/communication.py
