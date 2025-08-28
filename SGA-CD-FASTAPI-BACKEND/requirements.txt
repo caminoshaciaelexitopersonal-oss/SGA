@@ -19,3 +19,7 @@ langchain-community
 # Testing dependencies
 pytest
 httpx
+
+# Payment Gateway SDKs
+stripe
+mercadopago

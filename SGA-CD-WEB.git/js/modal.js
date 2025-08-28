@@ -1,42 +1,35 @@
-// --- Lógica para el Modal Genérico ---
-
-const modal = document.getElementById('generic-modal');
-const modalTitle = document.getElementById('modal-title');
-const modalBody = document.getElementById('modal-body');
-const closeModalBtn = document.getElementById('modal-close-btn');
-
-/**
- * Abre el modal con un título y contenido específico.
- * @param {string} title - El título a mostrar en el header del modal.
- * @param {string} bodyContent - El contenido HTML a insertar en el cuerpo del modal.
- */
+// --- Lógica Mejorada para el Modal Genérico ---
 function openModal(title, bodyContent) {
-    if (!modal) return;
+    const modal = document.getElementById('generic-modal');
+    const modalTitle = document.getElementById('modal-title');
+    const modalBody = document.getElementById('modal-body');
+    if (!modal || !modalTitle || !modalBody) {
+        console.error("No se encontraron los elementos del modal en el DOM.");
+        alert(`${title}\n\n${(bodyContent || '').replace(/<[^>]*>/g, '')}`);
+        return;
+    }
     modalTitle.textContent = title;
     modalBody.innerHTML = bodyContent;
     modal.style.display = 'flex';
 }
-
-/**
- * Cierra el modal.
- */
 function closeModal() {
-    if (!modal) return;
-    modal.style.display = 'none';
-    modalTitle.textContent = '';
-    modalBody.innerHTML = '';
+    const modal = document.getElementById('generic-modal');
+    const modalTitle = document.getElementById('modal-title');
+    const modalBody = document.getElementById('modal-body');
+    if (modal) { modal.style.display = 'none'; }
+    if (modalTitle) { modalTitle.textContent = ''; }
+    if (modalBody) { modalBody.innerHTML = ''; }
 }
-
-// Event Listeners para cerrar el modal
-if (closeModalBtn) {
-    closeModalBtn.addEventListener('click', closeModal);
+function setupModalListeners() {
+    const modal = document.getElementById('generic-modal');
+    const closeModalButton = document.getElementById('modal-close-btn') || document.querySelector('.modal-close');
+    if (closeModalButton) { closeModalButton.addEventListener('click', closeModal); }
+    if (modal) {
+        modal.addEventListener('click', (event) => {
+            if (event.target.id === 'generic-modal') {
+                closeModal();
+            }
+        });
+    }
 }
-
-// Cerrar el modal si se hace clic fuera del contenido
-if (modal) {
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-            closeModal();
-        }
-    });
-}
+document.addEventListener('DOMContentLoaded', setupModalListeners);
