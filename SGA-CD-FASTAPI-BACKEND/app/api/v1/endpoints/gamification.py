@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app import crud, schemas
+from app.models import user as user_model
 from app.api import deps
 
 router = APIRouter()
@@ -53,3 +54,65 @@ def create_puntos_log_entry(
     return log_entry
 
 # Other endpoints for Medals, etc., would follow the same pattern.
+
+
+# --- GamificacionMision Endpoints ---
+
+@router.get("/misiones/", response_model=List[schemas.GamificacionMision])
+def read_misiones(
+    db: Session = Depends(deps.get_db),
+    skip: int = 0,
+    limit: int = 100,
+    current_user: user_model.Usuario = Depends(deps.get_current_active_user),
+) -> Any:
+    """
+    Retrieve all missions for the current user's tenant.
+    """
+    misiones = crud.gamification.get_misiones_by_tenant(db, inquilino_id=current_user.inquilino_id, skip=skip, limit=limit)
+    return misiones
+
+@router.post("/misiones/", response_model=schemas.GamificacionMision)
+def create_mision(
+    *,
+    db: Session = Depends(deps.get_db),
+    mision_in: schemas.GamificacionMisionCreate,
+    current_user: user_model.Usuario = Depends(deps.role_required(["admin_empresa", "coordinador"])),
+) -> Any:
+    """
+    Create a new mission. (Restricted to admins and coordinators)
+    """
+    if mision_in.inquilino_id != current_user.inquilino_id:
+        raise HTTPException(status_code=403, detail="Cannot create mission for another tenant.")
+    mision = crud.gamification.create_mision(db=db, obj_in=mision_in)
+    return mision
+
+
+# --- GamificacionMercadoItem Endpoints ---
+
+@router.get("/mercado/items/", response_model=List[schemas.GamificacionMercadoItem])
+def read_mercado_items(
+    db: Session = Depends(deps.get_db),
+    skip: int = 0,
+    limit: int = 100,
+    current_user: user_model.Usuario = Depends(deps.get_current_active_user),
+) -> Any:
+    """
+    Retrieve all marketplace items for the current user's tenant.
+    """
+    items = crud.gamification.get_mercado_items_by_tenant(db, inquilino_id=current_user.inquilino_id, skip=skip, limit=limit)
+    return items
+
+@router.post("/mercado/items/", response_model=schemas.GamificacionMercadoItem)
+def create_mercado_item(
+    *,
+    db: Session = Depends(deps.get_db),
+    item_in: schemas.GamificacionMercadoItemCreate,
+    current_user: user_model.Usuario = Depends(deps.role_required(["admin_empresa", "jefe_almacen"])),
+) -> Any:
+    """
+    Create a new marketplace item. (Restricted to admins and warehouse managers)
+    """
+    if item_in.inquilino_id != current_user.inquilino_id:
+        raise HTTPException(status_code=403, detail="Cannot create marketplace item for another tenant.")
+    item = crud.gamification.create_mercado_item(db=db, obj_in=item_in)
+    return item

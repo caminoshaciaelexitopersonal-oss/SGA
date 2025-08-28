@@ -1,5 +1,5 @@
 from .sargento_base_graph import SargentoGraphBuilder, SargentoBaseState
-from tools.herramientas_comunicaciones import ComunicacionesSoldiers
+from app.tools.herramientas_comunicaciones import ComunicacionesSoldiers
 
 def get_comunicaciones_sargento_graph(llm: any):
     """

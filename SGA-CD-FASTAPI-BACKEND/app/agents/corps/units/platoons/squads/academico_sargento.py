@@ -1,5 +1,5 @@
 from .sargento_base_graph import SargentoGraphBuilder, SargentoBaseState
-from tools.herramientas_academico import AcademicoSoldiers
+from app.tools.herramientas_academico import AcademicoSoldiers
 
 def get_academico_sargento_graph(llm: any):
     """
