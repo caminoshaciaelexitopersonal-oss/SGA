@@ -22,19 +22,35 @@ async function renderCalendarioEscenariosView(token) {
                 <td>${e.tipo}</td>
                 <td>${e.capacidad || 'N/A'}</td>
                 <td><span class="status-${e.estado.toLowerCase()}">${e.estado}</span></td>
-                <td><button class="btn-secondary">Ver Horario</button> <button class="btn-secondary">Editar</button></td>
+                <td>
+                    <button class="btn-secondary btn-ver-horario" data-id="${e.id}">Ver Horario</button>
+                    <button class="btn-secondary btn-editar-escenario" data-id="${e.id}">Editar</button>
+                </td>
             </tr>
         `).join('') || '<tr><td colspan="6">No se encontraron escenarios.</td></tr>';
 
         contentArea.innerHTML = `
             <div class="view-header">
                 <h2><i class="fas fa-calendar-alt"></i> Calendario y Gestión de Escenarios</h2>
-                <button class="btn-primary">Añadir Nuevo Escenario</button>
+                <button class="btn-primary" id="btn-add-escenario">Añadir Nuevo Escenario</button>
             </div>
             <table class="data-table">
                 <thead><tr><th>ID</th><th>Nombre</th><th>Tipo</th><th>Capacidad</th><th>Estado</th><th>Acciones</th></tr></thead>
-                <tbody>${escenarioRows}</tbody>
+                <tbody id="escenarios-tbody">${escenarioRows}</tbody>
             </table>`;
+
+        document.getElementById('escenarios-tbody').addEventListener('click', (e) => {
+            if (e.target.classList.contains('btn-ver-horario')) {
+                alert(`Funcionalidad 'Ver Horario' para escenario ID: ${e.target.dataset.id} pendiente de implementación.`);
+            }
+            if (e.target.classList.contains('btn-editar-escenario')) {
+                alert(`Funcionalidad 'Editar' para escenario ID: ${e.target.dataset.id} pendiente de implementación.`);
+            }
+        });
+         document.getElementById('btn-add-escenario').addEventListener('click', (e) => {
+            alert(`Funcionalidad 'Añadir Nuevo Escenario' pendiente de implementación.`);
+        });
+
     } catch (error) {
         contentArea.innerHTML = `<p class="message-error">Error al cargar los escenarios: ${error.message}</p>`;
     }
@@ -57,6 +73,41 @@ async function renderAsignarEspaciosView(token) {
         </form>
         <div id="asignar-feedback" class="message-info" style="display:none;"></div>
     `;
+
+    document.getElementById('asignar-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const feedbackDiv = document.getElementById('asignar-feedback');
+        feedbackDiv.style.display = 'block';
+        feedbackDiv.textContent = 'Procesando asignación...';
+
+        const payload = {
+            escenario_id: parseInt(document.getElementById('asignar-escenario-id').value, 10),
+            nombre_evento: document.getElementById('asignar-evento-nombre').value,
+            fecha: document.getElementById('asignar-fecha').value,
+            hora_inicio: document.getElementById('asignar-hora-inicio').value,
+            hora_fin: document.getElementById('asignar-hora-fin').value,
+        };
+
+        try {
+            const response = await fetch(`${config.apiBaseUrl}/api/v1/escenarios/asignar`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || 'Error desconocido.');
+            }
+
+            feedbackDiv.className = 'message-success';
+            feedbackDiv.textContent = '¡Espacio asignado con éxito!';
+            e.target.reset();
+        } catch (error) {
+            feedbackDiv.className = 'message-error';
+            feedbackDiv.textContent = `Error: ${error.message}`;
+        }
+    });
 }
 
 /**
@@ -84,13 +135,18 @@ async function renderMantenimientoEscenariosView(token) {
         contentArea.innerHTML = `
             <div class="view-header">
                 <h2><i class="fas fa-tools"></i> Mantenimiento de Escenarios</h2>
-                <button class="btn-primary">Registrar Nuevo Mantenimiento</button>
+                <button class="btn-primary" id="btn-registrar-mantenimiento">Registrar Nuevo Mantenimiento</button>
             </div>
             <table class="data-table">
                 <thead><tr><th>Escenario</th><th>Fecha</th><th>Descripción</th><th>Estado</th></tr></thead>
                 <tbody>${rows}</tbody>
             </table>
         `;
+
+        document.getElementById('btn-registrar-mantenimiento').addEventListener('click', () => {
+            alert('Funcionalidad para registrar mantenimiento pendiente de implementación.');
+        });
+
     } catch (error) {
         contentArea.innerHTML = `<p class="message-error">Error al cargar el historial: ${error.message}</p>`;
     }
