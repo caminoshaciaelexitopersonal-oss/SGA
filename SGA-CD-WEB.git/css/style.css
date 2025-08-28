@@ -280,3 +280,19 @@ footer a {
     border-top-right-radius: 10px;
 }
 
+/* Animation for the floating agent button when it 'speaks' */
+@keyframes pulse-glow {
+    0% {
+        box-shadow: 0 0 0 0 rgba(0, 166, 81, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 20px rgba(0, 166, 81, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(0, 166, 81, 0);
+    }
+}
+
+#ai-agent-toggle.agent-speaking {
+    animation: pulse-glow 2s infinite;
+}

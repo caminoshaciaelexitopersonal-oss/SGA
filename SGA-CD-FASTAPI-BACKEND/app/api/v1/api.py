@@ -20,11 +20,17 @@ from .endpoints import (
     tenancy,
     profesor,   # profesor ya estaba en main y en la feature
     jefe_area,  # agregado desde feat/implement-roles-and-agent-ui
+    webhooks,
+    admin_general,
+    sales_agent,
 )
 
 api_router = APIRouter()
 
 # API Routers
+api_router.include_router(sales_agent.router, prefix="/sales_agent", tags=["Sales Agent"])
+api_router.include_router(webhooks.router, prefix="/webhooks", tags=["Webhooks"])
+api_router.include_router(admin_general.router, prefix="/admin_general", tags=["Admin General"])
 api_router.include_router(auth.router, prefix="/auth", tags=["Authentication"])
 api_router.include_router(tenancy.router, prefix="/tenants", tags=["Tenants"])
 api_router.include_router(profesor.router, prefix="/profesor", tags=["Profesor"])

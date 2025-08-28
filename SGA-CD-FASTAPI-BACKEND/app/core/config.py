@@ -28,6 +28,11 @@ class Settings(BaseSettings):
     WOMPI_PUBLIC_KEY: str = "wompi_pub_key_placeholder"
     WOMPI_SECRET_KEY: str = "wompi_sec_key_placeholder"
 
+    # WhatsApp
+    WHATSAPP_API_TOKEN: str = "YOUR_WHATSAPP_API_TOKEN"
+    WHATSAPP_PHONE_NUMBER_ID: str = "YOUR_PHONE_NUMBER_ID"
+    WHATSAPP_VERIFY_TOKEN: str = "sga-cd-whatsapp-secret"
+
     class Config:
         case_sensitive = True
         env_file = ".env"
