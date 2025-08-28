@@ -29,3 +29,4 @@ from .dropdowns import (
     Genero, GrupoEtario, TipoDocumento, Escolaridad, Discapacidad,
     GrupoPoblacional, Barrio, Vereda, Resguardo, TipoEscenario
 )
+from .settings import Setting
