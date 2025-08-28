@@ -5,12 +5,15 @@ from langgraph.graph import StateGraph, END, START
 from langgraph.prebuilt import ToolNode
 from langchain_core.tools import BaseTool
 
+import json
+
 class SargentoBaseState(TypedDict):
     """La pizarra táctica estandarizada para todos los Sargentos."""
     teniente_order: str
     app_context: Any
     messages: Annotated[List[BaseMessage], operator.add]
-    final_report: str
+    # El reporte final ahora es un objeto estructurado
+    final_report: dict
     error: str | None
 
 class SargentoGraphBuilder:
@@ -33,14 +36,42 @@ class SargentoGraphBuilder:
         return "squad_executor"
 
     def compile_report_node(self, state: SargentoBaseState) -> SargentoBaseState:
-        """Compila el informe final para el Teniente a partir del historial de la misión."""
+        """
+        Compila el informe final estructurado (texto e imagen) para el Teniente.
+        """
         print(f"--- 📄 SARGENTO ({self.squad_name}): Misión completada. Compilando reporte. ---")
-        executed_steps = [f"Acción: {msg.name}, Resultado: {msg.content}" for msg in state["messages"] if msg.type == 'tool']
-        if not executed_steps:
-            report_body = "Misión completada sin necesidad de acciones directas de la escuadra."
+
+        report_text_parts = []
+        image_url = None
+
+        tool_messages = [msg for msg in state["messages"] if msg.type == 'tool']
+
+        for msg in tool_messages:
+            try:
+                # Intenta parsear el contenido como JSON si es un string
+                content_data = json.loads(msg.content) if isinstance(msg.content, str) else msg.content
+
+                # Si es un diccionario y tiene image_url, la extraemos
+                if isinstance(content_data, dict) and 'image_url' in content_data:
+                    image_url = content_data.get('image_url')
+                    # Añadimos un mensaje amigable al reporte de texto
+                    report_text_parts.append(f"Acción '{msg.name}': {content_data.get('message', 'Gráfico generado.')}")
+                else:
+                    # Si no, lo tratamos como texto normal
+                    report_text_parts.append(f"Acción '{msg.name}': Resultado: {msg.content}")
+            except (json.JSONDecodeError, TypeError):
+                # Si no es JSON, es un string simple
+                report_text_parts.append(f"Acción '{msg.name}': Resultado: {msg.content}")
+
+        if not report_text_parts:
+            final_text = "Misión completada sin necesidad de acciones directas de la escuadra."
         else:
-            report_body = "\n- ".join(executed_steps)
-        state["final_report"] = f"Misión completada. Resumen de acciones de la escuadra de {self.squad_name}:\n- {report_body}"
+            final_text = f"Resumen de acciones de la escuadra de {self.squad_name}:\n- " + "\n- ".join(report_text_parts)
+
+        state["final_report"] = {
+            "text": final_text,
+            "image_url": image_url
+        }
         return state
 
     def build_graph(self):

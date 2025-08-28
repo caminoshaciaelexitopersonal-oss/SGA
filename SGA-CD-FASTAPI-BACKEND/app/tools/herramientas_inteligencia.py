@@ -89,6 +89,32 @@ class InteligenciaSoldiers:
             "Crear un nuevo taller sobre 'Técnicas de Estudio Avanzadas' basado en las preguntas de soporte más frecuentes."
         ]
 
+from app.tools.herramientas_analiticas import generar_grafico_asistencia
+
+    # --- Soldado #6: Soldado_Visualizacion_Grafica ---
+    @tool
+    def generar_visualizacion_grafica(self, pregunta: str) -> Dict:
+        """
+        (SOLDADO VISUALIZACIÓN) Genera un gráfico para responder a una pregunta sobre datos.
+        Utilízalo cuando el usuario pida comparar, analizar o ver tendencias de datos visualmente.
+        Devuelve un diccionario con la URL de la imagen generada.
+        """
+        print(f"--- 💥 SOLDADO (Visualización): ¡ACCIÓN! Generando gráfico para la pregunta: '{pregunta}'. ---")
+        try:
+            # Llama a la función que hemos creado en el otro archivo
+            web_path = generar_grafico_asistencia(pregunta)
+            # Devuelve una respuesta estructurada
+            return {
+                "status": "success",
+                "message": "Se ha generado un gráfico para responder a tu pregunta.",
+                "image_url": web_path
+            }
+        except Exception as e:
+            return {
+                "status": "error",
+                "message": f"No se pudo generar el gráfico: {e}"
+            }
+
     def get_all_soldiers(self) -> List:
         """
         Recluta y devuelve la Escuadra de Inteligencia completa, lista para ser comandada por el Sargento de Inteligencia.
@@ -98,5 +124,6 @@ class InteligenciaSoldiers:
             self.calcular_kpi,
             self.construir_dashboard,
             self.exportar_reporte_a_csv,
-            self.obtener_sugerencias_estrategicas_ia
+            self.obtener_sugerencias_estrategicas_ia,
+            self.generar_visualizacion_grafica
         ]
