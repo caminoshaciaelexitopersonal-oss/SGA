@@ -67,15 +67,14 @@ async function renderContentForView(viewName, token, roleName = 'default') {
 
       // Se pueden añadir otros casos aquí si es necesario para vistas
       // que no tengan su propio archivo modular.
-
       default:
         // Si la vista no es manejada aquí, se asume que un script modular
         // (como alumno.js, profesor.js) la manejará.
         // Si después de un momento no carga nada, mostramos un error.
         setTimeout(() => {
-            if(contentArea.innerHTML === '<h2>Cargando...</h2>') {
-                 contentArea.innerHTML = `<h2>Vista no encontrada: ${viewName}</h2><p>La vista solicitada no fue encontrada o no está configurada en el router principal.</p>`;
-            }
+          if (contentArea.innerHTML === '<h2>Cargando...</h2>') {
+            contentArea.innerHTML = `<h2>Vista no encontrada: ${viewName}</h2><p>La vista solicitada no fue encontrada o no está configurada en el router principal.</p>`;
+          }
         }, 500);
         break;
     }
@@ -104,7 +103,12 @@ async function fetchRoles(token) {
 
 async function getVerificarRolesView(token) {
   const roles = await fetchRoles(token);
-  const rolesRequeridos = ['admin_general', 'admin_empresa', 'jefe_area', 'profesional_area', 'tecnico_area', 'coordinador', 'profesor', 'alumno', 'padre_acudiente', 'jefe_almacen', 'almacenista', 'jefe_escenarios'];
+  const rolesRequeridos = [
+    'admin_general', 'admin_empresa', 'jefe_area',
+    'profesional_area', 'tecnico_area', 'coordinador',
+    'profesor', 'alumno', 'padre_acudiente',
+    'jefe_almacen', 'almacenista', 'jefe_escenarios'
+  ];
 
   const faltantes = rolesRequeridos.filter(r => !(roles || []).some(x => x.nombre === r));
 
