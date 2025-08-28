@@ -15,6 +15,7 @@ const navLinks = {
     // Rol 2: Admin de Empresa
     admin_empresa: [
         { text: 'Panel de Empresa', view: 'panel-empresa', icon: 'fa-tachometer-alt' },
+        { text: 'Suscripción y Pagos', view: 'suscripcion', icon: 'fa-credit-card' },
         { text: 'Reportes', view: 'reportes-empresa', icon: 'fa-chart-bar' },
         { text: 'Auditoría', view: 'auditoria-empresa', icon: 'fa-history' },
         { text: 'Configuración', view: 'config-empresa', icon: 'fa-cog' }
