@@ -243,3 +243,22 @@ function setupVerificarRolesListeners(token) {
     }
   });
 }
+
+/* ==========================================================================
+   Placeholder / Helper Views (mocks)
+   ========================================================================== */
+
+// Estas funciones son placeholders y deben reemplazarse por implementaciones reales
+// si las vistas 'misiones' o 'mercado' están desarrolladas en módulos separados.
+
+async function renderMisionesView(token) {
+  const contentArea = document.getElementById('content-area');
+  if (!contentArea) return;
+  contentArea.innerHTML = `<h2>Misiónes (Proximamente)</h2><p>Contenido de misiones aún no modularizado.</p>`;
+}
+
+async function renderMercadoView(token) {
+  const contentArea = document.getElementById('content-area');
+  if (!contentArea) return;
+  contentArea.innerHTML = `<h2>Mercado (Proximamente)</h2><p>Contenido de mercado aún no modularizado.</p>`;
+}

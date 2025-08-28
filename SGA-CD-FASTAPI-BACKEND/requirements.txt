@@ -1,28 +1,40 @@
+# Web / ASGI
 fastapi
 uvicorn[standard]
+
+# Database / ORM / Migrations
 sqlalchemy
-pydantic[email]
-pydantic-settings
-python-dotenv
-passlib[bcrypt]
-python-jose[cryptography]
-python-multipart
 alembic
 psycopg2-binary
 
-# LangChain dependencies for AI Agents
+# Settings & env
+pydantic[email]
+pydantic-settings
+python-dotenv
+
+# Auth / Security / Uploads
+passlib[bcrypt]
+python-jose[cryptography]
+python-multipart
+
+# Payment Gateway SDKs
+stripe
+mercadopago
+# Wompi does not have an official PyPI package in many repos; if you use a specific SDK add it here.
+
+# LangChain / AI Agents
 langchain
 langgraph
 langchain-openai
 langchain-community
 
-# Testing dependencies
-pytest
-httpx
-
-# Dependencias para nuevas funcionalidades de IA (Voz y Gráficos)
+# AI-related extras (speech, audio, plotting, data)
 SpeechRecognition
 pydub
 matplotlib
 plotly
 pandas
+
+# Testing
+pytest
+httpx

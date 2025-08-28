@@ -1,6 +1,3 @@
-/* ==========================================================================
-   Motor de Renderizado de Vistas y Registro (Arquitectura Mejorada v2)
-   ========================================================================== */
 
 // --- Registro Global de Vistas, ahora por Rol ---
 window.sgaViewRegistry = {};
@@ -44,18 +41,11 @@ async function renderContentForView(viewName, token, roleName = 'default') {
             await renderer(token, roleName);
         } else {
             console.warn(`No se encontró un renderer para la vista '${viewName}' para el rol '${roleName}' o en común.`);
-            contentArea.innerHTML = `<div class="view-error">
-                <h2><i class="fas fa-exclamation-triangle"></i> Vista no encontrada</h2>
-                <p>La vista solicitada (<strong>${viewName}</strong>) no está implementada para su rol.</p>
-            </div>`;
+            contentArea.innerHTML = `<div class="view-error"><h2><i class="fas fa-exclamation-triangle"></i> Vista no encontrada</h2><p>La vista solicitada (<strong>${viewName}</strong>) no está implementada para su rol.</p></div>`;
         }
     } catch (error) {
         console.error(`Error al renderizar la vista '${viewName}':`, error);
-        contentArea.innerHTML = `<div class="view-error">
-            <h2><i class="fas fa-times-circle"></i> Error al cargar la vista</h2>
-            <p>Ocurrió un problema al intentar mostrar <strong>${viewName}</strong>.</p>
-            <p class="error-message">Detalle: ${error.message}</p>
-        </div>`;
+        contentArea.innerHTML = `<div class="view-error"><h2><i class="fas fa-times-circle"></i> Error al cargar la vista</h2><p>Ocurrió un problema al intentar mostrar <strong>${viewName}</strong>.</p><p class="error-message">Detalle: ${error.message}</p></div>`;
     }
 }
 

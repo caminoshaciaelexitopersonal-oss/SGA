@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional, List
+from typing import Optional, List, Dict
 from datetime import datetime
 
 # --- PaymentGateway Schemas ---
@@ -15,6 +15,7 @@ class PaymentGateway(PaymentGatewayBase):
     class Config:
         from_attributes = True
 
+
 # --- SubscriptionPlan Schemas ---
 class SubscriptionPlanBase(BaseModel):
     name: str
@@ -29,6 +30,7 @@ class SubscriptionPlan(SubscriptionPlanBase):
     id: int
     class Config:
         from_attributes = True
+
 
 # --- Subscription Schemas ---
 class SubscriptionBase(BaseModel):
@@ -53,6 +55,7 @@ class Subscription(SubscriptionBase):
     class Config:
         from_attributes = True
 
+
 # --- Payment Schemas ---
 class PaymentBase(BaseModel):
     amount: float
@@ -72,6 +75,7 @@ class Payment(PaymentBase):
     class Config:
         from_attributes = True
 
+
 # --- Schemas for Payment Intent ---
 class PaymentIntentCreate(BaseModel):
     amount: float
@@ -79,3 +83,13 @@ class PaymentIntentCreate(BaseModel):
 
 class PaymentIntent(BaseModel):
     client_secret: str
+
+
+# --- MercadoPago Schemas ---
+class MercadoPagoPreference(BaseModel):
+    redirect_url: str
+
+
+# --- Wompi Schemas ---
+class WompiTransaction(BaseModel):
+    redirect_url: str
