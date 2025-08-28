@@ -13,22 +13,6 @@ class Settings(BaseSettings):
     # Database settings
     DATABASE_URL: str
 
-    # OpenAI API Key
-    OPENAI_API_KEY: str = "your_openai_api_key_here"
-
-    # Stripe settings
-    STRIPE_SECRET_KEY: str = "sk_test_placeholder"
-    STRIPE_PUBLISHABLE_KEY: str = "pk_test_placeholder"
-    STRIPE_WEBHOOK_SECRET: str = "whsec_placeholder"
-
-    # Mercado Pago settings
-    MERCADOPAGO_ACCESS_TOKEN: str = "mp_test_placeholder"
-
-    # PayU settings
-    PAYU_API_KEY: str = "payu_api_key_placeholder"
-    PAYU_API_LOGIN: str = "payu_api_login_placeholder"
-    PAYU_MERCHANT_ID: str = "payu_merchant_id_placeholder"
-
     class Config:
         case_sensitive = True
         env_file = ".env"

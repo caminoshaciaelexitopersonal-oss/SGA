@@ -1,140 +1,58 @@
-from fastapi import APIRouter, Depends, HTTPException, Request
+from typing import List, Any
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from app import schemas, models
+
+from app import crud, schemas
 from app.api import deps
-from app.services.billing_service import BillingService
 
 router = APIRouter()
 
-@router.post("/stripe/create-payment-intent", response_model=schemas.PaymentIntent)
-async def create_payment_intent(
-    *,
+# --- Suscripcion Endpoints ---
+
+@router.get("/suscripcion/", response_model=schemas.Suscripcion)
+def read_suscripcion(
     db: Session = Depends(deps.get_db),
-    payment_in: schemas.PaymentIntentCreate,
-    current_user: models.Usuario = Depends(deps.get_current_active_user),
-):
-    billing_service = BillingService(db)
-    try:
-        amount_in_cents = int(payment_in.amount * 100)
-        intent_details = billing_service.create_payment_intent(
-            gateway_name="stripe",
-            amount=amount_in_cents,
-            currency=payment_in.currency,
-            user_id=current_user.id
-        )
-        return intent_details
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
-
-
-# --- PayU Endpoints ---
-
-@router.post("/payu/create-transaction", response_model=schemas.PayUTransaction)
-async def create_payu_transaction(
-    *,
-    db: Session = Depends(deps.get_db),
-    payment_in: schemas.PaymentIntentCreate, # Re-using this schema
-    current_user: models.Usuario = Depends(deps.get_current_active_user),
-):
+    # current_user = Depends(deps.get_current_user)
+) -> Any:
     """
-    Create a PayU Transaction.
-    The frontend will use the returned data to auto-submit a form.
+    Retrieve suscripcion for the current user's tenant.
     """
-    billing_service = BillingService(db)
-    try:
-        transaction_details = billing_service.create_payment_intent(
-            gateway_name="payu",
-            amount=int(payment_in.amount * 100),
-            currency=payment_in.currency,
-            user_id=current_user.id
-        )
-        return transaction_details
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+    tenant_id = 1 # Placeholder for current_user.inquilino_id
+    suscripcion = crud.billing.get_suscripcion_by_tenant(db, inquilino_id=tenant_id)
+    if not suscripcion:
+        raise HTTPException(status_code=404, detail="Suscripcion not found")
+    return suscripcion
 
-@router.post("/payu/webhook")
-async def payu_webhook(
+@router.put("/suscripcion/", response_model=schemas.Suscripcion)
+def update_suscripcion(
     *,
-    request: Request,
     db: Session = Depends(deps.get_db),
-):
+    suscripcion_in: schemas.SuscripcionUpdate,
+    # current_user = Depends(deps.get_current_user)
+) -> Any:
     """
-    Handle webhooks from PayU.
+    Update the subscription for the current tenant.
+    (e.g., changing plan, canceling)
     """
-    billing_service = BillingService(db)
-    # PayU sends data as application/x-www-form-urlencoded
-    payload = await request.form()
-    payload_dict = {key: value for key, value in payload.items()}
+    tenant_id = 1 # Placeholder
+    db_suscripcion = crud.billing.get_suscripcion_by_tenant(db, inquilino_id=tenant_id)
+    if not db_suscripcion:
+        raise HTTPException(status_code=404, detail="Suscripcion not found")
+    suscripcion = crud.billing.update_suscripcion(db=db, db_obj=db_suscripcion, obj_in=suscripcion_in)
+    return suscripcion
 
-    try:
-        event = billing_service.handle_webhook(
-            gateway_name="payu",
-            payload=payload_dict,
-            signature="" # Signature verification is handled inside the adapter
-        )
-        print(f"PayU event received: {event}")
-        return {"status": "success"}
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+# --- Factura Endpoints ---
 
-@router.post("/stripe/webhook")
-async def stripe_webhook(
-    *,
-    request: Request,
+@router.get("/facturas/", response_model=List[schemas.Factura])
+def read_facturas(
     db: Session = Depends(deps.get_db),
-):
-    billing_service = BillingService(db)
-    payload = await request.body()
-    sig_header = request.headers.get('stripe-signature')
-    if not sig_header:
-        raise HTTPException(status_code=400, detail="Missing Stripe-Signature header.")
-    try:
-        event = billing_service.handle_webhook(
-            gateway_name="stripe",
-            payload=payload,
-            signature=sig_header
-        )
-        if event.type == 'payment_intent.succeeded':
-            payment_intent = event.data.object
-            print(f"PaymentIntent {payment_intent.id} succeeded for user {payment_intent.metadata.user_id}")
-        return {"status": "success"}
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
-
-@router.post("/mercadopago/create-preference", response_model=schemas.MercadoPagoPreference)
-async def create_mercadopago_preference(
-    *,
-    db: Session = Depends(deps.get_db),
-    payment_in: schemas.PaymentIntentCreate,
-    current_user: models.Usuario = Depends(deps.get_current_active_user),
-):
-    billing_service = BillingService(db)
-    try:
-        intent_details = billing_service.create_payment_intent(
-            gateway_name="mercadopago",
-            amount=int(payment_in.amount * 100),
-            currency=payment_in.currency,
-            user_id=current_user.id
-        )
-        return intent_details
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
-
-@router.post("/mercadopago/webhook")
-async def mercadopago_webhook(
-    *,
-    request: Request,
-    db: Session = Depends(deps.get_db),
-):
-    billing_service = BillingService(db)
-    payload = await request.json()
-    try:
-        event = billing_service.handle_webhook(
-            gateway_name="mercadopago",
-            payload=payload,
-            signature=""
-        )
-        print(f"Mercado Pago event received: {event}")
-        return {"status": "success"}
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+    skip: int = 0,
+    limit: int = 100,
+    # current_user = Depends(deps.get_current_user)
+) -> Any:
+    """
+    Retrieve facturas for the current user's tenant.
+    """
+    tenant_id = 1 # Placeholder
+    facturas = crud.billing.get_facturas_by_tenant(db, inquilino_id=tenant_id, skip=skip, limit=limit)
+    return facturas

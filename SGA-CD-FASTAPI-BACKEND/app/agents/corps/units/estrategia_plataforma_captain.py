@@ -19,7 +19,7 @@ class EstrategiaCaptainState(TypedDict):
     platform_plan: PlatformPlan | None
     task_queue: List[PlatformTask]
     completed_missions: list
-    final_report: dict # El reporte ahora es un objeto estructurado
+    final_report: str
     error: str | None
 
 async def create_platform_plan(state: EstrategiaCaptainState, llm: Any) -> EstrategiaCaptainState:
@@ -54,23 +54,12 @@ def route_to_lieutenant(state: EstrategiaCaptainState):
 
 
 async def compile_final_report(state: EstrategiaCaptainState) -> EstrategiaCaptainState:
-    """Compila los reportes de los tenientes en un único reporte estructurado para el Coronel."""
     print("--- 📄 CAP. ESTRATEGIA: Compilando Informe Estratégico para el Coronel... ---")
     if state.get("error"):
-        state["final_report"] = {"text": f"Misión fallida. Razón: {state['error']}", "image_url": None}
+        report_body = f"Misión fallida. Razón: {state['error']}"
     else:
-        final_text = "Misión de Estrategia y Plataforma completada.\n"
-        final_image_url = None
-        for mission_report in state["completed_missions"]:
-            report_content = mission_report.get("report", {})
-            final_text += f"- Reporte del Tte. de {mission_report['lieutenant']}:\n  {report_content.get('text', 'Sin reporte de texto.')}\n"
-            if report_content.get('image_url'):
-                final_image_url = report_content['image_url']
-
-        state["final_report"] = {
-            "text": final_text,
-            "image_url": final_image_url
-        }
+        report_body = "\n".join([f"- Reporte del Tte. de {m['lieutenant']}: {m['report']}" for m in state["completed_missions"]])
+    state["final_report"] = f"Misión de Estrategia y Plataforma completada. Resumen:\n{report_body}"
     return state
 
 def get_estrategia_plataforma_captain_graph(llm: Any):
@@ -81,14 +70,14 @@ def get_estrategia_plataforma_captain_graph(llm: Any):
         mission = state["task_queue"].pop(0)
         print(f"--- 🔽 CAPITÁN: Delegando a TTE. SEGURIDAD E INTELIGENCIA -> '{mission.task_description}' ---")
         result = await seguridad_agent.ainvoke({"captain_order": mission.task_description, "app_context": state.get("app_context")})
-        state["completed_missions"].append({"lieutenant": "Seguridad e Inteligencia", "report": result.get('final_report', {"text": "Sin reporte.", "image_url": None})})
+        state["completed_missions"].append({"lieutenant": "Seguridad e Inteligencia", "report": result.get("final_report", "Sin reporte.")})
         return state
 
     async def expansion_node(state: EstrategiaCaptainState) -> EstrategiaCaptainState:
         mission = state["task_queue"].pop(0)
         print(f"--- 🔽 CAPITÁN: Delegando a TTE. EXPANSIÓN INSTITUCIONAL -> '{mission.task_description}' ---")
         result = await expansion_agent.ainvoke({"captain_order": mission.task_description, "app_context": state.get("app_context")})
-        state["completed_missions"].append({"lieutenant": "Expansión Institucional", "report": result.get('final_report', {"text": "Sin reporte.", "image_url": None})})
+        state["completed_missions"].append({"lieutenant": "Expansión Institucional", "report": result.get("final_report", "Sin reporte.")})
         return state
 
     workflow = StateGraph(EstrategiaCaptainState)

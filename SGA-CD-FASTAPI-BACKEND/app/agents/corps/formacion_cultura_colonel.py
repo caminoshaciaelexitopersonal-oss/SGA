@@ -20,7 +20,7 @@ class FormacionCulturaColonelState(TypedDict):
     tactical_plan: TacticalPlan | None
     task_queue: List[TacticalTask]
     completed_missions: list
-    final_report: dict # El reporte ahora es un objeto estructurado
+    final_report: str
     error: str | None
 async def create_tactical_plan(state: FormacionCulturaColonelState, llm: Any) -> FormacionCulturaColonelState:
     print("--- 🧠 CORONEL FORMACIÓN Y CULTURA: Creando Plan Táctico... ---")
@@ -59,50 +59,53 @@ def route_to_captain(state: FormacionCulturaColonelState):
         state["task_queue"].pop(0)
         return "route_to_captain"
 
+async def operaciones_academicas_node(state: FormacionCulturaColonelState) -> FormacionCulturaColonelState:
+    mission = state["task_queue"].pop(0)
+    result = await operaciones_academicas_agent.ainvoke({"coronel_order": mission.task_description, "app_context": state.get("app_context")})
+    state["completed_missions"].append({
+        "captain": "Operaciones Academicas", "mission": mission.task_description, "report": result.get("final_report", "Sin reporte.")
+    })
+    return state
+
+async def estrategia_plataforma_node(state: FormacionCulturaColonelState) -> FormacionCulturaColonelState:
+    mission = state["task_queue"].pop(0)
+    result = await estrategia_plataforma_agent.ainvoke({"coronel_order": mission.task_description, "app_context": state.get("app_context")})
+    state["completed_missions"].append({
+        "captain": "Estrategia y Plataforma", "mission": mission.task_description, "report": result.get("final_report", "Sin reporte.")
+    })
+    return state
+
 async def compile_final_report(state: FormacionCulturaColonelState) -> FormacionCulturaColonelState:
-    """Compila el reporte final de la división para el General (la API)."""
     if state.get("error"):
-        state["final_report"] = {"text": f"Misión de la División fallida. Razón: {state['error']}", "image_url": None}
+        state["final_report"] = f"Misión de la División fallida. Razón: {state['error']}"
     else:
-        final_text = "Misión de la División de Formación y Cultura completada.\nResumen de Operaciones:\n"
-        final_image_url = None
-        for mission_report in state["completed_missions"]:
-            report_content = mission_report.get("report", {})
-            final_text += f"- Reporte del Capitán de {mission_report['captain']} (Misión: '{mission_report['mission']}'):\n  {report_content.get('text', 'Sin reporte de texto.')}\n"
-            if report_content.get('image_url'):
-                final_image_url = report_content['image_url']
-
-        state["final_report"] = {
-            "text": final_text,
-            "image_url": final_image_url
-        }
-    return state
-
-async def operaciones_academicas_node(state: FormacionCulturaColonelState, agent) -> FormacionCulturaColonelState:
-    mission = state["task_queue"].pop(0)
-    result = await agent.ainvoke({"coronel_order": mission.task_description, "app_context": state.get("app_context")})
-    state["completed_missions"].append({
-        "captain": "Operaciones Academicas", "mission": mission.task_description, "report": result.get('final_report', {"text": "Sin reporte.", "image_url": None})
-    })
-    return state
-
-async def estrategia_plataforma_node(state: FormacionCulturaColonelState, agent) -> FormacionCulturaColonelState:
-    mission = state["task_queue"].pop(0)
-    result = await agent.ainvoke({"coronel_order": mission.task_description, "app_context": state.get("app_context")})
-    state["completed_missions"].append({
-        "captain": "Estrategia y Plataforma", "mission": mission.task_description, "report": result.get('final_report', {"text": "Sin reporte.", "image_url": None})
-    })
+        report_body = "\n".join(
+            [f"- Reporte del Capitán de {m['captain']}:\n  Misión: '{m['mission']}'\n  Resultado: {m['report']}" for m in state["completed_missions"]]
+        )
+        state["final_report"] = f"Misión de la División de Formación y Cultura completada.\nResumen de Operaciones:\n{report_body}"
     return state
 
 def get_formacion_cultura_colonel_graph(db_path: str, llm: Any):
+    # Initialize subordinate agents inside the graph-building function, passing the llm down.
     operaciones_academicas_agent = get_operaciones_academicas_captain_graph(llm)
     estrategia_plataforma_agent = get_estrategia_plataforma_captain_graph(llm)
 
-    async def operaciones_academicas_node_wrapper(state: FormacionCulturaColonelState) -> FormacionCulturaColonelState:
-        return await operaciones_academicas_node(state, operaciones_academicas_agent)
+    # Define nodes here to close over the initialized agents
+    async def operaciones_academicas_node(state: FormacionCulturaColonelState) -> FormacionCulturaColonelState:
+        mission = state["task_queue"].pop(0)
+        result = await operaciones_academicas_agent.ainvoke({"coronel_order": mission.task_description, "app_context": state.get("app_context")})
+        state["completed_missions"].append({
+            "captain": "Operaciones Academicas", "mission": mission.task_description, "report": result.get("final_report", "Sin reporte.")
+        })
+        return state
 
-    async def estrategia_plataforma_node_wrapper(state: FormacionCulturaColonelState) -> FormacionCulturaColonelState:
-        return await estrategia_plataforma_node(state, estrategia_plataforma_agent)
+    async def estrategia_plataforma_node(state: FormacionCulturaColonelState) -> FormacionCulturaColonelState:
+        mission = state["task_queue"].pop(0)
+        result = await estrategia_plataforma_agent.ainvoke({"coronel_order": mission.task_description, "app_context": state.get("app_context")})
+        state["completed_missions"].append({
+            "captain": "Estrategia y Plataforma", "mission": mission.task_description, "report": result.get("final_report", "Sin reporte.")
+        })
+        return state
 
     memory = SqliteSaver.from_conn_string(db_path)
     workflow = StateGraph(FormacionCulturaColonelState)
@@ -111,8 +114,8 @@ def get_formacion_cultura_colonel_graph(db_path: str, llm: Any):
 
     workflow.add_node("planner", planner_node)
     workflow.add_node("router", lambda state: state)
-    workflow.add_node("operaciones_academicas_captain", operaciones_academicas_node_wrapper)
-    workflow.add_node("estrategia_plataforma_captain", estrategia_plataforma_node_wrapper)
+    workflow.add_node("operaciones_academicas_captain", operaciones_academicas_node)
+    workflow.add_node("estrategia_plataforma_captain", estrategia_plataforma_node)
     workflow.add_node("compiler", compile_final_report)
     workflow.set_entry_point("planner")
     workflow.add_edge("planner", "router")
