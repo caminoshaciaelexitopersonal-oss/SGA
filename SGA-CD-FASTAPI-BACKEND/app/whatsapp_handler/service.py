@@ -3,12 +3,13 @@ import json
 import logging
 
 from app.core.config import settings
-from app.api.v1.endpoints.agent import run_agent # Import the agent runner directly
+from app.agents.corps.ventas_colonel import sales_agent_executor  # Usamos el agente de ventas dedicado
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 WHATSAPP_GRAPH_API_URL = f"https://graph.facebook.com/v17.0/{settings.WHATSAPP_PHONE_NUMBER_ID}/messages"
+
 
 def send_whatsapp_message(to: str, message: str):
     """
@@ -67,14 +68,10 @@ async def process_whatsapp_message(payload: dict):
 
         logger.info(f"Mensaje recibido de {from_number}: '{message_text}'")
 
-        # Usar el número de teléfono como thread_id para mantener el historial de la conversación
-        thread_id = from_number
-
-        # Invocar al agente de IA. Asumimos un área de "Ventas" por defecto para el bot de WhatsApp.
-        # La función run_agent es asíncrona, así que la llamamos con await.
-        agent_response = await run_agent(prompt=message_text, thread_id=thread_id, area="Ventas")
-
-        reply_text = agent_response.get("text", "No pude procesar tu solicitud en este momento.")
+        # Invocar al nuevo agente de ventas de IA.
+        # El historial de conversación se maneja dentro del agente si está configurado,
+        # aquí solo pasamos la consulta directa.
+        reply_text = await sales_agent_executor.ainvoke(message_text)
 
         # Enviar la respuesta del agente de vuelta al usuario
         send_whatsapp_message(to=from_number, message=reply_text)
