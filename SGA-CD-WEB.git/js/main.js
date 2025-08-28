@@ -272,7 +272,7 @@ document.addEventListener('DOMContentLoaded', () => {
         toggleButton.addEventListener('click', () => {
             chatbox.classList.toggle('hidden');
             if (!chatbox.classList.contains('hidden') && messagesContainer.children.length === 0) {
-                addMessage('agent', '¡Hola! Soy el asistente virtual. ¿Cómo puedo ayudarte a conocer nuestra plataforma?');
+                addMessage('agent', '¡Hola! Soy Sarita, tu asistente virtual. ¿Cómo puedo ayudarte a conocer nuestra plataforma?');
             }
         });
 
@@ -298,22 +298,33 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         async function sendMessageToAgent(message) {
-            const API_ENDPOINT = `${config.apiBaseUrl}/api/sales_agent`;
-            addMessage('agent', '...');
+            // Updated to the new, versioned endpoint
+            const API_ENDPOINT = `${config.apiBaseUrl}/api/v1/sales_agent`;
+            const thinkingMessage = addMessage('agent', '...');
+
             try {
                 const response = await fetch(API_ENDPOINT, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ query: message }),
                 });
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
                 const data = await response.json();
-                messagesContainer.removeChild(messagesContainer.lastChild);
-                addMessage('agent', data.reply);
+                thinkingMessage.textContent = data.reply; // Update the "..." message
+
+                // Add the animation class and remove it after a few seconds
+                toggleButton.classList.add('agent-speaking');
+                setTimeout(() => {
+                    toggleButton.classList.remove('agent-speaking');
+                }, 2000); // Animation lasts for 2 seconds
+
             } catch (error) {
                 console.error('Error sending message to agent:', error);
-                messagesContainer.removeChild(messagesContainer.lastChild);
-                addMessage('agent', 'Lo siento, estoy teniendo problemas para conectarme.');
+                thinkingMessage.textContent = 'Lo siento, estoy teniendo problemas para conectarme.';
             }
         }
     }

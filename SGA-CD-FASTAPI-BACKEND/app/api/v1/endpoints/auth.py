@@ -9,7 +9,8 @@ from pydantic import ValidationError
 from app import crud, schemas, models
 from app.api import deps
 from app.core import security
-from app.core.config import settings
+from app.core.config import Settings
+settings = Settings()
 
 router = APIRouter()
 

@@ -7,7 +7,8 @@ from pydub import AudioSegment
 import io
 from app.agents.corps.formacion_cultura_colonel import get_formacion_cultura_colonel_graph
 from langchain_openai import ChatOpenAI
-from app.core.config import settings
+from app.core.config import Settings
+settings = Settings()
 
 router = APIRouter()
 

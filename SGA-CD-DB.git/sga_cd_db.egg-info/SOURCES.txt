@@ -9,6 +9,7 @@ models/curriculum.py
 models/dropdowns.py
 models/gamification.py
 models/inventory.py
+models/settings.py
 models/tenancy.py
 models/user.py
 sga_cd_db.egg-info/PKG-INFO

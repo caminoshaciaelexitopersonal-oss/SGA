@@ -1,7 +1,8 @@
 import hashlib
 import uuid
 from typing import Dict
-from app.core.config import settings
+from app.core.config import Settings
+settings = Settings()
 from app.billing.base_adapter import BaseAdapter
 
 class WompiAdapter(BaseAdapter):

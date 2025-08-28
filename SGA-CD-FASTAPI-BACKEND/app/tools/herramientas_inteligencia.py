@@ -1,5 +1,6 @@
 from langchain_core.tools import tool
 from typing import Any, List, Dict
+from app.tools.herramientas_analiticas import generar_grafico_asistencia
 
 class InteligenciaSoldiers:
     """
@@ -20,11 +21,6 @@ class InteligenciaSoldiers:
         Puede recibir un 'contexto' opcional para mejorar la respuesta.
         """
         print(f"--- 💥 SOLDADO (Agente IA): ¡ACCIÓN! Procesando pregunta: '{pregunta_usuario[:30]}...'. ---")
-        # response = self.api.get_ai_assistant_response(
-        #     user_query=pregunta_usuario,
-        #     context=contexto
-        # )
-        # return response
         return "Respuesta Simulada: La inscripción para los cursos de verano se abre el 15 de julio. Puede encontrar más detalles en la sección de 'Próximos Eventos'."
 
     # --- Soldado #2: Soldado_Analítica_y_KPIs ---
@@ -35,11 +31,6 @@ class InteligenciaSoldiers:
         'parametros' es un JSON con el contexto (ej. {'mes': 11, 'area_id': 3}).
         """
         print(f"--- 💥 SOLDADO (KPIs): ¡ACCIÓN! Calculando KPI '{nombre_kpi}' con parámetros {parametros}. ---")
-        # kpi_result = self.api.calculate_kpi(
-        #     kpi_name=nombre_kpi,
-        #     params=parametros
-        # )
-        # return kpi_result # Debería devolver {"kpi": "Tasa de Asistencia", "valor": "92%", "tendencia": "positiva", "comparativo": "+5% vs mes anterior"}
         return {"kpi": nombre_kpi, "valor": "92%", "tendencia": "positiva", "comparativo": "+5% vs mes anterior"}
 
     # --- Soldado #3: Soldado_Generar_Dashboard_Personalizado ---
@@ -50,11 +41,6 @@ class InteligenciaSoldiers:
         'widgets' es una lista de diccionarios, donde cada uno define un widget (ej. {'tipo': 'kpi', 'kpi_nombre': 'tasa_asistencia'}).
         """
         print(f"--- 💥 SOLDADO (Dashboard): ¡ACCIÓN! Construyendo dashboard '{nombre_dashboard}' con {len(widgets)} widgets. ---")
-        # result = self.api.build_dashboard(
-        #     dashboard_name=nombre_dashboard,
-        #     widget_definitions=widgets
-        # )
-        # return result # Debería devolver {"status": "success", "dashboard_id": "dash-xyz", "url": "/dashboards/dash-xyz"}
         return {"status": "success", "dashboard_id": "dash-xyz", "url": f"/dashboards/{nombre_dashboard.replace(' ','-').lower()}"}
 
     # --- Soldado #4: Soldado_Exportar_Datos_a_CSV ---
@@ -65,11 +51,6 @@ class InteligenciaSoldiers:
         'parametros' es un JSON con los filtros del reporte.
         """
         print(f"--- 💥 SOLDADO (Exportar): ¡ACCIÓN! Exportando reporte '{nombre_reporte}' a CSV. ---")
-        # result = self.api.export_report_to_csv(
-        #     report_name=nombre_reporte,
-        #     params=parametros
-        # )
-        # return result # Debería devolver {"status": "success", "file_url": "/downloads/report-xyz.csv"}
         return {"status": "success", "file_url": f"/downloads/{nombre_reporte.replace(' ','-').lower()}.csv"}
 
     # --- Soldado #5: Soldado_Sugerir_Acciones_con_IA ---
@@ -79,17 +60,11 @@ class InteligenciaSoldiers:
         (SOLDADO SUGERENCIAS IA) Utiliza un modelo de IA estratégico para analizar un objetivo (ej. 'aumentar la retención de estudiantes') y proponer una lista de acciones sugeridas basadas en los datos de la plataforma.
         """
         print(f"--- 💥 SOLDADO (Sugerencias IA): ¡ACCIÓN! Generando sugerencias para el objetivo: '{objetivo}'. ---")
-        # suggestions = self.api.get_strategic_suggestions(
-        #     objective=objetivo
-        # )
-        # return suggestions
         return [
             "Lanzar una campaña de gamificación con medallas por asistencia consecutiva.",
             "Enviar notificaciones personalizadas a estudiantes con bajo rendimiento reciente.",
             "Crear un nuevo taller sobre 'Técnicas de Estudio Avanzadas' basado en las preguntas de soporte más frecuentes."
         ]
-
-from app.tools.herramientas_analiticas import generar_grafico_asistencia
 
     # --- Soldado #6: Soldado_Visualizacion_Grafica ---
     @tool

@@ -2,7 +2,10 @@ from .token import Token, TokenData
 from .user import User, UserCreate
 from .alumno import Alumno, AlumnoCreate, AlumnoUpdate
 from .audit import AuditLog, AuditLogCreate
-from .billing import Suscripcion, SuscripcionCreate, SuscripcionUpdate, Factura, FacturaCreate, FacturaUpdate
+from .billing import (
+    Subscription, SubscriptionCreate, SubscriptionUpdate, Payment, PaymentCreate,
+    PaymentIntent, PaymentIntentCreate, MercadoPagoPreference, WompiTransaction
+)
 from .clase import ProcesoFormacion, ProcesoFormacionCreate, ProcesoFormacionUpdate, Clase, ClaseCreate, ClaseUpdate
 from .communication import ChatConversacion, ChatConversacionCreate, ChatMensaje, ChatMensajeCreate, ForoClase, ForoClaseCreate, ForoHilo, ForoHiloCreate, ForoPublicacion, ForoPublicacionCreate
 from .curriculum import PlanCurricular, PlanCurricularCreate, PlanCurricularUpdate, PlanCurricularTema, PlanCurricularTemaCreate, PlanCurricularTemaUpdate
@@ -15,10 +18,11 @@ from .gamification import (
     GamificacionMedalla, GamificacionMedallaCreate, GamificacionMedallaUpdate,
     GamificacionMedallaObtenida, GamificacionMedallaObtenidaCreate,
     GamificacionMision, GamificacionMisionCreate, GamificacionMisionUpdate,
-    GamificacionMercadoItem, GamificacionMercadoItemCreate, GamificacionMercadoItemUpdate
+    GamificacionMercadoItem, GamificacionMercadoItemCreate, GamificacionMercadoItemUpdate,
+    GamificacionCompraLog, GamificacionCompraLogCreate
 )
 from .inscripcion_asistencia import Inscripcion, InscripcionCreate, Asistencia, AsistenciaCreate
 from .inventory import Elemento, ElementoCreate, ElementoUpdate, Prestamo, PrestamoCreate, PrestamoUpdate
 from .notificacion import Notificacion, NotificacionCreate, NotificacionUpdate
-from .agent import AgentInput
+from .agent import AgentInput, AgentOutput
 from .area import Area, AreaCreate, AreaUpdate

@@ -1,6 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from app.core.config import settings
+from app.core.config import Settings
+settings = Settings()
 
 # The DATABASE_URL will be loaded from the settings, which in turn loads from .env
 SQLALCHEMY_DATABASE_URL = settings.DATABASE_URL

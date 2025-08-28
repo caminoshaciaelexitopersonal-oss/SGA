@@ -5,7 +5,8 @@ from jose import jwt, JWTError
 from pydantic import ValidationError
 from sqlalchemy.orm import Session
 
-from app.core.config import settings
+from app.core.config import Settings
+settings = Settings()
 from app.db.session import SessionLocal
 from app.schemas.token import TokenData
 from app import crud

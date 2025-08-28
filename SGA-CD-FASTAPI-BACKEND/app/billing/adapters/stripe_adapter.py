@@ -1,6 +1,7 @@
 import stripe
 from typing import Dict, Optional
-from app.core.config import settings
+from app.core.config import Settings
+settings = Settings()
 from app.billing.base_adapter import BaseAdapter
 
 class StripeAdapter(BaseAdapter):

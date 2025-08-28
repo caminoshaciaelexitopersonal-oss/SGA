@@ -142,3 +142,24 @@ class GamificacionMercadoItemInDBBase(GamificacionMercadoItemBase):
 
 class GamificacionMercadoItem(GamificacionMercadoItemInDBBase):
     pass
+
+
+# --- GamificacionCompraLog Schemas ---
+
+class GamificacionCompraLogBase(BaseModel):
+    alumno_id: int
+    item_id: int
+    costo_puntos: int
+    timestamp: datetime
+
+class GamificacionCompraLogCreate(GamificacionCompraLogBase):
+    inquilino_id: int
+
+class GamificacionCompraLogInDBBase(GamificacionCompraLogBase):
+    id: int
+    inquilino_id: int
+    class Config:
+        from_attributes = True
+
+class GamificacionCompraLog(GamificacionCompraLogInDBBase):
+    pass
