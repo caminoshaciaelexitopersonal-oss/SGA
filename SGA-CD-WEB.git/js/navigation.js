@@ -43,28 +43,26 @@ const navLinks = {
     ],
     // Rol 6: Coordinador
     coordinador: [
-        { text: 'Planificación', icon: 'fa-calendar-day' },
-        { text: 'Verificar Programación', icon: 'fa-clipboard-check' },
-        { text: 'Enviar Reportes', icon: 'fa-paper-plane' },
-        { text: 'Aprobaciones', icon: 'fa-check-double' }
+        { text: 'Planificación', view: 'planificacion', icon: 'fa-calendar-day' },
+        { text: 'Verificar Programación', view: 'verificar-programacion', icon: 'fa-clipboard-check' },
+        { text: 'Aprobaciones', view: 'aprobaciones', icon: 'fa-check-double' },
+        { text: 'Gestionar Misiones', view: 'misiones', icon: 'fa-tasks' }
     ],
     // Rol 7: Profesor
     profesor: [
-        { text: 'Gestionar Cursos', icon: 'fa-chalkboard-teacher' },
-        { text: 'Gestionar Alumnos', icon: 'fa-user-graduate' },
-        { text: 'Registrar Asistencia', icon: 'fa-user-check' },
-        { text: 'Calificaciones', icon: 'fa-marker' },
-        { text: 'Solicitudes', icon: 'fa-envelope-open-text' },
-        { text: 'Gamificación', icon: 'fa-trophy' },
-        { text: 'Asistente de IA', icon: 'fa-robot' }
+        { text: 'Gestionar Cursos', view: 'gestionar-cursos', icon: 'fa-chalkboard-teacher' },
+        { text: 'Gestionar Alumnos', view: 'gestionar-alumnos', icon: 'fa-user-graduate' },
+        { text: 'Calificaciones', view: 'calificaciones', icon: 'fa-marker' },
+        { text: 'Gamificación', view: 'gamificacion', icon: 'fa-trophy' }
     ],
     // Rol 8: Alumno
     alumno: [
-        { text: 'Mis Cursos', icon: 'fa-book-reader' },
-        { text: 'Mi Horario', icon: 'fa-clock' },
-        { text: 'Mis Calificaciones', icon: 'fa-star' },
-        { text: 'Gamificación', icon: 'fa-gamepad' },
-        { text: 'Solicitar Elementos', icon: 'fa-hand-holding' }
+        { text: 'Mis Cursos', view: 'mis-cursos', icon: 'fa-book-reader' },
+        { text: 'Mi Horario', view: 'mi-horario', icon: 'fa-clock' },
+        { text: 'Mis Calificaciones', view: 'mis-calificaciones', icon: 'fa-star' },
+        { text: 'Mi Progreso', view: 'mi-progreso', icon: 'fa-gamepad' },
+        { text: 'Misiones', view: 'misiones', icon: 'fa-tasks' },
+        { text: 'Mercado de Puntos', view: 'mercado', icon: 'fa-store' }
     ],
     // Rol 9: Padre o Acudiente
     padre_acudiente: [

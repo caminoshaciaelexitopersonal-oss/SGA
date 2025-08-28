@@ -1,5 +1,5 @@
 from .sargento_base_graph import SargentoGraphBuilder, SargentoBaseState
-from tools.herramientas_seguridad import SeguridadSoldiers
+from app.tools.herramientas_seguridad import SeguridadSoldiers
 
 def get_seguridad_sargento_graph(llm: any):
     """

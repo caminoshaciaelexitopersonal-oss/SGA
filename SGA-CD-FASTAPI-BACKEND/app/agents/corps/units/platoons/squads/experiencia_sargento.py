@@ -1,5 +1,5 @@
 from .sargento_base_graph import SargentoGraphBuilder, SargentoBaseState
-from tools.herramientas_experiencia import ExperienciaSoldiers
+from app.tools.herramientas_experiencia import ExperienciaSoldiers
 
 def get_experiencia_sargento_graph(llm: any):
     """

@@ -1,5 +1,5 @@
 from .sargento_base_graph import SargentoGraphBuilder, SargentoBaseState
-from tools.herramientas_deportivo import DeportivoSoldiers
+from app.tools.herramientas_deportivo import DeportivoSoldiers
 
 def get_deportivo_sargento_graph(llm: any):
     """

@@ -2,10 +2,12 @@ from sqlalchemy.orm import Session
 from typing import List
 
 from models.gamification import (
-    GamificacionAccion, GamificacionPuntosLog, GamificacionMedalla, GamificacionMedallaObtenida
+    GamificacionAccion, GamificacionPuntosLog, GamificacionMedalla, GamificacionMedallaObtenida,
+    GamificacionMision, GamificacionMercadoItem
 )
 from app.schemas.gamification import (
-    GamificacionAccionCreate, GamificacionPuntosLogCreate, GamificacionMedallaCreate
+    GamificacionAccionCreate, GamificacionPuntosLogCreate, GamificacionMedallaCreate,
+    GamificacionMisionCreate, GamificacionMercadoItemCreate
 )
 
 # --- CRUD for GamificacionAccion ---
@@ -52,4 +54,54 @@ def create_medalla(db: Session, *, obj_in: GamificacionMedallaCreate) -> Gamific
     db.refresh(db_obj)
     return db_obj
 
-# ... and so on for other gamification models as needed.
+
+# --- CRUD for GamificacionMision ---
+
+def get_mision(db: Session, mision_id: int) -> GamificacionMision | None:
+    return db.query(GamificacionMision).filter(GamificacionMision.id == mision_id).first()
+
+def get_misiones_by_tenant(
+    db: Session, *, inquilino_id: int, skip: int = 0, limit: int = 100
+) -> List[GamificacionMision]:
+    return (
+        db.query(GamificacionMision)
+        .filter(GamificacionMision.inquilino_id == inquilino_id)
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
+
+def create_mision(db: Session, *, obj_in: GamificacionMisionCreate) -> GamificacionMision:
+    db_obj = GamificacionMision(**obj_in.model_dump())
+    db.add(db_obj)
+    db.commit()
+    db.refresh(db_obj)
+    return db_obj
+
+# --- CRUD for GamificacionMercadoItem ---
+
+def get_mercado_item(db: Session, item_id: int) -> GamificacionMercadoItem | None:
+    return db.query(GamificacionMercadoItem).filter(GamificacionMercadoItem.id == item_id).first()
+
+def get_mercado_items_by_tenant(
+    db: Session, *, inquilino_id: int, skip: int = 0, limit: int = 100
+) -> List[GamificacionMercadoItem]:
+    return (
+        db.query(GamificacionMercadoItem)
+        .filter(GamificacionMercadoItem.inquilino_id == inquilino_id)
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
+
+def create_mercado_item(db: Session, *, obj_in: GamificacionMercadoItemCreate) -> GamificacionMercadoItem:
+    db_obj = GamificacionMercadoItem(**obj_in.model_dump())
+    db.add(db_obj)
+    db.commit()
+    db.refresh(db_obj)
+    return db_obj
+
+# Additional business logic functions will be needed here, e.g.:
+# - A function to handle a student purchasing an item, which would
+#   deduct points and create a GamificacionCompraLog entry.
+# - A function to check a student's progress on a mission.
