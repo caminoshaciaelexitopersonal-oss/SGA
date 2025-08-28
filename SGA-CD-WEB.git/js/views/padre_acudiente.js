@@ -88,3 +88,10 @@ async function renderPadreAcudienteView(token) {
         contentArea.innerHTML += `<p class="message-error">Error al cargar la información: ${error.message}</p>`;
     }
 }
+
+// --- Registrar la vista principal de Padre/Acudiente en el Router ---
+if (typeof registerView === 'function') {
+    registerView('padre_acudiente', 'mis-alumnos', renderPadreAcudienteView);
+} else {
+    console.error("El sistema de registro de vistas no está disponible.");
+}
