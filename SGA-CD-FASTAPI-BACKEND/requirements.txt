@@ -19,3 +19,10 @@ langchain-community
 # Testing dependencies
 pytest
 httpx
+
+# Dependencias para nuevas funcionalidades de IA (Voz y Gráficos)
+SpeechRecognition
+pydub
+matplotlib
+plotly
+pandas

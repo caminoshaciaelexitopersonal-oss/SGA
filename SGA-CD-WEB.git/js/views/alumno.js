@@ -203,3 +203,98 @@ async function renderMiGamificacionView(token, userId) {
         contentArea.innerHTML += `<p class="message-error">Error al cargar el progreso: ${error.message}</p>`;
     }
 }
+
+async function renderAlumnoMisionesView(token) {
+    const contentArea = document.getElementById('content-area');
+    contentArea.innerHTML = `<div class="view-header"><h2><i class="fas fa-tasks"></i> Misiones Disponibles</h2></div><p>Cargando misiones...</p>`;
+
+    try {
+        const response = await fetch(`${config.apiBaseUrl}/api/v1/gamificacion/misiones`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!response.ok) throw new Error('No se pudieron cargar las misiones.');
+        const misiones = await response.json();
+
+        let misionesHtml = '<p>No hay misiones disponibles en este momento.</p>';
+        if (misiones && misiones.length > 0) {
+            misionesHtml = misiones.map(mision => `
+                <div class="card">
+                    <h3>${mision.nombre} ${mision.es_grupal ? '<span class="badge">Grupal</span>' : ''}</h3>
+                    <p>${mision.descripcion}</p>
+                    <p><strong>Recompensa:</strong> ${mision.puntos_recompensa} puntos</p>
+                    <button class="btn-primary" disabled>Ver Progreso</button>
+                </div>
+            `).join('');
+        }
+
+        contentArea.innerHTML = `
+            <div class="view-header"><h2><i class="fas fa-tasks"></i> Misiones Disponibles</h2></div>
+            <div class="card-container">${misionesHtml}</div>
+        `;
+    } catch (error) {
+        contentArea.innerHTML = `<p class="message-error">Error al cargar las misiones: ${error.message}</p>`;
+    }
+}
+
+async function renderMercadoView(token) {
+    const contentArea = document.getElementById('content-area');
+    contentArea.innerHTML = `<div class="view-header"><h2><i class="fas fa-store"></i> Mercado de Puntos</h2></div><p>Cargando artículos...</p>`;
+
+    try {
+        const response = await fetch(`${config.apiBaseUrl}/api/v1/gamificacion/mercado/items`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!response.ok) throw new Error('No se pudieron cargar los artículos del mercado.');
+        const items = await response.json();
+
+        let itemsHtml = '<p>No hay artículos disponibles en el mercado en este momento.</p>';
+        if (items && items.length > 0) {
+            itemsHtml = items.map(item => `
+                <div class="card">
+                    <h3>${item.nombre}</h3>
+                    <p>${item.descripcion}</p>
+                    <p><strong>Costo:</strong> <span class="badge points">${item.costo_puntos} puntos</span></p>
+                    <button class="btn-primary btn-comprar-item" data-item-id="${item.id}">Comprar</button>
+                </div>
+            `).join('');
+        }
+
+        contentArea.innerHTML = `
+            <div class="view-header"><h2><i class="fas fa-store"></i> Mercado de Puntos</h2></div>
+            <div class="card-container" id="mercado-container">${itemsHtml}</div>
+        `;
+
+        document.getElementById('mercado-container').addEventListener('click', async (e) => {
+            if (e.target.classList.contains('btn-comprar-item')) {
+                const itemId = e.target.dataset.itemId;
+                if (confirm('¿Estás seguro de que quieres comprar este artículo? Se deducirán los puntos de tu cuenta.')) {
+                    const buyResponse = await fetch(`${config.apiBaseUrl}/api/v1/gamificacion/mercado/comprar/${itemId}`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (buyResponse.ok) {
+                        alert('¡Compra exitosa!');
+                    } else {
+                        const errorData = await buyResponse.json();
+                        alert(`Error en la compra: ${errorData.detail}`);
+                    }
+                }
+            }
+        });
+
+    } catch (error) {
+        contentArea.innerHTML = `<p class="message-error">Error al cargar el mercado: ${error.message}</p>`;
+    }
+}
+
+// --- Registrar todas las vistas de Alumno en el Router ---
+if (typeof registerView === 'function') {
+    registerView('alumno', 'mis-cursos', renderMisCursosView);
+    registerView('alumno', 'mi-horario', renderMiHorarioView);
+    registerView('alumno', 'mis-calificaciones', renderMisCalificacionesView);
+    registerView('alumno', 'mi-progreso', renderMiGamificacionView);
+    registerView('alumno', 'misiones', renderAlumnoMisionesView);
+    registerView('alumno', 'mercado', renderMercadoView);
+} else {
+    console.error("El sistema de registro de vistas no está disponible.");
+}
