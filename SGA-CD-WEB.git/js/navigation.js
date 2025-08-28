@@ -3,18 +3,19 @@
 const navLinks = {
     // Rol 1: Super Admin
     admin_general: [
-        { text: 'Dashboard', icon: 'fa-home' },
-        { text: 'Gestionar Empresas', icon: 'fa-building' },
-        { text: 'Roles y Permisos', icon: 'fa-shield-alt' },
-        { text: 'Verificar Roles BD', icon: 'fa-database' },
-        { text: 'Auditoría General', icon: 'fa-history' },
-        { text: 'Gestión de Cobros', icon: 'fa-credit-card' },
-        { text: 'Promociones', icon: 'fa-tags' },
-        { text: 'Asistente de IA', icon: 'fa-robot' }
+        { text: 'Dashboard', view: 'dashboard', icon: 'fa-home' },
+        { text: 'Gestionar Empresas', view: 'gestionar-empresas', icon: 'fa-building' },
+        { text: 'Roles y Permisos', view: 'roles-permisos', icon: 'fa-shield-alt' },
+        { text: 'Verificar Roles BD', view: 'verificar-roles-bd', icon: 'fa-database' },
+        { text: 'Auditoría General', view: 'auditoria-general', icon: 'fa-history' },
+        { text: 'Gestión de Cobros', view: 'gestion-cobros', icon: 'fa-credit-card' },
+        { text: 'Promociones', view: 'promociones', icon: 'fa-tags' },
+        { text: 'Asistente de IA', view: 'asistente-ia', icon: 'fa-robot' }
     ],
     // Rol 2: Admin de Empresa
     admin_empresa: [
         { text: 'Panel de Empresa', view: 'panel-empresa', icon: 'fa-tachometer-alt' },
+        { text: 'Suscripción y Pagos', view: 'suscripcion', icon: 'fa-credit-card' },
         { text: 'Reportes', view: 'reportes-empresa', icon: 'fa-chart-bar' },
         { text: 'Auditoría', view: 'auditoria-empresa', icon: 'fa-history' },
         { text: 'Configuración', view: 'config-empresa', icon: 'fa-cog' }
@@ -27,26 +28,26 @@ const navLinks = {
     ],
     // Rol 4: Profesional de Área
     profesional_area: [
-        { text: 'Dashboard', icon: 'fa-tachometer-alt' },
-        { text: 'Supervisar Actividades', icon: 'fa-tasks' },
-        { text: 'Gestionar Eventos', icon: 'fa-calendar-plus' },
-        { text: 'Gestionar Disciplinas', icon: 'fa-edit' },
-        { text: 'Reportes', icon: 'fa-chart-line' }
+        { text: 'Dashboard', view: 'dashboard', icon: 'fa-tachometer-alt' },
+        { text: 'Supervisar Actividades', view: 'supervisar-actividades', icon: 'fa-tasks' },
+        { text: 'Gestionar Eventos', view: 'gestionar-eventos', icon: 'fa-calendar-plus' },
+        { text: 'Gestionar Disciplinas', view: 'gestionar-disciplinas', icon: 'fa-edit' },
+        { text: 'Reportes', view: 'reportes', icon: 'fa-chart-line' }
     ],
     // Rol 5: Técnico o Asistente de Área
     tecnico_area: [
-        { text: 'Dashboard', icon: 'fa-tachometer-alt' },
-        { text: 'Ver Actividades', icon: 'fa-eye' },
-        { text: 'Gestionar Eventos', icon: 'fa-calendar-check' },
-        { text: 'Ver Disciplinas', icon: 'fa-search' },
-        { text: 'Reportes', icon: 'fa-file-alt' }
+        { text: 'Dashboard', view: 'dashboard', icon: 'fa-tachometer-alt' },
+        { text: 'Ver Actividades', view: 'ver-actividades', icon: 'fa-eye' },
+        { text: 'Gestionar Eventos', view: 'gestionar-eventos', icon: 'fa-calendar-check' },
+        { text: 'Ver Disciplinas', view: 'ver-disciplinas', icon: 'fa-search' },
+        { text: 'Reportes', view: 'reportes', icon: 'fa-file-alt' }
     ],
     // Rol 6: Coordinador
     coordinador: [
         { text: 'Planificación', view: 'planificacion', icon: 'fa-calendar-day' },
         { text: 'Verificar Programación', view: 'verificar-programacion', icon: 'fa-clipboard-check' },
         { text: 'Aprobaciones', view: 'aprobaciones', icon: 'fa-check-double' },
-        { text: 'Gestionar Misiones', view: 'misiones', icon: 'fa-tasks' }
+        { text: 'Gestionar Misiones', view: 'gestionar-misiones', icon: 'fa-tasks' }
     ],
     // Rol 7: Profesor
     profesor: [
@@ -66,33 +67,33 @@ const navLinks = {
     ],
     // Rol 9: Padre o Acudiente
     padre_acudiente: [
-        { text: 'Mis Alumnos', icon: 'fa-child' },
-        { text: 'Inscripciones', icon: 'fa-file-signature' },
-        { text: 'Autorizaciones', icon: 'fa-user-edit' },
-        { text: 'Reportes de Progreso', icon: 'fa-chart-bar' }
+        { text: 'Mis Alumnos', view: 'mis-alumnos', icon: 'fa-child' },
+        { text: 'Inscripciones', view: 'inscripciones', icon: 'fa-file-signature' },
+        { text: 'Autorizaciones', view: 'autorizaciones', icon: 'fa-user-edit' },
+        { text: 'Reportes de Progreso', view: 'reportes-progreso', icon: 'fa-chart-bar' }
     ],
     // Rol 10: Jefe de Almacén
     jefe_almacen: [
-        { text: 'Dashboard Inventario', icon: 'fa-boxes' },
-        { text: 'Registrar Movimientos', icon: 'fa-dolly-flatbed' },
-        { text: 'Stock y Reposición', icon: 'fa-sort-amount-up' },
-        { text: 'Hojas de Vida', icon: 'fa-file-invoice' },
-        { text: 'Reportes de Inventario', icon: 'fa-file-excel' }
+        { text: 'Dashboard Inventario', view: 'dashboard-inventario', icon: 'fa-boxes' },
+        { text: 'Registrar Movimientos', view: 'registrar-movimientos', icon: 'fa-dolly-flatbed' },
+        { text: 'Stock y Reposición', view: 'stock-y-reposicion', icon: 'fa-sort-amount-up' },
+        { text: 'Hojas de Vida', view: 'hojas-de-vida', icon: 'fa-file-invoice' },
+        { text: 'Reportes de Inventario', view: 'reportes-de-inventario', icon: 'fa-file-excel' }
     ],
     // Rol 11: Almacenista (hereda de jefe_almacen, pero con menos permisos)
     almacenista: [
-        { text: 'Ver Inventario', icon: 'fa-boxes' },
-        { text: 'Registrar Movimientos', icon: 'fa-dolly-flatbed' }
+        { text: 'Ver Inventario', view: 'ver-inventario', icon: 'fa-boxes' },
+        { text: 'Registrar Movimientos', view: 'registrar-movimientos', icon: 'fa-dolly-flatbed' }
     ],
     // Rol 12: Jefe de Escenarios
     jefe_escenarios: [
-        { text: 'Calendario de Escenarios', icon: 'fa-calendar-alt' },
-        { text: 'Asignar Espacios', icon: 'fa-map-marker-alt' },
-        { text: 'Mantenimiento', icon: 'fa-tools' }
+        { text: 'Calendario de Escenarios', view: 'calendario-de-escenarios', icon: 'fa-calendar-alt' },
+        { text: 'Asignar Espacios', view: 'asignar-espacios', icon: 'fa-map-marker-alt' },
+        { text: 'Mantenimiento', view: 'mantenimiento', icon: 'fa-tools' }
     ],
     // Rol por defecto si no se encuentra uno
     default: [
-        { text: 'Mi Perfil', icon: 'fa-user' }
+        { text: 'Mi Perfil', view: 'mi-perfil', icon: 'fa-user' }
     ]
 };
 
@@ -104,7 +105,6 @@ function renderNavigation(roleName) {
 
     let navHtml = '';
     links.forEach(link => {
-        // Usar la propiedad 'view' si existe, si no, generar desde el texto
         const viewName = link.view || link.text.toLowerCase().replace(/ /g, '-');
         navHtml += `<a href="#" data-view="${viewName}">
                         <i class="fas ${link.icon}"></i>

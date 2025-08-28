@@ -65,6 +65,49 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
+        // --- Lógica de Grabación de Voz ---
+        const micBtn = document.getElementById('chat-mic-btn');
+        let mediaRecorder;
+        let audioChunks = [];
+        let isRecording = false;
+
+        if (micBtn) {
+            micBtn.addEventListener('click', async () => {
+                if (!isRecording) {
+                    try {
+                        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                        mediaRecorder = new MediaRecorder(stream);
+
+                        mediaRecorder.ondataavailable = (event) => {
+                            audioChunks.push(event.data);
+                        };
+
+                        mediaRecorder.onstop = async () => {
+                            const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                            audioChunks = [];
+                            sendAudioMessage(audioBlob, token);
+                            stream.getTracks().forEach(track => track.stop());
+                        };
+
+                        mediaRecorder.start();
+                        isRecording = true;
+                        micBtn.style.color = 'red';
+                        micBtn.querySelector('i').classList.add('fa-beat');
+                        addMessageToLog('Grabando... habla ahora. Pulsa de nuevo para enviar.', 'agent');
+
+                    } catch (err) {
+                        console.error("Error al acceder al micrófono:", err);
+                        addMessageToLog('Error: No se pudo acceder al micrófono.', 'agent');
+                    }
+                } else {
+                    mediaRecorder.stop();
+                    isRecording = false;
+                    micBtn.style.color = '';
+                    micBtn.querySelector('i').classList.remove('fa-beat');
+                }
+            });
+        }
+
         // Listeners existentes
         const navContainer = document.getElementById('app-nav');
         const langSelect = document.getElementById('language-select');
@@ -85,7 +128,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (langSelect) langSelect.addEventListener('change', (e) => setLanguage(e.target.value));
 
-        // Lógica del Theme Switcher
         function applyTheme(theme) {
             document.body.setAttribute('data-theme', theme);
             if (themeToggle) themeToggle.checked = theme === 'dark';
@@ -118,43 +160,80 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function addMessageToLog(message, sender) {
+    function addMessageToLog(messageContent, sender) {
         const chatLog = document.getElementById('chat-log');
         const msgDiv = document.createElement('div');
         msgDiv.className = `chat-message ${sender}`;
-        msgDiv.textContent = message;
+
+        if (typeof messageContent === 'object' && messageContent.image_url) {
+            const textP = document.createElement('p');
+            textP.textContent = messageContent.text;
+            msgDiv.appendChild(textP);
+
+            const img = document.createElement('img');
+            img.src = `${config.apiBaseUrl}${messageContent.image_url}`;
+            img.alt = 'Gráfico generado por IA';
+            img.className = 'chat-image';
+            msgDiv.appendChild(img);
+
+        } else {
+            msgDiv.textContent = messageContent.text || messageContent;
+        }
+
         chatLog.appendChild(msgDiv);
-        chatLog.scrollTop = chatLog.scrollHeight; // Auto-scroll
+        chatLog.scrollTop = chatLog.scrollHeight;
     }
 
     async function startAgentConversation(authToken) {
         addMessageToLog('Conectando con el asistente...', 'agent');
-        // El prompt inicial ahora está vacío para indicar que es el inicio
         await sendChatMessage("", authToken, true);
+    }
+
+    async function sendAudioMessage(audioBlob, authToken) {
+        addMessageToLog('Enviando audio...', 'user');
+        try {
+            const formData = new FormData();
+            formData.append('audio_file', audioBlob, 'grabacion.webm');
+            const response = await fetch(`${config.apiBaseUrl}/api/v1/agent/invoke-voice`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${authToken}` },
+                body: formData
+            });
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || 'Error al procesar el audio.');
+            }
+            const structuredResponse = await response.json();
+            addMessageToLog(structuredResponse, 'agent');
+            speakText(structuredResponse.text);
+        } catch (error) {
+            addMessageToLog({ text: `Error: ${error.message}` }, 'agent');
+        }
     }
 
     async function sendChatMessage(prompt, authToken, isInitial = false) {
         if (!isInitial) {
             addMessageToLog(prompt, 'user');
         }
-
         try {
             const response = await fetch(`${config.apiBaseUrl}/api/v1/agent/invoke`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
                 body: JSON.stringify({
-                    prompt: prompt, // Puede estar vacío en la llamada inicial
-                    area: "Deportes", // Hardcodeado
-                    thread_id: `user_${currentUser.id}` // Thread_id persistente por sesión
+                    prompt: prompt,
+                    area: "Cultura",
+                    thread_id: `user_${currentUser.id}`
                 })
             });
-            const data = await response.json();
-            const agentMessage = data.response || (data.detail || "No se pudo obtener respuesta.");
-            addMessageToLog(agentMessage, 'agent');
-            speakText(agentMessage); // Llamar a la función de TTS
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || 'Error del servidor.');
+            }
+            const structuredResponse = await response.json();
+            addMessageToLog(structuredResponse, 'agent');
+            speakText(structuredResponse.text);
         } catch (error) {
-            console.error('Error al invocar al agente:', error);
-            addMessageToLog('Error de conexión con el agente.', 'agent');
+            addMessageToLog({ text: `Error de conexión con el agente: ${error.message}` }, 'agent');
         }
     }
 
@@ -169,7 +248,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function initializeNotifications() { /* ... (código existente) */ }
+    function initializeNotifications() { /* ... */ }
 
     // -- 7. Lógica de Text-to-Speech (TTS) y Vibración --
     function speakText(text) {

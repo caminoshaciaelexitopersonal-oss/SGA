@@ -14,13 +14,14 @@ from .academic import (
 from .inventory import Elemento, Prestamo
 from .gamification import (
     GamificacionAccion, GamificacionPuntosLog, GamificacionMedalla,
-    GamificacionMedallaObtenida
+    GamificacionMedallaObtenida, GamificacionMision, GamificacionMisionProgreso,
+    GamificacionMercadoItem, GamificacionCompraLog
 )
 from .curriculum import (
     PlanCurricular, PlanCurricularTema, PlanificadorClasesEventos,
     ProgresoAlumnoTema, ContenidoCurricular
 )
-from .billing import Suscripcion, Factura
+from .billing import PaymentGateway, SubscriptionPlan, Subscription, Payment
 from .communication import (
     ChatConversacion, ChatParticipante, ChatMensaje, ForoClase,
     ForoHilo, ForoPublicacion

@@ -18,7 +18,7 @@ class SecurityIntelligenceState(TypedDict):
     mission_plan: MissionPlan | None
     task_queue: List[SargentoMission]
     completed_missions: list
-    final_report: str
+    final_report: dict # El reporte ahora es un objeto estructurado
     error: str | None
 
 async def planner_node(state: SecurityIntelligenceState, llm: Any) -> SecurityIntelligenceState:
@@ -53,10 +53,21 @@ def router_node(state: SecurityIntelligenceState):
 
 
 async def compiler_node(state: SecurityIntelligenceState) -> SecurityIntelligenceState:
+    """Compila los reportes de los sargentos en un único reporte estructurado para el Capitán."""
     if state.get("error"):
-        state["final_report"] = f"Misión fallida: {state['error']}"
+        state["final_report"] = {"text": f"Misión fallida: {state['error']}", "image_url": None}
     else:
-        state["final_report"] = "Misión de Seguridad e Inteligencia completada.\n- " + "\n- ".join(state["completed_missions"])
+        final_text = "Misión de Seguridad e Inteligencia completada.\n"
+        final_image_url = None
+        for mission_report in state["completed_missions"]:
+            final_text += f"- {mission_report['text']}\n"
+            if mission_report.get('image_url'):
+                final_image_url = mission_report['image_url']
+
+        state["final_report"] = {
+            "text": final_text,
+            "image_url": final_image_url
+        }
     return state
 
 def get_seguridad_inteligencia_lieutenant_graph(llm: Any):
@@ -67,14 +78,16 @@ def get_seguridad_inteligencia_lieutenant_graph(llm: Any):
         mission = state["task_queue"].pop(0)
         sargento_agent = seguridad_sargento_builder(state)
         result = await sargento_agent.ainvoke({"teniente_order": mission.task_description, "app_context": state["app_context"]})
-        state["completed_missions"].append(f"Reporte del Sgto. de Seguridad: {result.get('final_report', 'Sin reporte.')}")
+        report = result.get('final_report', {"text": "Sin reporte.", "image_url": None})
+        state["completed_missions"].append(report)
         return state
 
     async def inteligencia_node(state: SecurityIntelligenceState) -> SecurityIntelligenceState:
         mission = state["task_queue"].pop(0)
         sargento_agent = inteligencia_sargento_builder(state)
         result = await sargento_agent.ainvoke({"teniente_order": mission.task_description, "app_context": state["app_context"]})
-        state["completed_missions"].append(f"Reporte del Sgto. de Inteligencia: {result.get('final_report', 'Sin reporte.')}")
+        report = result.get('final_report', {"text": "Sin reporte.", "image_url": None})
+        state["completed_missions"].append(report)
         return state
 
     workflow = StateGraph(SecurityIntelligenceState)
