@@ -1,61 +1,81 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
 
-# --- Suscripcion Schemas ---
+# --- PaymentGateway Schemas ---
+class PaymentGatewayBase(BaseModel):
+    gateway_name: str
+    is_active: bool = True
 
-class SuscripcionBase(BaseModel):
-    plan: str
-    estado: str
-    fecha_inicio: datetime
-    fecha_fin: Optional[datetime] = None
-    stripe_customer_id: Optional[str] = None
-    stripe_subscription_id: Optional[str] = None
+class PaymentGatewayCreate(PaymentGatewayBase):
+    pass
 
-class SuscripcionCreate(SuscripcionBase):
-    inquilino_id: int
-
-class SuscripcionUpdate(BaseModel):
-    # Only some fields should be updatable
-    plan: Optional[str] = None
-    estado: Optional[str] = None
-    fecha_fin: Optional[datetime] = None
-
-class SuscripcionInDBBase(SuscripcionBase):
+class PaymentGateway(PaymentGatewayBase):
     id: int
-    inquilino_id: int
     class Config:
         from_attributes = True
 
-class Suscripcion(SuscripcionInDBBase):
+# --- SubscriptionPlan Schemas ---
+class SubscriptionPlanBase(BaseModel):
+    name: str
+    price: float
+    currency: str
+    features: Optional[str] = None
+
+class SubscriptionPlanCreate(SubscriptionPlanBase):
     pass
 
-
-# --- Factura Schemas ---
-
-class FacturaBase(BaseModel):
-    monto: float
-    estado: str
-    fecha_emision: datetime
-    fecha_pago: Optional[datetime] = None
-    stripe_invoice_id: Optional[str] = None
-    pdf_url: Optional[str] = None
-
-class FacturaCreate(FacturaBase):
-    inquilino_id: int
-    suscripcion_id: int
-
-class FacturaUpdate(BaseModel):
-    estado: Optional[str] = None
-    fecha_pago: Optional[datetime] = None
-    pdf_url: Optional[str] = None
-
-class FacturaInDBBase(FacturaBase):
+class SubscriptionPlan(SubscriptionPlanBase):
     id: int
-    suscripcion_id: int
-    inquilino_id: int
     class Config:
         from_attributes = True
 
-class Factura(FacturaInDBBase):
-    pass
+# --- Subscription Schemas ---
+class SubscriptionBase(BaseModel):
+    plan_id: int
+    status: str
+    start_date: datetime
+    end_date: Optional[datetime] = None
+    generic_customer_id: Optional[str] = None
+
+class SubscriptionCreate(SubscriptionBase):
+    inquilino_id: int
+
+class SubscriptionUpdate(BaseModel):
+    plan_id: Optional[int] = None
+    status: Optional[str] = None
+    end_date: Optional[datetime] = None
+
+class Subscription(SubscriptionBase):
+    id: int
+    inquilino_id: int
+    plan: SubscriptionPlan
+    class Config:
+        from_attributes = True
+
+# --- Payment Schemas ---
+class PaymentBase(BaseModel):
+    amount: float
+    currency: str
+    status: str
+    gateway_name: str
+    gateway_transaction_id: Optional[str] = None
+
+class PaymentCreate(PaymentBase):
+    subscription_id: int
+    inquilino_id: int
+
+class Payment(PaymentBase):
+    id: int
+    subscription_id: int
+    created_at: datetime
+    class Config:
+        from_attributes = True
+
+# --- Schemas for Payment Intent ---
+class PaymentIntentCreate(BaseModel):
+    amount: float
+    currency: str = "USD"
+
+class PaymentIntent(BaseModel):
+    client_secret: str

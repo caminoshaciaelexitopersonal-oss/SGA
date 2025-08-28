@@ -20,7 +20,7 @@ from .curriculum import (
     PlanCurricular, PlanCurricularTema, PlanificadorClasesEventos,
     ProgresoAlumnoTema, ContenidoCurricular
 )
-from .billing import Suscripcion, Factura
+from .billing import PaymentGateway, SubscriptionPlan, Subscription, Payment
 from .communication import (
     ChatConversacion, ChatParticipante, ChatMensaje, ForoClase,
     ForoHilo, ForoPublicacion
