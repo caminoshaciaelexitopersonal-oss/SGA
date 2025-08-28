@@ -21,7 +21,6 @@ function registerView(roleName, viewName, renderer) {
     window.sgaViewRegistry[roleName][viewName] = renderer;
 }
 
-
 // --- Router Principal de Vistas ---
 /**
  * Renderiza el contenido para una vista y rol dados.
@@ -36,36 +35,46 @@ async function renderContentForView(viewName, token, roleName = 'default') {
     contentArea.innerHTML = `<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i><h2>Cargando...</h2></div>`;
 
     try {
-        // Buscar un renderer específico para el rol Y un renderer común/default.
+        // Buscar un renderer específico para el rol y un renderer común/default.
         const roleSpecificRenderer = window.sgaViewRegistry[roleName]?.[viewName];
         const commonRenderer = window.sgaViewRegistry['common']?.[viewName];
-
         const renderer = roleSpecificRenderer || commonRenderer;
 
         if (typeof renderer === 'function') {
             await renderer(token, roleName);
         } else {
             console.warn(`No se encontró un renderer para la vista '${viewName}' para el rol '${roleName}' o en común.`);
-            contentArea.innerHTML = `<div class="view-error"><h2><i class="fas fa-exclamation-triangle"></i> Vista no encontrada</h2><p>La vista solicitada (<strong>${viewName}</strong>) no está implementada para su rol.</p></div>`;
+            contentArea.innerHTML = `<div class="view-error">
+                <h2><i class="fas fa-exclamation-triangle"></i> Vista no encontrada</h2>
+                <p>La vista solicitada (<strong>${viewName}</strong>) no está implementada para su rol.</p>
+            </div>`;
         }
     } catch (error) {
         console.error(`Error al renderizar la vista '${viewName}':`, error);
-        contentArea.innerHTML = `<div class="view-error"><h2><i class="fas fa-times-circle"></i> Error al cargar la vista</h2><p>Ocurrió un problema al intentar mostrar <strong>${viewName}</strong>.</p><p class="error-message">Detalle: ${error.message}</p></div>`;
+        contentArea.innerHTML = `<div class="view-error">
+            <h2><i class="fas fa-times-circle"></i> Error al cargar la vista</h2>
+            <p>Ocurrió un problema al intentar mostrar <strong>${viewName}</strong>.</p>
+            <p class="error-message">Detalle: ${error.message}</p>
+        </div>`;
     }
 }
-
 
 /* ==========================================================================
    Implementación de la Vista para Admin General
    ========================================================================== */
-
 async function renderVerificarRolesView(token) {
     const contentArea = document.getElementById('content-area');
-    const rolesRequeridos = ['admin_general', 'admin_empresa', 'jefe_area', 'profesional_area', 'tecnico_area', 'coordinador', 'profesor', 'alumno', 'padre_acudiente', 'jefe_almacen', 'almacenista', 'jefe_escenarios'];
+    const rolesRequeridos = [
+        'admin_general', 'admin_empresa', 'jefe_area', 'profesional_area',
+        'tecnico_area', 'coordinador', 'profesor', 'alumno', 'padre_acudiente',
+        'jefe_almacen', 'almacenista', 'jefe_escenarios'
+    ];
 
     let rolesDesdeAPI = [];
     try {
-        const res = await fetch(`${config.apiBaseUrl}/api/v1/roles`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const res = await fetch(`${config.apiBaseUrl}/api/v1/roles`, { 
+            headers: { 'Authorization': `Bearer ${token}` } 
+        });
         if (!res.ok) throw new Error(`El servidor respondió con estado ${res.status}`);
         rolesDesdeAPI = await res.json();
     } catch (e) {
@@ -76,13 +85,22 @@ async function renderVerificarRolesView(token) {
     const rolesEncontrados = new Set(rolesDesdeAPI.map(r => r.nombre));
     const faltantes = rolesRequeridos.filter(r => !rolesEncontrados.has(r));
 
-    const rows = rolesDesdeAPI.map(r => `<tr><td>${r.id ?? '—'}</td><td>${r.nombre ?? 'N/A'}</td><td>${r.descripcion ?? '—'}</td></tr>`).join('');
-    const faltHtml = faltantes.length ? `<div class="missing-roles">${faltantes.map(n => `<button class="btn-primary btn-crear-rol" data-rol-nombre="${n}">Crear rol: ${n}</button>`).join(' ')}</div>` : '<p class="message-success">¡Excelente! Todos los roles requeridos existen.</p>';
+    const rows = rolesDesdeAPI
+        .map(r => `<tr><td>${r.id ?? '—'}</td><td>${r.nombre ?? 'N/A'}</td><td>${r.descripcion ?? '—'}</td></tr>`)
+        .join('');
+
+    const faltHtml = faltantes.length
+        ? `<div class="missing-roles">${faltantes.map(n => `<button class="btn-primary btn-crear-rol" data-rol-nombre="${n}">Crear rol: ${n}</button>`).join(' ')}</div>`
+        : '<p class="message-success">¡Excelente! Todos los roles requeridos existen.</p>';
 
     contentArea.innerHTML = `
         <div class="view-header"><h2><i class="fas fa-user-shield"></i> Verificar Roles en la BD</h2></div>
-        <table class="data-table"><thead><tr><th>ID</th><th>Nombre</th><th>Descripción</th></tr></thead><tbody>${rows || '<tr><td colspan="3">No se encontraron roles.</td></tr>'}</tbody></table>
-        <div class="actions-footer"><h3>Roles Faltantes</h3>${faltHtml}</div>`;
+        <table class="data-table">
+            <thead><tr><th>ID</th><th>Nombre</th><th>Descripción</th></tr></thead>
+            <tbody>${rows || '<tr><td colspan="3">No se encontraron roles.</td></tr>'}</tbody>
+        </table>
+        <div class="actions-footer"><h3>Roles Faltantes</h3>${faltHtml}</div>
+    `;
 
     setupVerificarRolesListeners(token);
 }
@@ -90,6 +108,7 @@ async function renderVerificarRolesView(token) {
 function setupVerificarRolesListeners(token) {
     const contentArea = document.getElementById('content-area');
     if (!contentArea) return;
+
     contentArea.addEventListener('click', async (e) => {
         if (e.target?.classList.contains('btn-crear-rol')) {
             abrirModalCrearRol(e.target.dataset.rolNombre, token);
@@ -98,11 +117,19 @@ function setupVerificarRolesListeners(token) {
 }
 
 function abrirModalCrearRol(rolNombre, token) {
-    const modalBodyContent = `<form id="crear-rol-form" style="display: flex; flex-direction: column; gap: 1rem;">
-        <p>Creando el rol: <strong>${rolNombre}</strong></p>
-        <div class="form-group"><label for="rol-descripcion-input">Descripción</label><textarea id="rol-descripcion-input" class="form-textarea" required></textarea></div>
-        <div class="form-actions"><button type="submit" class="btn-primary">Confirmar</button></div>
-        </form><div id="modal-feedback"></div>`;
+    const modalBodyContent = `
+        <form id="crear-rol-form" style="display: flex; flex-direction: column; gap: 1rem;">
+            <p>Creando el rol: <strong>${rolNombre}</strong></p>
+            <div class="form-group">
+                <label for="rol-descripcion-input">Descripción</label>
+                <textarea id="rol-descripcion-input" class="form-textarea" required></textarea>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">Confirmar</button>
+            </div>
+        </form>
+        <div id="modal-feedback"></div>
+    `;
 
     openModal(`Crear Rol: ${rolNombre}`, modalBodyContent);
 
@@ -113,13 +140,23 @@ function abrirModalCrearRol(rolNombre, token) {
         try {
             const res = await fetch(`${config.apiBaseUrl}/api/v1/roles`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify({ nombre: rolNombre, descripcion: document.getElementById('rol-descripcion-input').value })
+                headers: { 
+                    'Content-Type': 'application/json', 
+                    'Authorization': `Bearer ${token}` 
+                },
+                body: JSON.stringify({ 
+                    nombre: rolNombre, 
+                    descripcion: document.getElementById('rol-descripcion-input').value 
+                })
             });
             const result = await res.json();
             if (!res.ok) throw new Error(result.detail || 'Error del servidor');
+
             feedbackDiv.textContent = '¡Rol creado! Refrescando...';
-            setTimeout(() => { closeModal(); renderContentForView('verificar-roles-bd', token, 'admin_general'); }, 1200);
+            setTimeout(() => { 
+                closeModal(); 
+                renderContentForView('verificar-roles-bd', token, 'admin_general'); 
+            }, 1200);
         } catch (error) {
             feedbackDiv.textContent = `Error: ${error.message}`;
         }
