@@ -40,17 +40,58 @@ async function renderPlanificacionView(token) {
 
 /**
  * Renderiza la vista para Verificar Programación.
- * (Actualmente es un placeholder)
  */
 async function renderVerificarProgramacionView(token) {
     const contentArea = document.getElementById('content-area');
-    contentArea.innerHTML = `
-        <div class="view-header">
-            <h2><i class="fas fa-clipboard-check"></i> Verificar Programación</h2>
-        </div>
-        <p>Aquí el coordinador podrá ver y verificar la programación de los profesores para asegurar el cumplimiento.</p>
-        <p class="message-info">Esta funcionalidad se implementará en una futura actualización.</p>
-    `;
+    contentArea.innerHTML = `<div class="view-header"><h2><i class="fas fa-clipboard-check"></i> Verificar Cumplimiento</h2></div><p>Cargando programación para verificación...</p>`;
+
+    try {
+        const response = await fetch(`${config.apiBaseUrl}/api/v1/coordinador/programacion`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!response.ok) throw new Error('No se pudo obtener la programación.');
+        const programacion = await response.json();
+
+        const rows = programacion.map(item => `
+            <tr>
+                <td>${item.profesor}</td>
+                <td>${item.materia}</td>
+                <td><span class="status-${item.estado.toLowerCase()}">${item.estado}</span></td>
+                <td><input type="checkbox" ${item.estado === 'Completado' ? 'checked' : ''} /></td>
+            </tr>
+        `).join('') || '<tr><td colspan="4">No hay actividades programadas para verificar.</td></tr>';
+
+        contentArea.innerHTML = `
+            <div class="view-header"><h2><i class="fas fa-clipboard-check"></i> Verificar Cumplimiento de Programación</h2></div>
+            <table class="data-table">
+                <thead><tr><th>Profesor</th><th>Materia</th><th>Estado</th><th>Verificado</th></tr></thead>
+                <tbody>${rows}</tbody>
+            </table>
+        `;
+    } catch (error) {
+        contentArea.innerHTML = `<p class="message-error">Error al cargar la vista de verificación: ${error.message}</p>`;
+    }
+}
+
+
+/**
+ * Maneja la acción de aprobar o rechazar una solicitud.
+ */
+async function handleAprobacionAction(id, action, token) {
+    try {
+        const response = await fetch(`${config.apiBaseUrl}/api/v1/coordinador/aprobaciones/${id}/${action}`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!response.ok) {
+            const err = await response.json();
+            throw new Error(err.detail || `No se pudo ${action} la solicitud.`);
+        }
+        return true;
+    } catch (error) {
+        alert(`Error al procesar la solicitud: ${error.message}`);
+        return false;
+    }
 }
 
 /**
@@ -68,13 +109,13 @@ async function renderAprobacionesView(token) {
         const aprobaciones = await response.json();
 
         const rows = aprobaciones.map(item => `
-            <tr>
+            <tr data-id="${item.id}">
                 <td>${item.tipo}</td>
                 <td>${item.descripcion}</td>
                 <td>${item.solicitado_por}</td>
                 <td>
-                    <button class="btn-primary btn-aprobar" data-id="${item.id}">Aprobar</button>
-                    <button class="btn-danger btn-rechazar" data-id="${item.id}">Rechazar</button>
+                    <button class="btn-primary btn-aprobar" data-action="approve">Aprobar</button>
+                    <button class="btn-danger btn-rechazar" data-action="reject">Rechazar</button>
                 </td>
             </tr>
         `).join('') || '<tr><td colspan="4">No hay items pendientes de aprobación.</td></tr>';
@@ -83,10 +124,30 @@ async function renderAprobacionesView(token) {
             <div class="view-header"><h2><i class="fas fa-check-double"></i> Panel de Aprobaciones</h2></div>
             <table class="data-table">
                 <thead><tr><th>Tipo</th><th>Descripción</th><th>Solicitado Por</th><th>Acciones</th></tr></thead>
-                <tbody>${rows}</tbody>
+                <tbody id="aprobaciones-tbody">${rows}</tbody>
             </table>
         `;
-        // Aquí se podrían añadir los listeners para los botones de aprobar/rechazar
+
+        document.getElementById('aprobaciones-tbody').addEventListener('click', async (e) => {
+            if (e.target.tagName === 'BUTTON') {
+                const button = e.target;
+                const action = button.dataset.action;
+                const row = button.closest('tr');
+                const id = row.dataset.id;
+
+                button.disabled = true;
+                button.textContent = 'Procesando...';
+
+                const success = await handleAprobacionAction(id, action, token);
+                if (success) {
+                    row.remove(); // Elimina la fila de la tabla si la acción fue exitosa
+                } else {
+                    button.disabled = false;
+                    button.textContent = action === 'approve' ? 'Aprobar' : 'Rechazar';
+                }
+            }
+        });
+
     } catch (error) {
         contentArea.innerHTML = `<p class="message-error">Error al cargar las aprobaciones: ${error.message}</p>`;
     }

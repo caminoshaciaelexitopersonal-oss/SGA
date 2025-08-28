@@ -22,7 +22,7 @@ from .endpoints import (
     jefe_area,  # agregado desde feat/implement-roles-and-agent-ui
     webhooks,
     admin_general,
-    sales_agent,
+    sales_agent,  # agregado desde feature/implement-role-views
 )
 
 api_router = APIRouter()
@@ -51,4 +51,3 @@ api_router.include_router(inscripciones_asistencias.router, prefix="/academic", 
 api_router.include_router(dropdowns.router, prefix="/dropdowns", tags=["Dropdown Management"])
 api_router.include_router(notificaciones.router, prefix="/notificaciones", tags=["Notificaciones"])
 api_router.include_router(audit.router, prefix="/audit", tags=["Audit Log"])
- 

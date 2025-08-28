@@ -3,12 +3,13 @@ import json
 import logging
 
 from app.core.config import settings
-from app.agents.corps.ventas_colonel import sales_agent_executor
+from app.agents.corps.ventas_colonel import sales_agent_executor  # Usamos el agente de ventas dedicado
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 WHATSAPP_GRAPH_API_URL = f"https://graph.facebook.com/v17.0/{settings.WHATSAPP_PHONE_NUMBER_ID}/messages"
+
 
 def send_whatsapp_message(to: str, message: str):
     """

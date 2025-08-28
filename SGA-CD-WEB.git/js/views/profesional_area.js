@@ -17,18 +17,42 @@ async function renderProfesionalAreaDashboardView(token) {
 
 /**
  * Renderiza la vista para Supervisar Actividades.
- * (Actualmente es un placeholder)
  */
 async function renderSupervisarActividadesView(token) {
     const contentArea = document.getElementById('content-area');
-    contentArea.innerHTML = `
-        <div class="view-header">
-            <h2><i class="fas fa-tasks"></i> Supervisar Actividades</h2>
-        </div>
-        <p>Panel para supervisar las actividades en curso del área.</p>
-        <p class="message-info">Esta funcionalidad se implementará en una futura actualización.</p>
-    `;
+    contentArea.innerHTML = `<div class="view-header"><h2><i class="fas fa-tasks"></i> Supervisar Actividades</h2></div><p>Cargando actividades en curso...</p>`;
+
+    try {
+        const response = await fetch(`${config.apiBaseUrl}/api/v1/eventos?estado=en-curso`, { // Asumimos un filtro por estado
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!response.ok) throw new Error('No se pudo obtener la lista de actividades en curso.');
+        const actividades = await response.json();
+
+        const rows = actividades.map(item => `
+            <tr>
+                <td>${item.nombre}</td>
+                <td>${item.tipo}</td>
+                <td>${item.responsable || 'N/A'}</td>
+                <td><span class="status-${item.estado.toLowerCase()}">${item.estado}</span></td>
+            </tr>
+        `).join('') || '<tr><td colspan="4">No hay actividades en curso para supervisar.</td></tr>';
+
+        contentArea.innerHTML = `
+            <div class="view-header">
+                <h2><i class="fas fa-tasks"></i> Supervisar Actividades</h2>
+            </div>
+            <p>Panel para supervisar las actividades en curso del área.</p>
+            <table class="data-table">
+                <thead><tr><th>Actividad/Evento</th><th>Tipo</th><th>Responsable</th><th>Estado</th></tr></thead>
+                <tbody>${rows}</tbody>
+            </table>
+        `;
+    } catch (error) {
+        contentArea.innerHTML = `<p class="message-error">Error al cargar las actividades: ${error.message}</p>`;
+    }
 }
+
 
 /**
  * Renderiza la vista para Gestionar Eventos.
