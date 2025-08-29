@@ -30,3 +30,4 @@ from .dropdowns import (
     GrupoPoblacional, Barrio, Vereda, Resguardo, TipoEscenario
 )
 from .settings import Setting
+from .video import VideoGenerationRequest

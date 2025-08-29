@@ -13,6 +13,9 @@ class WhatsAppSettings(BaseModel):
     api_token: str
     phone_number_id: str
 
+class RunwayMLSettings(BaseModel):
+    api_key: str
+
 @router.post("/settings/whatsapp")
 def update_whatsapp_settings(
     *,
@@ -36,3 +39,22 @@ def update_whatsapp_settings(
     logger.info("WhatsApp settings updated successfully in the database.")
 
     return {"status": "success", "message": "WhatsApp settings updated successfully."}
+
+
+@router.post("/settings/runwayml")
+def update_runwayml_settings(
+    *,
+    db: Session = Depends(deps.get_db),
+    settings_in: RunwayMLSettings,
+    current_user: models.Usuario = Depends(deps.get_current_active_admin_general),
+):
+    """
+    Endpoint for the Admin General to update RunwayML API key.
+    """
+    logger.info(f"Admin General ({current_user.nombre_usuario}) is updating RunwayML settings.")
+
+    crud_settings.update_setting(db, key="RUNWAYML_API_KEY", value=settings_in.api_key)
+
+    logger.info("RunwayML settings updated successfully in the database.")
+
+    return {"status": "success", "message": "RunwayML settings updated successfully."}

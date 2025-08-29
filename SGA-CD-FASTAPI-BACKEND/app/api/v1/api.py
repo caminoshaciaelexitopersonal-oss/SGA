@@ -23,6 +23,7 @@ from .endpoints import (
     webhooks,
     admin_general,
     sales_agent,
+    video,
 )
 
 api_router = APIRouter()
@@ -51,4 +52,4 @@ api_router.include_router(inscripciones_asistencias.router, prefix="/academic", 
 api_router.include_router(dropdowns.router, prefix="/dropdowns", tags=["Dropdown Management"])
 api_router.include_router(notificaciones.router, prefix="/notificaciones", tags=["Notificaciones"])
 api_router.include_router(audit.router, prefix="/audit", tags=["Audit Log"])
- 
+api_router.include_router(video.router, prefix="/video", tags=["Video Generation"])
