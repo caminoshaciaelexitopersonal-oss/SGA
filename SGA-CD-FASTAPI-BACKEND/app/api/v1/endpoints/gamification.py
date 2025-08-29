@@ -9,38 +9,38 @@ from app.api import deps
 router = APIRouter()
 
 
-@router.post("/mercado/comprar/{item_id}", response_model=schemas.GamificacionCompraLog)
-def comprar_item_mercado(
-    *,
-    db: Session = Depends(deps.get_db),
-    item_id: int,
-    current_user: user_model.Usuario = Depends(deps.role_required(["alumno"])),
-) -> Any:
-    """
-    Allows a student to purchase an item from the marketplace.
-    """
-    # Business logic for purchasing an item would go here
-    # 1. Get the item and its cost
-    # 2. Check if the student has enough points
-    # 3. Deduct points from the student
-    # 4. Create a purchase log entry
-    # This is a placeholder implementation
-    item = crud.gamification.get_mercado_item(db, item_id=item_id)
-    if not item:
-        raise HTTPException(status_code=404, detail="Item not found")
+# @router.post("/mercado/comprar/{item_id}", response_model=schemas.GamificacionCompraLog)
+# def comprar_item_mercado(
+#     *,
+#     db: Session = Depends(deps.get_db),
+#     item_id: int,
+#     current_user: user_model.Usuario = Depends(deps.role_required(["alumno"])),
+# ) -> Any:
+#     """
+#     Allows a student to purchase an item from the marketplace.
+#     """
+#     # Business logic for purchasing an item would go here
+#     # 1. Get the item and its cost
+#     # 2. Check if the student has enough points
+#     # 3. Deduct points from the student
+#     # 4. Create a purchase log entry
+#     # This is a placeholder implementation
+#     item = crud.gamification.get_mercado_item(db, item_id=item_id)
+#     if not item:
+#         raise HTTPException(status_code=404, detail="Item not found")
 
-    # Placeholder for student points check
-    print(f"User {current_user.nombre_completo} is attempting to buy {item.nombre} for {item.costo_puntos} points.")
+#     # Placeholder for student points check
+#     print(f"User {current_user.nombre_completo} is attempting to buy {item.nombre} for {item.costo_puntos} points.")
 
-    # Create a dummy purchase log
-    compra_log_in = schemas.GamificacionCompraLogCreate(
-        item_id=item_id,
-        alumno_id=current_user.id,
-        costo_en_puntos=item.costo_puntos
-    )
-    # This is not a real CRUD function, so we just return the schema
-    # In a real scenario, you'd have a crud.gamification.create_compra_log
-    return compra_log_in
+#     # Create a dummy purchase log
+#     compra_log_in = schemas.GamificacionCompraLogCreate(
+#         item_id=item_id,
+#         alumno_id=current_user.id,
+#         costo_en_puntos=item.costo_puntos
+#     )
+#     # This is not a real CRUD function, so we just return the schema
+#     # In a real scenario, you'd have a crud.gamification.create_compra_log
+#     return compra_log_in
 
 
 # --- GamificacionAccion Endpoints ---

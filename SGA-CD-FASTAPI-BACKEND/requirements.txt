@@ -27,6 +27,7 @@ langchain
 langgraph
 langchain-openai
 langchain-community
+langgraph-checkpoint-sqlite
 
 # AI-related extras (speech, audio, plotting, data)
 SpeechRecognition

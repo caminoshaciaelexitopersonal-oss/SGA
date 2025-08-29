@@ -86,3 +86,46 @@ def delete_alumno(
         raise HTTPException(status_code=404, detail="Alumno not found")
     alumno = crud.alumno.remove(db=db, id=alumno_id)
     return alumno
+
+
+@router.get("/{alumno_id}/progreso", response_model=schemas.AlumnoProgreso)
+def read_alumno_progreso(
+    *,
+    db: Session = Depends(deps.get_db),
+    alumno_id: int,
+    current_user: user_model.Usuario = Depends(deps.get_current_active_user),
+) -> Any:
+    """
+    Get a specific alumno's progress by id.
+    """
+    # Here, alumno_id is the user_id of the student.
+    alumno_user = crud.user.get(db=db, id=alumno_id)
+    if not alumno_user or "alumno" not in alumno_user.roles:
+        raise HTTPException(status_code=404, detail="Alumno not found")
+
+    if alumno_user.inquilino_id != current_user.inquilino_id:
+        raise HTTPException(status_code=403, detail="Not authorized to access this tenant's data")
+
+    # Permission check
+    user_roles = set(current_user.roles)
+    is_admin_or_profesor = user_roles.intersection({"admin_empresa", "profesor", "jefe_area", "coordinador"})
+    is_parent = "padre_acudiente" in user_roles and alumno_user in current_user.hijos
+
+    if not is_admin_or_profesor and not is_parent:
+        raise HTTPException(status_code=403, detail="Not enough permissions to view student progress")
+
+    # Mock data for now, as CRUD functions for progress are not yet implemented.
+    # TODO: Replace with real data fetching from CRUD layer.
+    progreso_data = {
+        "asistencia_porcentaje": 85.5,
+        "asistencia_status": "buena",
+        "calificaciones_recientes": [
+            {"materia": "Matemáticas", "nota": "A"},
+            {"materia": "Deportes", "nota": "B+"},
+        ],
+        "logros_gamificacion": [
+            {"nombre": "Madrugador"},
+            {"nombre": "Participante Activo"},
+        ],
+    }
+    return progreso_data

@@ -26,6 +26,25 @@ def get_user_by_username(db: Session, username: str) -> Usuario | None:
     return user
 
 
+def get(db: Session, id: int) -> Usuario | None:
+    """
+    Fetches a user from the database by their ID.
+    The user object is augmented with a `roles` attribute.
+    """
+    user = db.query(Usuario).filter(Usuario.id == id).first()
+    if user:
+        # This logic is duplicated from get_user_by_username.
+        # Consider refactoring into a helper function if this becomes common.
+        query = text("""
+            SELECT r.nombre FROM roles r
+            JOIN user_roles ur ON r.id = ur.role_id
+            WHERE ur.user_id = :user_id
+        """)
+        roles_result = db.execute(query, {"user_id": user.id}).fetchall()
+        user.roles = [row[0] for row in roles_result]
+    return user
+
+
 def create_user(db: Session, user: UserCreate) -> Usuario:
     """
     Creates a new user in the database and assigns them a role.

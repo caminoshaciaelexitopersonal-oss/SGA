@@ -23,6 +23,7 @@ from .endpoints import (
     webhooks,
     admin_general,
     sales_agent,  # agregado desde feature/implement-role-views
+    padre,
 )
 
 api_router = APIRouter()
@@ -33,6 +34,7 @@ api_router.include_router(webhooks.router, prefix="/webhooks", tags=["Webhooks"]
 api_router.include_router(admin_general.router, prefix="/admin_general", tags=["Admin General"])
 api_router.include_router(auth.router, prefix="/auth", tags=["Authentication"])
 api_router.include_router(tenancy.router, prefix="/tenants", tags=["Tenants"])
+api_router.include_router(padre.router, prefix="/padre", tags=["Padre Acudiente"])
 api_router.include_router(profesor.router, prefix="/profesor", tags=["Profesor"])
 api_router.include_router(jefe_area.router, prefix="/jefe_area", tags=["Jefe de Área"])
 api_router.include_router(admin.router, prefix="/admin", tags=["Admin"])
