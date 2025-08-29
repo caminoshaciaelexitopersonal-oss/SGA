@@ -37,10 +37,8 @@ def publish_video(
                 description=request_in.description
             )
             results.append(result)
-        except ValueError as e:
-            errors.append({"platform": platform, "error": str(e)})
         except Exception as e:
-            errors.append({"platform": platform, "error": f"A service error occurred: {e}"})
+            errors.append({"platform": platform, "error": str(e)})
 
     if not results and errors:
         raise HTTPException(status_code=500, detail={"message": "All publications failed.", "errors": errors})

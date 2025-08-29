@@ -31,10 +31,10 @@ def login(
     if not user.activo:
         raise HTTPException(status_code=400, detail="Inactive user")
 
-    # The user object is now augmented with a `role_names` attribute
+    # El objeto user de crud.get_user_by_username ya trae los roles
     access_token_data = {
         "sub": str(user.id),
-        "roles": user.role_names, # Use the new attribute here
+        "roles": user.roles,
         "inquilino_id": user.inquilino_id,
         "nombre_completo": user.nombre_completo
     }

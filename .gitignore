@@ -1,31 +1,13 @@
-# Byte-compiled / optimized / DLL files
+# Secrets
+client_secrets.json
+*.env
+
+# Python
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
 
-# Environments
-.env
-.venv
-env/
-venv/
-ENV/
-env.bak
-venv.bak
-
 # Database
 *.db
 *.sqlite3
-
-# Logs
-*.log
-
-# IDEs
-.idea/
-.vscode/
-
-# Test outputs
-.pytest_cache/
-coverage.xml
-htmlcov/
-.tox/

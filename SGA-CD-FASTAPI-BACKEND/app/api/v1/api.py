@@ -24,7 +24,6 @@ from .endpoints import (
     admin_general,
     sales_agent,  # agregado desde feature/implement-role-views
     padre,
-    video_creation,
     video_distribution,
 )
 
@@ -54,6 +53,5 @@ api_router.include_router(eventos.router, prefix="/eventos", tags=["Eventos"])
 api_router.include_router(inscripciones_asistencias.router, prefix="/academic", tags=["Inscripciones y Asistencias"])
 api_router.include_router(dropdowns.router, prefix="/dropdowns", tags=["Dropdown Management"])
 api_router.include_router(notificaciones.router, prefix="/notificaciones", tags=["Notificaciones"])
-api_router.include_router(video_creation.router, prefix="/video_creation", tags=["Video Creation"])
 api_router.include_router(video_distribution.router, prefix="/video_distribution", tags=["Video Distribution"])
 api_router.include_router(audit.router, prefix="/audit", tags=["Audit Log"])

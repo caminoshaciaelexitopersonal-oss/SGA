@@ -50,7 +50,7 @@ def db() -> Generator:
     with engine.connect() as connection:
         # Create the roles table
         connection.execute(text("""
-            CREATE TABLE IF NOT EXISTS roles (
+            CREATE TABLE roles (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 nombre VARCHAR(50) UNIQUE NOT NULL,
                 descripcion TEXT
@@ -58,7 +58,7 @@ def db() -> Generator:
         """))
         # Create the user_roles join table
         connection.execute(text("""
-            CREATE TABLE IF NOT EXISTS user_roles (
+            CREATE TABLE user_roles (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id INTEGER NOT NULL,
                 role_id INTEGER NOT NULL,
@@ -88,10 +88,13 @@ def db() -> Generator:
         yield db_session
     finally:
         db_session.close()
-            # Base.metadata.drop_all should handle all tables, including those
-            # created manually, as long as they are reflected or part of the metadata.
-            # The manual drops are causing issues if the tables are already dropped.
+        # Drop all tables after the test
         Base.metadata.drop_all(bind=engine)
+        # Manually drop the custom tables
+        with engine.connect() as connection:
+            connection.execute(text("DROP TABLE user_roles"))
+            connection.execute(text("DROP TABLE roles"))
+            connection.commit()
 
 
 @pytest.fixture(scope="module")

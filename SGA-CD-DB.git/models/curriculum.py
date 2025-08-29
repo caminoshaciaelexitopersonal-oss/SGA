@@ -65,13 +65,3 @@ class ContenidoCurricular(Base):
 
     tema = relationship("PlanCurricularTema")
     uploader = relationship("Usuario")
-
-class Disciplina(Base):
-    __tablename__ = "disciplinas"
-    id = Column(Integer, primary_key=True, index=True)
-    inquilino_id = Column(Integer, ForeignKey("inquilinos.id"), nullable=False)
-    nombre = Column(String, nullable=False, index=True)
-    descripcion = Column(Text)
-    area_id = Column(Integer, ForeignKey("areas.id"), nullable=False)
-
-    area = relationship("Area")

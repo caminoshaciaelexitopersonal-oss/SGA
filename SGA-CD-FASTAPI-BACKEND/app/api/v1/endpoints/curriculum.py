@@ -50,33 +50,3 @@ def create_tema(
     """
     tema = crud.curriculum.create_tema(db=db, obj_in=tema_in)
     return tema
-
-# --- Disciplina Endpoints ---
-
-@router.get("/disciplinas/", response_model=List[schemas.Disciplina])
-def read_disciplinas(
-    db: Session = Depends(deps.get_db),
-    skip: int = 0,
-    limit: int = 100,
-    # current_user = Depends(deps.get_current_user)
-) -> Any:
-    """
-    Retrieve disciplines.
-    """
-    # Assuming tenant_id would be part of the user or a general dependency
-    tenant_id = 1 # Placeholder
-    disciplinas = crud.curriculum.get_disciplinas_by_tenant(db, inquilino_id=tenant_id, skip=skip, limit=limit)
-    return disciplinas
-
-@router.post("/disciplinas/", response_model=schemas.Disciplina)
-def create_disciplina(
-    *,
-    db: Session = Depends(deps.get_db),
-    disciplina_in: schemas.DisciplinaCreate,
-    # current_user = Depends(deps.get_current_user)
-) -> Any:
-    """
-    Create new discipline.
-    """
-    disciplina = crud.curriculum.create_disciplina(db=db, obj_in=disciplina_in)
-    return disciplina
