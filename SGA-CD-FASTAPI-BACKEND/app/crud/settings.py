@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from sga_cd_db.models import settings as models
+from models import settings as models
 
 def get_setting(db: Session, key: str) -> models.Setting | None:
     """
