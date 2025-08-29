@@ -62,9 +62,8 @@ def get_current_user(
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    # Attach role names from token to a new, non-SQLAlchemy attribute
-    # to avoid conflicts with the ORM relationship.
-    user.role_names = token_data.roles
+    # Attach roles from token for convenience in other dependencies or endpoints
+    user.roles = token_data.roles
     return user
 
 def get_current_active_user(

@@ -272,7 +272,7 @@ document.addEventListener('DOMContentLoaded', () => {
         toggleButton.addEventListener('click', () => {
             chatbox.classList.toggle('hidden');
             if (!chatbox.classList.contains('hidden') && messagesContainer.children.length === 0) {
-                addMessage('agent', '¡Hola! Soy Sarita, tu asistente virtual. ¿Cómo puedo ayudarte a conocer nuestra plataforma?');
+                addMessage('agent', '¡Hola! Soy el asistente virtual. ¿Cómo puedo ayudarte a conocer nuestra plataforma?');
             }
         });
 

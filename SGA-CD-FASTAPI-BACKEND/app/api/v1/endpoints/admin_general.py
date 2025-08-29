@@ -13,49 +13,42 @@ class WhatsAppSettings(BaseModel):
     api_token: str
     phone_number_id: str
 
-class LLMSettings(BaseModel):
+class ApiSettings(BaseModel):
     openai_api_key: str
     google_api_key: str
-    runwayml_api_key: str
+    youtube_refresh_token: str
 
-@router.get("/settings/llm", response_model=LLMSettings)
-def get_llm_settings(
+@router.get("/settings/api_keys", response_model=ApiSettings)
+def get_api_keys(
     db: Session = Depends(deps.get_db),
     current_user: models.Usuario = Depends(deps.role_required(["admin_general"])),
 ):
     """
-    Retrieve LLM API keys for the Admin General.
+    Retrieve API keys for the Admin General.
     """
-    logger.info(f"Admin General ({current_user.nombre_usuario}) is fetching LLM settings.")
-
-    openai_key_obj = crud_settings.get_setting(db, key="openai_api_key")
-    google_key_obj = crud_settings.get_setting(db, key="google_api_key")
-    runwayml_key_obj = crud_settings.get_setting(db, key="runwayml_api_key")
-
-    return LLMSettings(
-        openai_api_key=openai_key_obj.value if openai_key_obj else "",
-        google_api_key=google_key_obj.value if google_key_obj else "",
-        runwayml_api_key=runwayml_key_obj.value if runwayml_key_obj else "",
+    openai_key = crud_settings.get_setting(db, key="openai_api_key")
+    google_key = crud_settings.get_setting(db, key="google_api_key")
+    youtube_token = crud_settings.get_setting(db, key="youtube_refresh_token")
+    return ApiSettings(
+        openai_api_key=openai_key.value if openai_key else "",
+        google_api_key=google_key.value if google_key else "",
+        youtube_refresh_token=youtube_token.value if youtube_token else "",
     )
 
-@router.post("/settings/llm")
-def update_llm_settings(
+@router.post("/settings/api_keys")
+def update_api_keys(
     *,
     db: Session = Depends(deps.get_db),
-    settings_in: LLMSettings,
+    settings_in: ApiSettings,
     current_user: models.Usuario = Depends(deps.role_required(["admin_general"])),
 ):
     """
-    Update LLM API keys.
+    Update API keys.
     """
-    logger.info(f"Admin General ({current_user.nombre_usuario}) is updating LLM settings.")
-
     crud_settings.update_setting(db, key="openai_api_key", value=settings_in.openai_api_key)
     crud_settings.update_setting(db, key="google_api_key", value=settings_in.google_api_key)
-    crud_settings.update_setting(db, key="runwayml_api_key", value=settings_in.runwayml_api_key)
-
-    logger.info("LLM settings updated successfully.")
-    return {"status": "success", "message": "LLM settings updated successfully."}
+    crud_settings.update_setting(db, key="youtube_refresh_token", value=settings_in.youtube_refresh_token)
+    return {"status": "success", "message": "API keys updated successfully."}
 
 
 @router.post("/settings/whatsapp")
