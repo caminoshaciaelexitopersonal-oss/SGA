@@ -13,12 +13,57 @@ class WhatsAppSettings(BaseModel):
     api_token: str
     phone_number_id: str
 
+class LLMSettings(BaseModel):
+    openai_api_key: str
+    google_api_key: str
+    runwayml_api_key: str
+
+@router.get("/settings/llm", response_model=LLMSettings)
+def get_llm_settings(
+    db: Session = Depends(deps.get_db),
+    current_user: models.Usuario = Depends(deps.role_required(["admin_general"])),
+):
+    """
+    Retrieve LLM API keys for the Admin General.
+    """
+    logger.info(f"Admin General ({current_user.nombre_usuario}) is fetching LLM settings.")
+
+    openai_key_obj = crud_settings.get_setting(db, key="openai_api_key")
+    google_key_obj = crud_settings.get_setting(db, key="google_api_key")
+    runwayml_key_obj = crud_settings.get_setting(db, key="runwayml_api_key")
+
+    return LLMSettings(
+        openai_api_key=openai_key_obj.value if openai_key_obj else "",
+        google_api_key=google_key_obj.value if google_key_obj else "",
+        runwayml_api_key=runwayml_key_obj.value if runwayml_key_obj else "",
+    )
+
+@router.post("/settings/llm")
+def update_llm_settings(
+    *,
+    db: Session = Depends(deps.get_db),
+    settings_in: LLMSettings,
+    current_user: models.Usuario = Depends(deps.role_required(["admin_general"])),
+):
+    """
+    Update LLM API keys.
+    """
+    logger.info(f"Admin General ({current_user.nombre_usuario}) is updating LLM settings.")
+
+    crud_settings.update_setting(db, key="openai_api_key", value=settings_in.openai_api_key)
+    crud_settings.update_setting(db, key="google_api_key", value=settings_in.google_api_key)
+    crud_settings.update_setting(db, key="runwayml_api_key", value=settings_in.runwayml_api_key)
+
+    logger.info("LLM settings updated successfully.")
+    return {"status": "success", "message": "LLM settings updated successfully."}
+
+
 @router.post("/settings/whatsapp")
 def update_whatsapp_settings(
     *,
     db: Session = Depends(deps.get_db),
     settings_in: WhatsAppSettings,
-    current_user: models.Usuario = Depends(deps.get_current_active_admin_general),
+    current_user: models.Usuario = Depends(deps.role_required(["admin_general"])),
 ):
     """
     Endpoint for the Admin General to update WhatsApp settings.

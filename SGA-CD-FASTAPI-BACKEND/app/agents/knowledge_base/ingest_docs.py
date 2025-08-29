@@ -6,21 +6,21 @@ from langchain_community.vectorstores import FAISS
 from app.core.config import Settings
 
 # Create a settings instance, explicitly providing the path to the .env file
-# This is necessary because this script is run from the root of the repo,
-# not from within the backend directory where the .env file is located.
-settings = Settings(_env_file="SGA-CD-FASTAPI-BACKEND/.env")
+# This is necessary because this script is run from the root of the repo.
+settings = Settings(_env_file="/app/.env")
 
 # --- Configuration ---
-# List of documentation files to ingest. Paths are relative to the repository root.
+# List of documentation files to ingest. Paths must be absolute.
 DOC_PATHS = [
-    "SGA-CD-FASTAPI-BACKEND/ROLES_Y_PERMISOS.md",
-    "SGA-CD-WEB.git/INFORME_TECNICO.md",
-    "SGA-CD-APK.git/docs/user_manual.md",
-    "SGA-CD-APP.git/docs/ecosystem.md"
+    "/app/SGA-CD-FASTAPI-BACKEND/ROLES_Y_PERMISOS.md",
+    "/app/SGA-CD-WEB.git/INFORME_TECNICO.md",
+    # The following two files do not exist in the initial file listing, commenting them out.
+    # "/app/SGA-CD-APK.git/docs/user_manual.md",
+    # "/app/SGA-CD-APP.git/docs/ecosystem.md"
 ]
 
-# Path where the final vector store will be saved.
-VECTOR_STORE_PATH = "SGA-CD-FASTAPI-BACKEND/app/agents/knowledge_base/faiss_index_sales"
+# Path where the final vector store will be saved. Must be absolute.
+VECTOR_STORE_PATH = "/app/SGA-CD-FASTAPI-BACKEND/app/agents/knowledge_base/faiss_index_sales"
 
 def load_documents():
     """Loads documents from the specified paths."""

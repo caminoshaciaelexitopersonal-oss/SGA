@@ -10,38 +10,50 @@ from app.core.security import get_password_hash
 def get_user_by_username(db: Session, username: str) -> Usuario | None:
     """
     Fetches a user from the database by their username.
-    The user object is augmented with a `roles` attribute.
+    The user object is augmented with a `roles` attribute, ensuring backward compatibility.
     """
     user = db.query(Usuario).filter(Usuario.nombre_usuario == username).first()
     if user:
-        # Since we cannot modify the Usuario model to add a relationship,
-        # we fetch the roles manually and attach them to the user object.
+        # First, try to get roles from the new RBAC 'user_roles' table.
         query = text("""
             SELECT r.nombre FROM roles r
             JOIN user_roles ur ON r.id = ur.role_id
             WHERE ur.user_id = :user_id
         """)
         roles_result = db.execute(query, {"user_id": user.id}).fetchall()
-        user.roles = [row[0] for row in roles_result]
+        user_roles = [row[0] for row in roles_result]
+
+        # If no roles are found in the new system, fall back to the deprecated 'rol' column.
+        if not user_roles and user.rol:
+            user_roles = [user.rol.value]  # Use the enum's value
+
+        # Attach the role names to a new, non-SQLAlchemy attribute to avoid conflicts.
+        user.role_names = user_roles
     return user
 
 
 def get(db: Session, id: int) -> Usuario | None:
     """
     Fetches a user from the database by their ID.
-    The user object is augmented with a `roles` attribute.
+    The user object is augmented with a `roles` attribute, ensuring backward compatibility.
     """
     user = db.query(Usuario).filter(Usuario.id == id).first()
     if user:
-        # This logic is duplicated from get_user_by_username.
-        # Consider refactoring into a helper function if this becomes common.
+        # First, try to get roles from the new RBAC 'user_roles' table.
         query = text("""
             SELECT r.nombre FROM roles r
             JOIN user_roles ur ON r.id = ur.role_id
             WHERE ur.user_id = :user_id
         """)
         roles_result = db.execute(query, {"user_id": user.id}).fetchall()
-        user.roles = [row[0] for row in roles_result]
+        user_roles = [row[0] for row in roles_result]
+
+        # If no roles are found in the new system, fall back to the deprecated 'rol' column.
+        if not user_roles and user.rol:
+            user_roles = [user.rol.value]  # Use the enum's value
+
+        # Attach the role names to a new, non-SQLAlchemy attribute to avoid conflicts.
+        user.role_names = user_roles
     return user
 
 
@@ -89,7 +101,13 @@ def create_user(db: Session, user: UserCreate) -> Usuario:
     db.execute(assign_role_query, {"user_id": db_user.id, "role_id": role_id})
     db.commit()
 
-    # Attach the roles to the returned user object for consistency
-    db_user.roles = [user.rol]
+    # Attach the Role object to the returned user object for consistency
+    from models.user import Role
+    role_obj = db.query(Role).filter(Role.id == role_id).first()
+    if role_obj:
+        db_user.roles = [role_obj]
+    else:
+        # This case should not be reached if the role was found before
+        db_user.roles = []
 
     return db_user

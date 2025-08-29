@@ -49,3 +49,26 @@ class PlanCurricularTemaInDBBase(PlanCurricularTemaBase):
 
 class PlanCurricularTema(PlanCurricularTemaInDBBase):
     pass
+
+
+# --- Disciplina Schemas ---
+
+class DisciplinaBase(BaseModel):
+    nombre: str
+    descripcion: Optional[str] = None
+    area_id: int
+
+class DisciplinaCreate(DisciplinaBase):
+    inquilino_id: int
+
+class DisciplinaUpdate(DisciplinaBase):
+    pass
+
+class DisciplinaInDBBase(DisciplinaBase):
+    id: int
+    inquilino_id: int
+    class Config:
+        from_attributes = True
+
+class Disciplina(DisciplinaInDBBase):
+    pass
