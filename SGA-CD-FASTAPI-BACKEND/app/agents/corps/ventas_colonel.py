@@ -2,12 +2,11 @@ import os
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
-from langchain_core.runnables import RunnablePassthrough
+from langchain_core.runnables import RunnablePassthrough, Runnable
 from langchain_community.vectorstores import FAISS
-from app.core.config import Settings
+from app.core.config import settings
 
 # --- Configuration ---
-settings = Settings(_env_file="SGA-CD-FASTAPI-BACKEND/.env")
 VECTOR_STORE_PATH = "SGA-CD-FASTAPI-BACKEND/app/agents/knowledge_base/faiss_index_sales"
 
 def get_sales_agent_executor():
@@ -27,8 +26,9 @@ def get_sales_agent_executor():
         print("El agente de ventas funcionará sin conocimiento de la documentación.")
         print("Ejecute 'python run_ingest.py' para crear la base de conocimiento.")
         # Create a dummy retriever that does nothing
-        class DummyRetriever:
-            def get_relevant_documents(self, query): return []
+        class DummyRetriever(Runnable):
+            def invoke(self, input, config=None):
+                return []
         retriever = DummyRetriever()
     else:
         embeddings = OpenAIEmbeddings(api_key=settings.OPENAI_API_KEY)

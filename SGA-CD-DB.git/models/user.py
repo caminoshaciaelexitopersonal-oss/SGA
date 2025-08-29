@@ -1,29 +1,31 @@
 import enum
 from sqlalchemy import (
-    Column, Integer, String, Boolean, ForeignKey, DateTime, Text, Enum as SQLAlchemyEnum
+    Column, Integer, String, Boolean, ForeignKey, DateTime, Text, Enum as SQLAlchemyEnum, Table
 )
 from sqlalchemy.orm import relationship
 from .base import Base
 from .area import usuario_areas_association # Import the association table
 
+
+# Association table for the many-to-many relationship between parents and children
+padre_hijos_association = Table('padre_hijos_association', Base.metadata,
+    Column('padre_id', Integer, ForeignKey('usuarios.id'), primary_key=True),
+    Column('hijo_id', Integer, ForeignKey('usuarios.id'), primary_key=True)
+)
+
 class RolesEnum(enum.Enum):
     admin_general = "admin_general"
     admin_empresa = "admin_empresa"
     jefe_area = "jefe_area"
+    profesional_area = "profesional_area"
+    tecnico_area = "tecnico_area"
     coordinador = "coordinador"
     profesor = "profesor"
     alumno = "alumno"
-    almacenista = "almacenista"
+    padre_acudiente = "padre_acudiente"
     jefe_almacen = "jefe_almacen"
+    almacenista = "almacenista"
     jefe_escenarios = "jefe_escenarios"
-    profesional_cultura = "profesional_cultura"
-    profesional_deportes = "profesional_deportes"
-    tecnico_cultura = "tecnico_cultura"
-    tecnico_deportes = "tecnico_deportes"
-    asistencial_cultura = "asistencial_cultura"
-    asistencial_deportes = "asistencial_deportes"
-    instructor_cultura = "instructor_cultura"
-    instructor_deportes = "instructor_deportes"
 
 class Usuario(Base):
     __tablename__ = "usuarios"
@@ -56,6 +58,29 @@ class Usuario(Base):
     almacenista_details = relationship("Almacenista", back_populates="usuario", uselist=False, cascade="all, delete-orphan")
     jefe_almacen_details = relationship("JefeAlmacen", back_populates="usuario", uselist=False, cascade="all, delete-orphan")
     jefe_escenarios_details = relationship("JefeEscenarios", back_populates="usuario", uselist=False, cascade="all, delete-orphan")
+
+    # Many-to-many relationship for parents and children
+    hijos = relationship(
+        "Usuario",
+        secondary=padre_hijos_association,
+        primaryjoin=(id == padre_hijos_association.c.padre_id),
+        secondaryjoin=(id == padre_hijos_association.c.hijo_id),
+        backref="padres"
+    )
+    roles = relationship("Role", secondary="user_roles")
+
+
+user_roles_association = Table(
+    'user_roles', Base.metadata,
+    Column('user_id', Integer, ForeignKey('usuarios.id'), primary_key=True),
+    Column('role_id', Integer, ForeignKey('roles.id'), primary_key=True)
+)
+
+class Role(Base):
+    __tablename__ = 'roles'
+    id = Column(Integer, primary_key=True, index=True)
+    nombre = Column(String, unique=True, index=True, nullable=False)
+    descripcion = Column(String)
 
 
 class Profesor(Base):

@@ -1,5 +1,6 @@
 from langchain_core.tools import tool
 from typing import Any, List, Dict
+from app.tools.herramientas_analiticas import generar_grafico_asistencia
 
 class InteligenciaSoldiers:
     """
@@ -88,8 +89,6 @@ class InteligenciaSoldiers:
             "Enviar notificaciones personalizadas a estudiantes con bajo rendimiento reciente.",
             "Crear un nuevo taller sobre 'Técnicas de Estudio Avanzadas' basado en las preguntas de soporte más frecuentes."
         ]
-
-from app.tools.herramientas_analiticas import generar_grafico_asistencia
 
     # --- Soldado #6: Soldado_Visualizacion_Grafica ---
     @tool

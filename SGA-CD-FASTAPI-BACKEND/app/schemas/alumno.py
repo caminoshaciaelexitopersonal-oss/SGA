@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 from datetime import date
 
 # Shared properties for an Alumno
@@ -47,3 +47,19 @@ class Alumno(AlumnoInDBBase):
 # Properties to return from DB
 class AlumnoInDB(AlumnoInDBBase):
     pass
+
+
+# --- Progreso del Alumno ---
+
+class CalificacionReciente(BaseModel):
+    materia: str
+    nota: str
+
+class LogroGamificacion(BaseModel):
+    nombre: str
+
+class AlumnoProgreso(BaseModel):
+    asistencia_porcentaje: float
+    asistencia_status: str
+    calificaciones_recientes: List[CalificacionReciente]
+    logros_gamificacion: List[LogroGamificacion]
