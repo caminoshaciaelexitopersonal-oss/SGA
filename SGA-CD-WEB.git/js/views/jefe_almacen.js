@@ -187,10 +187,52 @@ async function renderReportesInventarioView(token) {
                 <option value="rotacion">Reporte de Rotación</option>
                 <option value="completo">Inventario Completo</option>
             </select>
-            <button class="btn-primary">Generar y Descargar</button>
+            <button type="button" id="generate-report-btn" class="btn-primary">Generar y Descargar</button>
+            <button type="button" id="export-sheets-btn" class="btn-secondary">Exportar a Google Sheets</button>
         </div>
-        <p class="message-info">La generación de reportes se implementará en una futura actualización.</p>
+        <div id="report-feedback" class="message-info" style="display:none; margin-top: 1rem;"></div>
+        <p class="message-info">La generación de reportes local se implementará en una futura actualización.</p>
     `;
+
+    document.getElementById('export-sheets-btn').addEventListener('click', async () => {
+        const feedbackDiv = document.getElementById('report-feedback');
+        feedbackDiv.style.display = 'block';
+        feedbackDiv.className = 'message-info';
+        feedbackDiv.textContent = 'Exportando a Google Sheets...';
+
+        // Sample data since report generation is not implemented
+        const sampleData = [
+            ["ID del Elemento", "Nombre", "Categoría", "Stock", "Estado"],
+            ["101", "Balón de Fútbol", "Deportes", "50", "Disponible"],
+            ["102", "Zapatillas de Ballet", "Danza", "25", "Bajo Stock"],
+            ["201", "Pintura Acrílica", "Artes Plásticas", "120", "Disponible"],
+            ["301", "Guitarra Acústica", "Música", "15", "Disponible"]
+        ];
+
+        try {
+            const response = await fetch(`${config.apiBaseUrl}/api/v1/auth/google/export_sheets`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({
+                    sheet_name: `Reporte de Inventario - ${new Date().toLocaleString()}`,
+                    data: sampleData
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || 'Error del servidor.');
+            }
+
+            const result = await response.json();
+            feedbackDiv.className = 'message-success';
+            feedbackDiv.innerHTML = `¡Exportación exitosa! <a href="${result.link}" target="_blank">Ver en Google Sheets</a>`;
+
+        } catch (error) {
+            feedbackDiv.className = 'message-error';
+            feedbackDiv.textContent = `Error al exportar: ${error.message}`;
+        }
+    });
 }
 
 // --- Registrar las vistas de Jefe de Almacén en el Router ---

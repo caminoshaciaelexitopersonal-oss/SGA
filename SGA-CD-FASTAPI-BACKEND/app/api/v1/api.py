@@ -25,6 +25,8 @@ from .endpoints import (
     sales_agent,  # agregado desde feature/implement-role-views
     padre,
     video_distribution,
+    meta,
+    google,
 )
 
 api_router = APIRouter()
@@ -34,6 +36,8 @@ api_router.include_router(sales_agent.router, prefix="/sales_agent", tags=["Sale
 api_router.include_router(webhooks.router, prefix="/webhooks", tags=["Webhooks"])
 api_router.include_router(admin_general.router, prefix="/admin_general", tags=["Admin General"])
 api_router.include_router(auth.router, prefix="/auth", tags=["Authentication"])
+api_router.include_router(meta.router, prefix="/auth", tags=["Meta Authentication"]) # Using /auth prefix
+api_router.include_router(google.router, prefix="/auth", tags=["Google Authentication"])
 api_router.include_router(tenancy.router, prefix="/tenants", tags=["Tenants"])
 api_router.include_router(padre.router, prefix="/padre", tags=["Padre Acudiente"])
 api_router.include_router(profesor.router, prefix="/profesor", tags=["Profesor"])
