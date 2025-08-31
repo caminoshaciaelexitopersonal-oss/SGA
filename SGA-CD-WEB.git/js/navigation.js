@@ -4,7 +4,10 @@ const navLinks = {
     // Rol 1: Super Admin
     admin_general: [
         { text: 'Dashboard', view: 'dashboard', icon: 'fa-home' },
+        { text: 'Gestión de Marca', view: 'gestion-de-marca', icon: 'fa-palette' },
         { text: 'Config. WhatsApp', view: 'configuracion-whatsapp', icon: 'fab fa-whatsapp' },
+        { text: 'Gestión de Claves API', view: 'gestion-api-keys', icon: 'fa-key' },
+        { text: 'Calendario de Contenidos', view: 'calendario-de-contenidos', icon: 'fa-calendar-alt' },
         { text: 'Gestionar Empresas', icon: 'fa-building' },
         { text: 'Roles y Permisos', icon: 'fa-shield-alt' },
         { text: 'Verificar Roles BD', icon: 'fa-database' },

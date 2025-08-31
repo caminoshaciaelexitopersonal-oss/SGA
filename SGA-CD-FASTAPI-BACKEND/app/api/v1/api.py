@@ -25,6 +25,10 @@ from .endpoints import (
     sales_agent,  # agregado desde feature/implement-role-views
     padre,
     video_distribution,
+    meta,
+    google,
+    brand,
+    calendar,
 )
 
 api_router = APIRouter()
@@ -33,7 +37,10 @@ api_router = APIRouter()
 api_router.include_router(sales_agent.router, prefix="/sales_agent", tags=["Sales Agent"])
 api_router.include_router(webhooks.router, prefix="/webhooks", tags=["Webhooks"])
 api_router.include_router(admin_general.router, prefix="/admin_general", tags=["Admin General"])
+api_router.include_router(brand.router, prefix="/brand-profile", tags=["Brand Profile"])
 api_router.include_router(auth.router, prefix="/auth", tags=["Authentication"])
+api_router.include_router(meta.router, prefix="/auth", tags=["Meta Authentication"]) # Using /auth prefix
+api_router.include_router(google.router, prefix="/auth", tags=["Google Authentication"])
 api_router.include_router(tenancy.router, prefix="/tenants", tags=["Tenants"])
 api_router.include_router(padre.router, prefix="/padre", tags=["Padre Acudiente"])
 api_router.include_router(profesor.router, prefix="/profesor", tags=["Profesor"])
@@ -55,3 +62,4 @@ api_router.include_router(dropdowns.router, prefix="/dropdowns", tags=["Dropdown
 api_router.include_router(notificaciones.router, prefix="/notificaciones", tags=["Notificaciones"])
 api_router.include_router(video_distribution.router, prefix="/video_distribution", tags=["Video Distribution"])
 api_router.include_router(audit.router, prefix="/audit", tags=["Audit Log"])
+api_router.include_router(calendar.router, prefix="/calendar", tags=["Content Calendar"])

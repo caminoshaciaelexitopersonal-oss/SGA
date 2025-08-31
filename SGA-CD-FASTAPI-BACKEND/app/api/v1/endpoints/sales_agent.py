@@ -1,6 +1,8 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Depends
 from pydantic import BaseModel
-from app.agents.corps.ventas_colonel import sales_agent_executor
+from sqlalchemy.orm import Session
+from app.api import deps
+from app.agents.corps.ventas_colonel import get_sales_agent_executor
 import logging
 
 router = APIRouter()
@@ -16,11 +18,12 @@ class SalesAgentOutput(BaseModel):
 
 @router.post("")
 async def invoke_sales_agent(
-    agent_in: SalesAgentInput
+    agent_in: SalesAgentInput,
+    db: Session = Depends(deps.get_db)
 ) -> SalesAgentOutput:
     """
     Public endpoint to interact with the AI Sales Agent.
-    This endpoint is not protected by authentication to allow public access.
+    This endpoint now uses a dynamically configured agent.
     """
     if not agent_in.query:
         raise HTTPException(
@@ -31,8 +34,11 @@ async def invoke_sales_agent(
     logger.info(f"Invocando al Agente de Ventas con la consulta: '{agent_in.query}'")
 
     try:
-        # El executor es asíncrono si el LLM lo es.
-        response_text = await sales_agent_executor.ainvoke(agent_in.query)
+        # For a public endpoint, we assume a default tenant (e.g., the main company)
+        inquilino_id = 1
+        agent_executor = get_sales_agent_executor(db=db, inquilino_id=inquilino_id)
+
+        response_text = await agent_executor.ainvoke({"question": agent_in.query})
         logger.info(f"Respuesta generada por el agente: '{response_text}'")
         return SalesAgentOutput(reply=response_text)
     except Exception as e:

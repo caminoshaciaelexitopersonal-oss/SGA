@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String, Boolean, Float, DateTime
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from .base import Base
 
@@ -23,3 +24,6 @@ class Inquilino(Base):
     pais = Column(String)
     latitud = Column(Float)
     longitud = Column(Float)
+
+    # Relationship to BrandProfile
+    brand_profile = relationship("BrandProfile", uselist=False, back_populates="inquilino")

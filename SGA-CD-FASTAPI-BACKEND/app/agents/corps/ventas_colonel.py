@@ -1,44 +1,51 @@
 import os
+from sqlalchemy.orm import Session
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
-from langchain_core.runnables import RunnablePassthrough, Runnable
+from langchain_core.runnables import RunnablePassthrough, Runnable, RunnableParallel
 from langchain_community.vectorstores import FAISS
+
 from app.core.config import settings
+from app import crud
 
 # --- Configuration ---
 VECTOR_STORE_PATH = "SGA-CD-FASTAPI-BACKEND/app/agents/knowledge_base/faiss_index_sales"
+DEFAULT_TONE_OF_VOICE = "Amistoso, profesional y servicial."
 
-def get_sales_agent_executor():
+def get_sales_agent_executor(db: Session, inquilino_id: int):
     """
     Creates and returns the executor for the Sales Agent.
-    This agent is designed to answer questions based on a vector store of project documentation.
+    This agent is now configured dynamically based on the tenant's Brand Profile.
     """
-    # --- 1. Set up the LLM ---
+    # --- 1. Get Brand Profile ---
+    brand_profile = crud.brand.get_brand_profile(db, inquilino_id=inquilino_id)
+    tone_of_voice = brand_profile.tone_of_voice if brand_profile else DEFAULT_TONE_OF_VOICE
+
+    # --- 2. Set up the LLM ---
     llm = ChatOpenAI(api_key=settings.OPENAI_API_KEY, model="gpt-4o", temperature=0)
 
-    # --- 2. Set up the Retriever from the FAISS Vector Store ---
-    # Check if the vector store index file exists
+    # --- 3. Set up the Retriever ---
     if not os.path.exists(VECTOR_STORE_PATH):
-        # This is a fallback for when the user hasn't run the ingestion script yet.
-        # The agent will still work but won't have the documentation knowledge.
         print("ADVERTENCIA: El índice del almacén de vectores no se encontró.")
-        print("El agente de ventas funcionará sin conocimiento de la documentación.")
-        print("Ejecute 'python run_ingest.py' para crear la base de conocimiento.")
-        # Create a dummy retriever that does nothing
         class DummyRetriever(Runnable):
-            def invoke(self, input, config=None):
-                return []
+            def invoke(self, input, config=None): return []
         retriever = DummyRetriever()
     else:
         embeddings = OpenAIEmbeddings(api_key=settings.OPENAI_API_KEY)
         vector_store = FAISS.load_local(VECTOR_STORE_PATH, embeddings, allow_dangerous_deserialization=True)
         retriever = vector_store.as_retriever()
 
-    # --- 3. Define the Prompt Template ---
+    # --- 4. Define the Prompt Template ---
     template = """
-    Eres un asistente de ventas amigable y experto para una plataforma de software llamada SGA-CD.
+    Eres un asistente de ventas experto para una plataforma de software llamada SGA-CD.
     Tu objetivo es responder a las preguntas de los usuarios para ayudarles a entender el producto y animarles a registrarse.
+
+    **Instrucción de Tono de Voz:** Debes adoptar el siguiente tono en todas tus respuestas:
+    ---
+    {tone_of_voice}
+    ---
+
     Utiliza la siguiente información de la documentación interna para basar tus respuestas.
     Si la información no contiene la respuesta, di amablemente que no tienes esa información.
     No inventes respuestas. Sé conciso y servicial.
@@ -53,9 +60,14 @@ def get_sales_agent_executor():
     """
     prompt = ChatPromptTemplate.from_template(template)
 
-    # --- 4. Create the RAG Chain ---
+    # --- 5. Create the RAG Chain ---
+    # This setup allows us to pass 'tone_of_voice' through to the prompt.
     rag_chain = (
-        {"context": retriever, "question": RunnablePassthrough()}
+        {
+            "context": retriever,
+            "question": RunnablePassthrough(),
+            "tone_of_voice": lambda x: tone_of_voice  # Pass the fetched tone of voice
+        }
         | prompt
         | llm
         | StrOutputParser()
@@ -63,7 +75,5 @@ def get_sales_agent_executor():
 
     return rag_chain
 
-# --- Main Executor ---
-# We create the agent executor when the module is loaded.
-# This can be imported and used by the API endpoint.
-sales_agent_executor = get_sales_agent_executor()
+# The global 'sales_agent_executor' is removed.
+# It will now be created on-demand by the calling service.

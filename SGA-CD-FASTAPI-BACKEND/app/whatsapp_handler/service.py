@@ -3,7 +3,8 @@ import json
 import logging
 
 from app.core.config import settings
-from app.agents.corps.ventas_colonel import sales_agent_executor  # Usamos el agente de ventas dedicado
+from app.agents.corps.ventas_colonel import get_sales_agent_executor
+from app.db.session import SessionLocal
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -47,10 +48,11 @@ def send_whatsapp_message(to: str, message: str):
 async def process_whatsapp_message(payload: dict):
     """
     Processes an incoming WhatsApp message payload from a webhook.
+    This now creates its own DB session to fetch tenant-specific agent configurations.
     """
+    db = SessionLocal()
     try:
         # Extraer información relevante del payload
-        # La estructura puede variar, esto es un ejemplo común
         changes = payload.get("entry", [{}])[0].get("changes", [{}])[0]
         value = changes.get("value", {})
         message_object = value.get("messages", [{}])[0]
@@ -68,12 +70,18 @@ async def process_whatsapp_message(payload: dict):
 
         logger.info(f"Mensaje recibido de {from_number}: '{message_text}'")
 
-        # Invocar al nuevo agente de ventas de IA.
-        # El historial de conversación se maneja dentro del agente si está configurado,
-        # aquí solo pasamos la consulta directa.
-        reply_text = await sales_agent_executor.ainvoke(message_text)
+        # --- MODIFIED AGENT INVOCATION ---
+        # For this PoC, we'll assume a default tenant. A real implementation would need
+        # to look up the tenant based on the 'from_number'.
+        inquilino_id = 1
 
-        # Enviar la respuesta del agente de vuelta al usuario
+        # Get a dynamically configured agent executor for this tenant
+        agent_executor = get_sales_agent_executor(db=db, inquilino_id=inquilino_id)
+
+        # Invoke the sales agent
+        reply_text = await agent_executor.ainvoke({"question": message_text})
+
+        # Send the agent's response back to the user
         send_whatsapp_message(to=from_number, message=reply_text)
 
     except (IndexError, KeyError) as e:
@@ -82,3 +90,5 @@ async def process_whatsapp_message(payload: dict):
     except Exception as e:
         logger.error(f"Error inesperado al procesar el mensaje de WhatsApp: {e}")
         logger.error(f"Payload recibido: {json.dumps(payload)}")
+    finally:
+        db.close()
