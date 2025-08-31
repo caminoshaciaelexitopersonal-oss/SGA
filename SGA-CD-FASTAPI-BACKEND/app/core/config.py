@@ -33,6 +33,16 @@ class Settings(BaseSettings):
     WHATSAPP_PHONE_NUMBER_ID: str = "YOUR_PHONE_NUMBER_ID"
     WHATSAPP_VERIFY_TOKEN: str = "sga-cd-whatsapp-secret"
 
+    # Meta (Facebook/Instagram)
+    META_CLIENT_ID: str = "YOUR_META_APP_ID"
+    META_CLIENT_SECRET: str = "YOUR_META_APP_SECRET"
+
+    # Google Workspace
+    GOOGLE_CLIENT_ID: str = "YOUR_GOOGLE_CLIENT_ID"
+    GOOGLE_CLIENT_SECRET: str = "YOUR_GOOGLE_CLIENT_SECRET"
+
+    SERVER_HOST: str = "http://localhost:8000" # For constructing callback URLs
+
     class Config:
         case_sensitive = True
         env_file = "/app/.env"

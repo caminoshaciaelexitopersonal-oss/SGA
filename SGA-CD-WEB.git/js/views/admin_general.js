@@ -124,6 +124,25 @@ async function renderApiKeysView(token) {
                 <label for="google-api-key">Google API Key</label>
                 <input type="password" id="google-api-key" placeholder="AIza..." value="${currentSettings.google_api_key || ''}">
             </div>
+
+            <hr>
+
+            <div class="form-group">
+                <label>Google Workspace Integration</label>
+                <div id="google-connection-status" class="api-status">Cargando estado...</div>
+                <button type="button" id="google-connect-btn" class="btn-secondary">Conectar con Google</button>
+            </div>
+
+            <hr>
+
+            <div class="form-group">
+                <label>Facebook / Instagram Video Publishing</label>
+                <div id="meta-connection-status" class="api-status">Cargando estado...</div>
+                <button type="button" id="meta-connect-btn" class="btn-secondary">Conectar con Facebook/Instagram</button>
+            </div>
+
+            <hr>
+
             <div class="form-group">
                 <label for="youtube-refresh-token">YouTube Refresh Token</label>
                 <input type="password" id="youtube-refresh-token" placeholder="Token de actualización de Google OAuth" value="${currentSettings.youtube_refresh_token || ''}">
@@ -134,7 +153,68 @@ async function renderApiKeysView(token) {
         <div id="api-keys-feedback" class="message-info" style="display:none; margin-top: 1rem;"></div>
     `;
 
-    // 3. Add submit listener
+    // 3. Fetch and display Meta connection status
+    const statusDiv = document.getElementById('meta-connection-status');
+    try {
+        const response = await fetch(`${config.apiBaseUrl}/api/v1/auth/meta/status`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (response.ok) {
+            const statusData = await response.json();
+            if (statusData.connected) {
+                statusDiv.innerHTML = `Conectado a la página de FB <strong>${statusData.page_name}</strong> y a la cuenta de IG <strong>${statusData.ig_username}</strong>.`;
+                statusDiv.className = 'api-status status-ok';
+            } else {
+                statusDiv.innerHTML = 'No Conectado. Haga clic en el botón para conectar su cuenta.';
+                statusDiv.className = 'api-status status-error';
+            }
+        } else {
+             statusDiv.innerHTML = 'No se pudo verificar el estado de la conexión.';
+             statusDiv.className = 'api-status status-error';
+        }
+    } catch (e) {
+        console.error("Error fetching meta status:", e);
+        statusDiv.innerHTML = 'Error al verificar el estado.';
+        statusDiv.className = 'api-status status-error';
+    }
+
+
+    // 4. Fetch and display Google connection status
+    const googleStatusDiv = document.getElementById('google-connection-status');
+    try {
+        const response = await fetch(`${config.apiBaseUrl}/api/v1/auth/google/status`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (response.ok) {
+            const statusData = await response.json();
+            if (statusData.connected) {
+                googleStatusDiv.innerHTML = `Conectado a Google Workspace.`;
+                googleStatusDiv.className = 'api-status status-ok';
+            } else {
+                googleStatusDiv.innerHTML = 'No Conectado. Haga clic en el botón para conectar su cuenta.';
+                googleStatusDiv.className = 'api-status status-error';
+            }
+        } else {
+             googleStatusDiv.innerHTML = 'No se pudo verificar el estado de la conexión.';
+             googleStatusDiv.className = 'api-status status-error';
+        }
+    } catch (e) {
+        console.error("Error fetching google status:", e);
+        googleStatusDiv.innerHTML = 'Error al verificar el estado.';
+        googleStatusDiv.className = 'api-status status-error';
+    }
+
+
+    // 5. Add connect button listeners
+    document.getElementById('meta-connect-btn').addEventListener('click', () => {
+        window.location.href = `${config.apiBaseUrl}/api/v1/auth/meta/login`;
+    });
+
+    document.getElementById('google-connect-btn').addEventListener('click', () => {
+        window.location.href = `${config.apiBaseUrl}/api/v1/auth/google/login`;
+    });
+
+    // 6. Add submit listener
     document.getElementById('api-keys-config-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const feedbackDiv = document.getElementById('api-keys-feedback');

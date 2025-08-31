@@ -97,10 +97,38 @@ class VideoDistributionService:
                     # Ensure the temporary file is deleted
                     os.unlink(video_path)
                     print(f"Deleted temporary file: {video_path}")
+        elif platform.lower() in ["facebook", "instagram"]:
+            with tempfile.NamedTemporaryFile(suffix=".mp4", delete=False) as tmp_file:
+                try:
+                    print(f"Downloading video from {video_url} for Meta upload...")
+                    response = requests.get(video_url, stream=True)
+                    response.raise_for_status()
+                    for chunk in response.iter_content(chunk_size=8192):
+                        tmp_file.write(chunk)
+                    print("Download complete.")
+                    video_path = tmp_file.name
+                    return self._publish_video_to_meta(video_path, title, description)
+                finally:
+                    os.unlink(video_path)
+                    print(f"Deleted temporary file: {video_path}")
         else:
-            # Mock for other platforms
-            print(f"MOCK API: Publishing to {platform} is not implemented. Simulating success.")
-            return { "status": "success", "platform": platform, "post_url": f"https://fake.{platform}.com/v/{int(time.time())}" }
+            raise NotImplementedError(f"Platform '{platform}' is not supported for video distribution.")
+
+    def _publish_video_to_meta(self, video_path: str, title: str, description: str) -> Dict[str, Any]:
+        """
+        Publishes a video to the connected Meta (Facebook/Instagram) page.
+        """
+        from .meta_uploader import MetaUploader
+
+        page_id = self.settings.get("meta_page_id")
+        page_access_token = self.settings.get("meta_page_access_token")
+
+        if not page_id or not page_access_token:
+            raise ValueError("Meta Page ID or Page Access Token not configured.")
+
+        uploader = MetaUploader(page_id=page_id, page_access_token=page_access_token)
+        return uploader.upload_video(video_path=video_path, title=title, description=description)
+
 
 def get_distribution_service(db_session) -> VideoDistributionService:
     from app import crud
@@ -111,13 +139,18 @@ def get_distribution_service(db_session) -> VideoDistributionService:
     except FileNotFoundError:
         secrets = {}
 
-    # This part is still a placeholder as we don't have the refresh token flow yet.
-    # In a real app, this would be fetched from the DB for the user.
-    refresh_token_obj = crud.settings.get_setting(db_session, "youtube_refresh_token")
+    # Fetch all necessary tokens and keys from the database
+    youtube_refresh_token_obj = crud.settings.get_setting(db_session, "youtube_refresh_token")
+    meta_page_id_obj = crud.settings.get_setting(db_session, "meta_page_id")
+    meta_token_obj = crud.settings.get_setting(db_session, "meta_page_access_token")
 
     settings = {
-        "youtube_refresh_token": refresh_token_obj.value if refresh_token_obj else None,
+        # YouTube Credentials
+        "youtube_refresh_token": youtube_refresh_token_obj.value if youtube_refresh_token_obj else None,
         "google_client_id": secrets.get("client_id"),
         "google_client_secret": secrets.get("client_secret"),
+        # Meta Credentials
+        "meta_page_id": meta_page_id_obj.value if meta_page_id_obj else None,
+        "meta_page_access_token": meta_token_obj.value if meta_token_obj else None,
     }
     return VideoDistributionService(settings=settings)
