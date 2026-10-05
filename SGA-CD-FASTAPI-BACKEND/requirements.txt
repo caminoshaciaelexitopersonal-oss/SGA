@@ -1,3 +1,5 @@
+-c ../constraints.txt
+
 # Web / ASGI
 fastapi
 uvicorn[standard]
@@ -16,6 +18,7 @@ python-dotenv
 passlib[bcrypt]
 python-jose[cryptography]
 python-multipart
+requests
 
 # Payment Gateway SDKs
 stripe

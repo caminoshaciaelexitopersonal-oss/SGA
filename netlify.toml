@@ -1,0 +1,9 @@
+[build]
+  base = "SGA-CD-WEB.git"
+  command = ""
+  publish = "."
+
+[dev]
+  framework = "#static"
+  publish = "."
+  port = 8889

@@ -1,3 +1,5 @@
+-c ../constraints.txt
+
 flet
 pandas
 fpdf
@@ -14,4 +16,3 @@ langchain-openai
 langgraph-checkpoint-sqlite
 langchain-ollama
 aiosqlite
-llama-cpp-python
