@@ -35,7 +35,7 @@ def get_users_by_empresa(
     """
     # Check for appropriate roles manually since we need the user object
     allowed_roles = {"admin_empresa", "jefe_area", "admin_general"}
-    user_roles = set(current_user.roles)
+    user_roles = set(getattr(current_user, "role_codes", []))
     if not user_roles.intersection(allowed_roles):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -46,7 +46,7 @@ def get_users_by_empresa(
         user_model.Usuario.inquilino_id == current_user.inquilino_id
     ).all()
 
-    # Manually attach roles to each user for the response model
+    # Manually attach role_list to each user for response
     for user in users:
         role_query = text("""
             SELECT r.nombre
@@ -55,7 +55,10 @@ def get_users_by_empresa(
             WHERE ur.user_id = :user_id
         """)
         roles_result = db.execute(role_query, {"user_id": user.id}).fetchall()
-        user.roles = [row[0] for row in roles_result]
+        role_names = [row[0] for row in roles_result]
+        if not role_names and user.rol:
+            role_names = [user.rol.value if hasattr(user.rol, 'value') else str(user.rol)]
+        user.role_list = role_names
 
     return users
 
@@ -70,7 +73,8 @@ def get_areas_by_empresa(
     Accessible by admin_empresa.
     """
     # Role check
-    if "admin_empresa" not in current_user.roles and "admin_general" not in current_user.roles:
+    user_roles = set(getattr(current_user, "role_codes", []))
+    if "admin_empresa" not in user_roles and "admin_general" not in user_roles:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not authorized. Requires 'admin_empresa' or 'admin_general' role.",

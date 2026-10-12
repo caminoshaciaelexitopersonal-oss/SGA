@@ -62,8 +62,8 @@ def get_current_user(
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    # Attach roles from token for convenience in other dependencies or endpoints
-    user.roles = token_data.roles
+    # Attach role codes from token to avoid modifying mapped relationship on ORM instance
+    user.role_codes = token_data.roles
     return user
 
 def get_current_active_user(

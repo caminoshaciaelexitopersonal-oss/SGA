@@ -1,6 +1,6 @@
 from typing import TypedDict, Any, List
 from langgraph.graph import StateGraph, END, START
-from langchain_core.pydantic_v1 import BaseModel, Field
+from pydantic import BaseModel, Field
 
 from .squads.seguridad_sargento import get_seguridad_sargento_graph
 from .squads.inteligencia_sargento import get_inteligencia_sargento_graph

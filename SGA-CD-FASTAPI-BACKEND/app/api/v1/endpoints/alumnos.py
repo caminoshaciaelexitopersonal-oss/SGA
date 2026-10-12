@@ -100,14 +100,15 @@ def read_alumno_progreso(
     """
     # Here, alumno_id is the user_id of the student.
     alumno_user = crud.user.get(db=db, id=alumno_id)
-    if not alumno_user or "alumno" not in alumno_user.roles:
+    alumno_role_list = getattr(alumno_user, "role_list", []) if alumno_user else []
+    if not alumno_user or "alumno" not in alumno_role_list:
         raise HTTPException(status_code=404, detail="Alumno not found")
 
     if alumno_user.inquilino_id != current_user.inquilino_id:
         raise HTTPException(status_code=403, detail="Not authorized to access this tenant's data")
 
     # Permission check
-    user_roles = set(current_user.roles)
+    user_roles = set(getattr(current_user, "role_codes", getattr(current_user, "role_list", [])))
     is_admin_or_profesor = user_roles.intersection({"admin_empresa", "profesor", "jefe_area", "coordinador"})
     is_parent = "padre_acudiente" in user_roles and alumno_user in current_user.hijos
 

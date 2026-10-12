@@ -1,3 +1,4 @@
+import re
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from sqlalchemy.orm import Session
 from app import schemas, models
@@ -18,6 +19,20 @@ if not settings.OPENAI_API_KEY:
     raise ValueError("OPENAI_API_KEY no está configurada en el archivo .env")
 llm = ChatOpenAI(api_key=settings.OPENAI_API_KEY)
 cultura_colonel_agent = get_formacion_cultura_colonel_graph(db_path, llm)
+
+
+def build_scoped_thread_id(user_inquilino_id: int, user_id: int, client_thread_id: str | None) -> str:
+    """
+    Constructs an isolated, server-scoped thread_id that prevents cross-tenant and cross-user session access.
+    Format: tenant_{inquilino_id}:user_{user_id}:session_{sanitized_session_id}
+    """
+    sanitized = "default"
+    if client_thread_id:
+        cleaned = re.sub(r"[^a-zA-Z0-9_-]", "", str(client_thread_id))
+        if cleaned:
+            sanitized = cleaned[:64]
+    return f"tenant_{user_inquilino_id}:user_{user_id}:session_{sanitized}"
+
 
 async def run_agent(prompt: str, thread_id: str, area: str):
     """Helper function to run the appropriate agent."""
@@ -58,13 +73,15 @@ async def invoke_agent_by_voice(
         transcribed_text = recognizer.recognize_google(audio, language="es-ES")
         print(f"Texto Transcrito: {transcribed_text}")
 
-        # Ahora, invoca al agente con el texto transcrito
-        # Usamos un thread_id basado en el user_id para la consistencia
-        thread_id = f"user_{current_user.id}"
-        # Asumimos un área por defecto o la extraemos de otro parámetro si estuviera disponible
+        # Always build server-scoped thread_id derived from authenticated JWT identity
+        scoped_thread_id = build_scoped_thread_id(
+            user_inquilino_id=current_user.inquilino_id,
+            user_id=current_user.id,
+            client_thread_id="voice_session"
+        )
         area = "Cultura"
 
-        report = await run_agent(transcribed_text, thread_id, area)
+        report = await run_agent(transcribed_text, scoped_thread_id, area)
         return report
 
     except sr.UnknownValueError:
@@ -88,8 +105,15 @@ async def invoke_agent(
     if agent_in.area not in ["Cultura", "Deportes"]:
         raise HTTPException(status_code=400, detail="Area must be 'Cultura' or 'Deportes'.")
 
-    print(f"Agent invoked for thread {agent_in.thread_id} with prompt: {agent_in.prompt} in area {agent_in.area}")
+    # Construct secure server-enforced thread_id
+    scoped_thread_id = build_scoped_thread_id(
+        user_inquilino_id=current_user.inquilino_id,
+        user_id=current_user.id,
+        client_thread_id=agent_in.thread_id
+    )
 
-    report = await run_agent(agent_in.prompt, agent_in.thread_id, agent_in.area)
+    print(f"Agent invoked for tenant {current_user.inquilino_id}, user {current_user.id}, scoped thread {scoped_thread_id}")
+
+    report = await run_agent(agent_in.prompt, scoped_thread_id, agent_in.area)
 
     return report
