@@ -1,5 +1,5 @@
 from typing import TypedDict, List, Any
-from langchain_core.pydantic_v1 import BaseModel, Field
+from pydantic import BaseModel, Field
 import sqlite3
 from langgraph.graph import StateGraph, END
 from langgraph.checkpoints.sqlite import SqliteSaver
@@ -108,7 +108,8 @@ def get_formacion_deportiva_colonel_graph(db_path: str, llm: Any):
     Construye y compila el agente LangGraph para el Coronel de Formación Deportiva.
     La compilación incluye un checkpointer que apunta a la base de datos local del usuario.
     """
-    memory = SqliteSaver.from_conn_string(db_path)
+    conn = sqlite3.connect(db_path, check_same_thread=False)
+    memory = SqliteSaver(conn)
     workflow = StateGraph(FormacionDeportivaColonelState)
 
     planner_node = lambda state: create_tactical_plan(state, llm)

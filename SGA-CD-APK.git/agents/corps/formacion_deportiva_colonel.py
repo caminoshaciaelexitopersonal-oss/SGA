@@ -2,7 +2,7 @@ import sqlite3
 from langgraph.graph import StateGraph, END
 from langgraph.checkpoint.sqlite import SqliteSaver
 from typing import Any, TypedDict, List
-from langchain_core.pydantic_v1 import BaseModel, Field
+from pydantic import BaseModel, Field
 
 from .units.operaciones_deportivas_captain import get_operaciones_deportivas_captain_graph
 from .units.estrategia_plataforma_captain import get_estrategia_plataforma_captain_graph
@@ -101,7 +101,8 @@ def get_formacion_deportiva_colonel_graph(db_path: str, llm: Any):
         })
         return state
 
-    memory = SqliteSaver.from_conn_string(db_path)
+    conn = sqlite3.connect(db_path, check_same_thread=False)
+    memory = SqliteSaver(conn)
     workflow = StateGraph(FormacionDeportivaColonelState)
 
     planner_node = lambda state: create_tactical_plan(state, llm)

@@ -1,20 +1,21 @@
-from typing import List
+from typing import List, Any
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from sqlalchemy import text
 
-from app import models, schemas
+from app import schemas
 from app.api import deps
+from app.models import user as user_model
 
 router = APIRouter()
 
-@router.get("/hijos", response_model=List[schemas.User], tags=["Padre Acudiente"])
-def read_hijos(
+@router.get("/hijos", response_model=List[schemas.User])
+def get_my_hijos(
     db: Session = Depends(deps.get_db),
-    current_user: models.Usuario = Depends(deps.get_current_active_user),
+    current_user: user_model.Usuario = Depends(deps.get_current_active_user),
 ):
     """
     Retrieve the children of the current user (padre_acudiente).
+    Ensures children belong strictly to the same tenant as the parent.
     """
     # Use the roles from the token attached by the dependency
     if "padre_acudiente" not in current_user.roles:
@@ -23,14 +24,14 @@ def read_hijos(
             detail="Not enough permissions. Required role: padre_acudiente",
         )
 
-    # The 'hijos' relationship returns a list of user models. These models do not
-    # have the `roles` attribute attached, so we must fetch them manually.
-    hijos_models = current_user.hijos
+    # Filter children strictly by tenant match
+    hijos_models = [hijo for hijo in current_user.hijos if hijo.inquilino_id == current_user.inquilino_id]
     hijos_schemas = []
     for hijo in hijos_models:
-        # Manually fetch roles for each child to ensure compatibility with the new RBAC system
-        query = text("SELECT r.nombre FROM roles r JOIN user_roles ur ON r.id = ur.role_id WHERE ur.user_id = :user_id")
-        roles_result = db.execute(query, {"user_id": hijo.id}).fetchall()
+        # Fetch roles for each child
+        query = "SELECT r.nombre FROM roles r JOIN user_roles ur ON r.id = ur.role_id WHERE ur.user_id = :user_id"
+        from sqlalchemy import text
+        roles_result = db.execute(text(query), {"user_id": hijo.id}).fetchall()
         hijo_roles = [row[0] for row in roles_result]
 
         hijo_schema = schemas.User(
@@ -38,7 +39,7 @@ def read_hijos(
             email=hijo.correo,
             nombre_completo=hijo.nombre_completo,
             activo=hijo.activo,
-            roles=hijo_roles # Use the manually fetched roles
+            roles=hijo_roles
         )
         hijos_schemas.append(hijo_schema)
 

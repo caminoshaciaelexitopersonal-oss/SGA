@@ -31,10 +31,10 @@ def login(
     if not user.activo:
         raise HTTPException(status_code=400, detail="Inactive user")
 
-    # El objeto user de crud.get_user_by_username ya trae los roles
+    # El objeto user de crud.get_user_by_username ya trae role_list
     access_token_data = {
         "sub": str(user.id),
-        "roles": user.roles,
+        "roles": getattr(user, "role_list", [user.rol.value if hasattr(user.rol, "value") else str(user.rol)]),
         "inquilino_id": user.inquilino_id,
         "nombre_completo": user.nombre_completo
     }

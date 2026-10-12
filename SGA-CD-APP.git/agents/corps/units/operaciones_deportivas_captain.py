@@ -1,5 +1,5 @@
 from typing import TypedDict, List, Any
-from langchain_core.pydantic_v1 import BaseModel, Field
+from pydantic import BaseModel, Field
 from langgraph.graph import StateGraph, END
 from agent.llm_service import get_llm
 
