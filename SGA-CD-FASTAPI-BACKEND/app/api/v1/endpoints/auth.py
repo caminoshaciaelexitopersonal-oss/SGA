@@ -11,7 +11,34 @@ from app.api import deps
 from app.core import security
 from app.core.config import settings
 
+from datetime import datetime, timedelta, timezone
+
 router = APIRouter()
+
+FAILED_LOGIN_ATTEMPTS = {}  # {username: {"count": int, "blocked_until": datetime}}
+
+def check_login_rate_limit(username: str):
+    record = FAILED_LOGIN_ATTEMPTS.get(username)
+    if record:
+        now = datetime.now(timezone.utc)
+        if record.get("blocked_until") and now < record["blocked_until"]:
+            time_left = int((record["blocked_until"] - now).total_seconds())
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail=f"Demasiados intentos fallidos. Cuenta bloqueada temporalmente por {time_left} segundos."
+            )
+
+def record_failed_login(username: str):
+    now = datetime.now(timezone.utc)
+    record = FAILED_LOGIN_ATTEMPTS.get(username, {"count": 0, "blocked_until": None})
+    record["count"] += 1
+    if record["count"] >= 5:
+        record["blocked_until"] = now + timedelta(minutes=5)
+    FAILED_LOGIN_ATTEMPTS[username] = record
+
+def clear_failed_login(username: str):
+    if username in FAILED_LOGIN_ATTEMPTS:
+        del FAILED_LOGIN_ATTEMPTS[username]
 
 
 @router.post("/login", response_model=schemas.Token)
@@ -19,10 +46,13 @@ def login(
     db: Session = Depends(deps.get_db), form_data: OAuth2PasswordRequestForm = Depends()
 ) -> Any:
     """
-    OAuth2 compatible token login, get an access token and refresh token.
+    OAuth2 compatible token login, get an access token and refresh token with brute-force protection.
     """
+    check_login_rate_limit(form_data.username)
+
     user = crud.user.get_user_by_username(db, username=form_data.username)
     if not user or not security.verify_password(form_data.password, user.password_hash):
+        record_failed_login(form_data.username)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
@@ -30,6 +60,8 @@ def login(
         )
     if not user.activo:
         raise HTTPException(status_code=400, detail="Inactive user")
+
+    clear_failed_login(form_data.username)
 
     # El objeto user de crud.get_user_by_username ya trae role_list
     access_token_data = {
