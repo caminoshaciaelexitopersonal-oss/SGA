@@ -21,6 +21,19 @@ llm = ChatOpenAI(api_key=settings.OPENAI_API_KEY)
 cultura_colonel_agent = get_formacion_cultura_colonel_graph(db_path, llm)
 
 
+def sanitize_prompt_for_ai(prompt: str) -> str:
+    """
+    Sanitizes prompts before sending to LLM providers by redacting sensitive data
+    such as credit card numbers, passwords, Bearer tokens.
+    """
+    if not prompt:
+        return prompt
+    prompt = re.sub(r"\b(?:\d[ -]*?){13,19}\b", "[TARJETA_CREDITO_REDACTADA]", prompt)
+    prompt = re.sub(r"Bearer\s+[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*", "[TOKEN_REDACTADO]", prompt)
+    prompt = re.sub(r"(?i)(password|clave|contraseña)\s*[:=]\s*\S+", r"\1: [PASSWORD_REDACTADO]", prompt)
+    return prompt
+
+
 def build_scoped_thread_id(user_inquilino_id: int, user_id: int, client_thread_id: str | None) -> str:
     """
     Constructs an isolated, server-scoped thread_id that prevents cross-tenant and cross-user session access.
@@ -35,15 +48,16 @@ def build_scoped_thread_id(user_inquilino_id: int, user_id: int, client_thread_i
 
 
 async def run_agent(prompt: str, thread_id: str, area: str):
-    """Helper function to run the appropriate agent."""
+    """Helper function to run the appropriate agent with sanitized prompt."""
     if area != "Cultura":
         return {"text": f"El agente para el área '{area}' no está disponible.", "image_url": None}
 
+    clean_prompt = sanitize_prompt_for_ai(prompt)
     config = {"configurable": {"thread_id": thread_id}}
     app_context = {"api": None}
 
     final_state = await cultura_colonel_agent.ainvoke(
-        {"general_order": prompt, "app_context": app_context},
+        {"general_order": clean_prompt, "app_context": app_context},
         config=config
     )
     return final_state.get("final_report", {"text": "El agente no produjo un reporte.", "image_url": None})
