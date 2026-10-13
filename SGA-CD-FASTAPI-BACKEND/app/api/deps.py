@@ -103,12 +103,13 @@ def verify_resource_tenant_and_owner(
     db_obj: Any,
     current_user: user_model.Usuario,
     owner_field: str = "usuario_id",
-    tenant_field: str = "inquilino_id"
+    tenant_field: str = "inquilino_id",
+    enforce_owner: bool = False
 ) -> bool:
     """
-    Helper function to enforce strict ABAC / Tenant isolation on any SQLAlchemy DB object.
+    Helper function to enforce strict ABAC / Tenant isolation and ownership on any SQLAlchemy DB object.
     Raises HTTP 404 if object belongs to another tenant (preventing object enumeration),
-    and HTTP 403 if user lacks ownership when required.
+    and HTTP 403 if user lacks ownership when enforce_owner is True.
     """
     if not db_obj:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Resource not found")
@@ -116,5 +117,10 @@ def verify_resource_tenant_and_owner(
     obj_tenant = getattr(db_obj, tenant_field, None)
     if obj_tenant is not None and obj_tenant != current_user.inquilino_id:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Resource not found")
+
+    if enforce_owner:
+        obj_owner = getattr(db_obj, owner_field, None)
+        if obj_owner is not None and obj_owner != current_user.id:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to access this resource")
 
     return True

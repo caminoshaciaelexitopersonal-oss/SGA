@@ -112,6 +112,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (partner.website_url) {
                 innerHTML = `<a href="${partner.website_url}" target="_blank" rel="noopener noreferrer">${innerHTML}</a>`;
             }
+            // Add authenticity badge for verified partners/testimonials
+            if (partner.es_autentico_verificado !== false) {
+                innerHTML += `<div class="verified-badge" style="font-size:0.75rem; color:#00A651; font-weight:bold; margin-top:0.25rem;">✔ Cliente Verificado</div>`;
+            }
             partnerLogo.innerHTML = innerHTML;
 
             if (partner.tipo === 'cliente') {
