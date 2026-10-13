@@ -53,6 +53,13 @@ document.addEventListener('DOMContentLoaded', () => {
     registrationForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
+        const submitBtn = registrationForm.querySelector('button[type="submit"]');
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.dataset.origText = submitBtn.innerHTML;
+            submitBtn.innerHTML = 'Procesando...';
+        }
+
         // Collect form data based on the new backend schema
         const tenantData = {
             nombre_empresa: document.getElementById('nombre_empresa').value,
@@ -64,6 +71,10 @@ document.addEventListener('DOMContentLoaded', () => {
         // Basic validation
         if (!tenantData.nombre_empresa || !tenantData.admin_nombre_completo || !tenantData.admin_email || !tenantData.admin_password) {
             showMessage('Por favor, completa todos los campos requeridos.', 'error');
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = submitBtn.dataset.origText || 'Registrar';
+            }
             return;
         }
 
@@ -86,10 +97,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 }, 3000);
             } else {
                 showMessage(result.detail || 'Ocurrió un error durante el registro.', 'error');
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = submitBtn.dataset.origText || 'Registrar';
+                }
             }
         } catch (error) {
             console.error('Error en el registro:', error);
             showMessage('No se pudo conectar con el servidor. Intenta de nuevo más tarde.', 'error');
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = submitBtn.dataset.origText || 'Registrar';
+            }
         }
     });
 
