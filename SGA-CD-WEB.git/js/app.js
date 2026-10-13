@@ -9,11 +9,37 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    // -- 2. Configurar el botón de cierre de sesión --
+    // -- 2. Configurar el botón de cierre de sesión y supresión ARCO --
     if (logoutBtn) {
         logoutBtn.addEventListener('click', () => {
             localStorage.clear(); // Limpiar todo al cerrar sesión
             window.location.href = 'login.html';
+        });
+    }
+
+    const arcoDeleteBtn = document.getElementById('arco-delete-btn');
+    if (arcoDeleteBtn) {
+        arcoDeleteBtn.addEventListener('click', async () => {
+            const confirmDelete = confirm('¿Estás seguro de ejercer tu Derecho ARCO de eliminación? Tus datos personales serán anonimizados y tu cuenta desactivada.');
+            if (!confirmDelete) return;
+
+            try {
+                const response = await fetch(`${config.apiBaseUrl}/api/v1/auth/me/data`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    alert(data.message || 'Tus datos han sido anonimizados exitosamente.');
+                    localStorage.clear();
+                    window.location.href = 'login.html';
+                } else {
+                    alert(`Error: ${data.detail || 'No se pudo procesar la solicitud.'}`);
+                }
+            } catch (err) {
+                console.error('Error procesando supresión de datos:', err);
+                alert('No se pudo conectar con el servidor.');
+            }
         });
     }
 

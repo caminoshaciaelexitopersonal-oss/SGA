@@ -4,6 +4,8 @@ from pydantic import BaseModel, EmailStr
 class UserBase(BaseModel):
     email: EmailStr
     nombre_completo: str | None = None
+    rango_edad: str | None = None
+    consentimiento_padre: bool | None = False
 
 # Properties to receive via API on creation
 class UserCreate(UserBase):

@@ -52,6 +52,14 @@
                 <input type="email" id="correo_admin" placeholder="Tu Correo Electrónico" required>
                 <input type="password" id="password_admin" placeholder="Elige una Contraseña" required>
 
+                <h3>Declaración de Edad / Rango Etario</h3>
+                <select id="rango_edad" style="width: 100%; padding: 0.8rem; margin-bottom: 1rem; border: 1px solid #ccc; border-radius: 4px;" required>
+                    <option value="">Selecciona el Rango de Edad del Usuario...</option>
+                    <option value="18+">Mayor de edad (18+ años - Administrador / Profesor)</option>
+                    <option value="13-17">Adolescente (13 a 17 años - Requiere Autorización del Acudiente)</option>
+                    <option value="5-12">Infantil (5 a 12 años - Requiere Tutoría del Acudiente)</option>
+                </select>
+
                 <div class="privacy-consent-group" style="margin: 1.5rem 0; font-size: 0.9rem; text-align: left;">
                     <label style="display: block; margin-bottom: 0.5rem; cursor: pointer;">
                         <input type="checkbox" id="declaracion_edad" required>
