@@ -1,9 +1,11 @@
 from typing import List, Any
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app import crud, schemas
 from app.api import deps
+from app.models import user as user_model
+from app.models.academic import Notificacion
 
 router = APIRouter()
 
@@ -12,7 +14,7 @@ def read_my_notificaciones(
     db: Session = Depends(deps.get_db),
     skip: int = 0,
     limit: int = 100,
-    current_user = Depends(deps.get_current_user) # This is now a dependency
+    current_user: user_model.Usuario = Depends(deps.get_current_active_user),
 ) -> Any:
     """
     Retrieve notifications for the current logged-in user.
@@ -26,11 +28,17 @@ def read_my_notificaciones(
 def mark_notification_as_read(
     notificacion_id: int,
     db: Session = Depends(deps.get_db),
-    current_user = Depends(deps.get_current_user)
+    current_user: user_model.Usuario = Depends(deps.get_current_active_user),
 ) -> Any:
     """
-    Mark a notification as read.
+    Mark a notification as read with strict ownership validation (ABAC).
     """
+    notif = db.query(Notificacion).filter(Notificacion.id == notificacion_id).first()
+    if not notif or notif.usuario_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Notification not found")
+
+    if notif.inquilino_id != current_user.inquilino_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to access this tenant's notification")
+
     db_notification = crud.notificacion.mark_as_read(db, notificacion_id=notificacion_id)
-    # TODO: Add security check to ensure the notification belongs to the current user
     return db_notification

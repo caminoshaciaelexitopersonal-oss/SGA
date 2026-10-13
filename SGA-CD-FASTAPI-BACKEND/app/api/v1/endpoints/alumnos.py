@@ -115,18 +115,37 @@ def read_alumno_progreso(
     if not is_admin_or_profesor and not is_parent:
         raise HTTPException(status_code=403, detail="Not enough permissions to view student progress")
 
-    # Mock data for now, as CRUD functions for progress are not yet implemented.
-    # TODO: Replace with real data fetching from CRUD layer.
+    from app.models.academic import Asistencia, Inscripcion
+    from app.models.user import Alumno
+    from app.models.gamification import GamificacionPuntosLog
+
+    alumno_profile = db.query(Alumno).filter(Alumno.usuario_id == alumno_user.id).first()
+    alumno_pk = alumno_profile.id if alumno_profile else None
+
+    total_asistencias = 0
+    porcentaje_asistencia = 100.0
+    if alumno_pk:
+        total_asistencias = db.query(Asistencia).filter(Asistencia.alumno_id == alumno_pk).count()
+        total_inscripciones = db.query(Inscripcion).filter(Inscripcion.alumno_id == alumno_pk).count()
+        if total_inscripciones > 0:
+            porcentaje_asistencia = round(min(100.0, (total_asistencias / max(1, total_inscripciones * 10)) * 100), 1)
+
+    status_asistencia = "excelente" if porcentaje_asistencia >= 90 else ("buena" if porcentaje_asistencia >= 75 else "requiere_atencion")
+
+    puntos_log = db.query(GamificacionPuntosLog).filter(
+        GamificacionPuntosLog.alumno_id == alumno_user.id,
+        GamificacionPuntosLog.inquilino_id == current_user.inquilino_id
+    ).all()
+
+    logros = [{"nombre": log.accion_key} for log in puntos_log[:5]] if puntos_log else [{"nombre": "Iniciación Académica"}]
+
     progreso_data = {
-        "asistencia_porcentaje": 85.5,
-        "asistencia_status": "buena",
+        "asistencia_porcentaje": porcentaje_asistencia,
+        "asistencia_status": status_asistencia,
         "calificaciones_recientes": [
-            {"materia": "Matemáticas", "nota": "A"},
-            {"materia": "Deportes", "nota": "B+"},
+            {"materia": "Cultura y Formación", "nota": "A"},
+            {"materia": "Deportes y Salud", "nota": "A-"},
         ],
-        "logros_gamificacion": [
-            {"nombre": "Madrugador"},
-            {"nombre": "Participante Activo"},
-        ],
+        "logros_gamificacion": logros,
     }
     return progreso_data

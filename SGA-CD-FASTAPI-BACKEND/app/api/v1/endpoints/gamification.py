@@ -50,13 +50,12 @@ def read_acciones(
     db: Session = Depends(deps.get_db),
     skip: int = 0,
     limit: int = 100,
-    # current_user = Depends(deps.get_current_user)
+    current_user: user_model.Usuario = Depends(deps.get_current_active_user),
 ) -> Any:
     """
     Retrieve gamification actions for the current tenant.
     """
-    tenant_id = 1 # Placeholder for current_user.inquilino_id
-    acciones = crud.gamification.get_acciones_by_tenant(db, inquilino_id=tenant_id, skip=skip, limit=limit)
+    acciones = crud.gamification.get_acciones_by_tenant(db, inquilino_id=current_user.inquilino_id, skip=skip, limit=limit)
     return acciones
 
 @router.post("/acciones/", response_model=schemas.GamificacionAccion)
@@ -64,11 +63,14 @@ def create_accion(
     *,
     db: Session = Depends(deps.get_db),
     accion_in: schemas.GamificacionAccionCreate,
-    # current_user = Depends(deps.get_current_user)
+    current_user: user_model.Usuario = Depends(deps.role_required(["admin_empresa"])),
 ) -> Any:
     """
-    Create a new gamification action.
+    Create a new gamification action for the user's tenant.
     """
+    if accion_in.inquilino_id != current_user.inquilino_id:
+        raise HTTPException(status_code=403, detail="Cannot create action for another tenant.")
+
     accion = crud.gamification.create_accion(db=db, obj_in=accion_in)
     return accion
 
@@ -79,12 +81,15 @@ def create_puntos_log_entry(
     *,
     db: Session = Depends(deps.get_db),
     log_in: schemas.GamificacionPuntosLogCreate,
-    # current_user = Depends(deps.get_current_user)
+    current_user: user_model.Usuario = Depends(deps.get_current_active_user),
 ) -> Any:
     """
-    Create a new gamification points log entry.
+    Create a new gamification points log entry with tenant validation.
     This would be called by other services when a student completes an action.
     """
+    if log_in.inquilino_id != current_user.inquilino_id:
+        raise HTTPException(status_code=403, detail="Cannot log points for another tenant.")
+
     log_entry = crud.gamification.create_puntos_log(db=db, obj_in=log_in)
     return log_entry
 

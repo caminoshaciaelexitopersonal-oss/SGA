@@ -4,6 +4,20 @@ from typing import Any, Union
 from jose import jwt
 from passlib.context import CryptContext
 
+# Fix passlib compatibility with bcrypt >= 4.1.0
+import bcrypt
+if not hasattr(bcrypt, "__about__"):
+    bcrypt.__about__ = type("about", (), {"__version__": bcrypt.__version__})
+
+orig_hashpw = bcrypt.hashpw
+def safe_hashpw(password, salt):
+    if isinstance(password, str):
+        password = password.encode('utf-8')
+    if len(password) > 72:
+        password = password[:72]
+    return orig_hashpw(password, salt)
+bcrypt.hashpw = safe_hashpw
+
 from app.core.config import settings
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -50,4 +64,4 @@ def get_password_hash(password: str) -> str:
     """
     Hashes a plain password.
     """
-    return pwd_context.hash(password)
+    return pwd_context.hash(password[:72])

@@ -6,6 +6,8 @@ from app import schemas
 from app.api import deps
 from app.crud.dropdown import crud_dropdowns, CRUDBase
 
+from app.models import user as user_model
+
 def create_dropdown_router(
     crud_instance: CRUDBase,
     schema: schemas.Dropdown,
@@ -20,13 +22,12 @@ def create_dropdown_router(
         db: Session = Depends(deps.get_db),
         skip: int = 0,
         limit: int = 100,
-        # current_user = Depends(deps.get_current_user)
+        current_user: user_model.Usuario = Depends(deps.get_current_active_user),
     ) -> Any:
         """
         Retrieve all items for a specific dropdown for the current tenant.
         """
-        tenant_id = 1 # Placeholder
-        items = crud_instance.get_multi_by_tenant(db, inquilino_id=tenant_id, skip=skip, limit=limit)
+        items = crud_instance.get_multi_by_tenant(db, inquilino_id=current_user.inquilino_id, skip=skip, limit=limit)
         return items
 
     @router.post("/", response_model=schema)
@@ -34,10 +35,14 @@ def create_dropdown_router(
         *,
         db: Session = Depends(deps.get_db),
         item_in: create_schema,
+        current_user: user_model.Usuario = Depends(deps.role_required(["admin_empresa", "admin_general"])),
     ) -> Any:
         """
-        Create a new dropdown item.
+        Create a new dropdown item with tenant validation.
         """
+        if getattr(item_in, "inquilino_id", current_user.inquilino_id) != current_user.inquilino_id:
+            raise HTTPException(status_code=403, detail="Cannot create item for another tenant.")
+
         item = crud_instance.create(db=db, obj_in=item_in)
         return item
 
@@ -47,12 +52,13 @@ def create_dropdown_router(
         db: Session = Depends(deps.get_db),
         item_id: int,
         item_in: update_schema,
+        current_user: user_model.Usuario = Depends(deps.role_required(["admin_empresa", "admin_general"])),
     ) -> Any:
         """
-        Update a dropdown item.
+        Update a dropdown item with tenant validation.
         """
         db_item = crud_instance.get(db=db, id=item_id)
-        if not db_item:
+        if not db_item or getattr(db_item, "inquilino_id", current_user.inquilino_id) != current_user.inquilino_id:
             raise HTTPException(status_code=404, detail="Item not found")
         item = crud_instance.update(db=db, db_obj=db_item, obj_in=item_in)
         return item
@@ -62,13 +68,16 @@ def create_dropdown_router(
         *,
         db: Session = Depends(deps.get_db),
         item_id: int,
+        current_user: user_model.Usuario = Depends(deps.role_required(["admin_empresa", "admin_general"])),
     ) -> Any:
         """
-        Delete a dropdown item.
+        Delete a dropdown item with tenant validation.
         """
-        item = crud_instance.remove(db=db, id=item_id)
-        if not item:
+        db_item = crud_instance.get(db=db, id=item_id)
+        if not db_item or getattr(db_item, "inquilino_id", current_user.inquilino_id) != current_user.inquilino_id:
             raise HTTPException(status_code=404, detail="Item not found")
+
+        item = crud_instance.remove(db=db, id=item_id)
         return item
 
     return router
