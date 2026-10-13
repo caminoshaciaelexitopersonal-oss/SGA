@@ -28,20 +28,23 @@
 
             <form id="form-registro">
                 <h3>Elige tu Plan</h3>
-                <div class="plan-selection">
-                    <label>
+                <div class="plan-selection" style="text-align: left; background: #f8fafc; padding: 1rem; border-radius: 6px; border: 1px solid #e2e8f0; margin-bottom: 0.5rem;">
+                    <label style="display: block; margin-bottom: 0.75rem; cursor: pointer;">
                         <input type="radio" name="plan" value="gratis" checked>
-                        Plan Básico (Prueba de 60 días)
+                        <strong>Plan Básico (Prueba Gratuita 60 días)</strong> - $0 USD por 60 días. Renovación automática a $20 USD/mes. Cancela en cualquier momento sin penalizaciones.
                     </label>
-                    <label>
+                    <label style="display: block; margin-bottom: 0.75rem; cursor: pointer;">
                         <input type="radio" name="plan" value="pro_mensual">
-                        Plan Pro ($100/mes)
+                        <strong>Plan Pro Mensual</strong> - $100 USD/mes. Primer cobro hoy. Renovación mensual automática.
                     </label>
-                    <label>
+                    <label style="display: block; cursor: pointer;">
                         <input type="radio" name="plan" value="pro_anual">
-                        Plan Pro ($1000/año)
+                        <strong>Plan Pro Anual</strong> - $1,000 USD/año. Primer cobro hoy. Ahorro de $200 USD. Renovación anual automática.
                     </label>
                 </div>
+                <p style="font-size: 0.82rem; color: #64748b; text-align: left; margin-bottom: 1.5rem;">
+                    * Precios finales con impuestos incluidos. La suscripción se renueva automáticamente. Puedes cancelar desde tu panel institucional o enviando un correo a soporte antes del ciclo de cobro.
+                </p>
 
                 <h3>Datos de la Empresa</h3>
                 <input type="text" id="nombre_empresa" placeholder="Nombre de tu Empresa" required>

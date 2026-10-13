@@ -27,7 +27,7 @@ async def create_stripe_intent(
             gateway_name="stripe",
             amount=amount_in_cents,
             currency=payment_in.currency,
-            user_id=current_user.id
+            user_id=current_user.inquilino_id
         )
         return intent_details
     except ValueError as e:
