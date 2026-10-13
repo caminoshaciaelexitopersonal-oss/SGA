@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from sqlalchemy.orm import Session
 from app import schemas, models
 from app.api import deps
+from app.core.rate_limiter import rate_limit
 import speech_recognition as sr
 from pydub import AudioSegment
 import io
@@ -106,7 +107,7 @@ async def invoke_agent_by_voice(
         raise HTTPException(status_code=500, detail=f"Error al procesar el archivo de audio: {e}")
 
 
-@router.post("/invoke", response_model=schemas.AgentOutput)
+@router.post("/invoke", response_model=schemas.AgentOutput, dependencies=[Depends(rate_limit("ai_agent_invoke", max_requests=15, window_seconds=60))])
 async def invoke_agent(
     *,
     db: Session = Depends(deps.get_db),

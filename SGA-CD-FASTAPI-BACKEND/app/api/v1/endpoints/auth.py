@@ -10,6 +10,7 @@ from app import crud, schemas, models
 from app.api import deps
 from app.core import security
 from app.core.config import settings
+from app.core.rate_limiter import rate_limit
 
 from datetime import datetime, timedelta, timezone
 
@@ -41,7 +42,7 @@ def clear_failed_login(username: str):
         del FAILED_LOGIN_ATTEMPTS[username]
 
 
-@router.post("/login", response_model=schemas.Token)
+@router.post("/login", response_model=schemas.Token, dependencies=[Depends(rate_limit("login", max_requests=10, window_seconds=60))])
 def login(
     db: Session = Depends(deps.get_db), form_data: OAuth2PasswordRequestForm = Depends()
 ) -> Any:
@@ -129,7 +130,7 @@ def refresh_token(
     }
 
 
-@router.post("/register", response_model=schemas.User)
+@router.post("/register", response_model=schemas.User, dependencies=[Depends(rate_limit("register", max_requests=10, window_seconds=3600))])
 def register_user(
     *,
     db: Session = Depends(deps.get_db),
@@ -162,7 +163,7 @@ def register_user(
     return user
 
 
-@router.get("/unsubscribe")
+@router.get("/unsubscribe", dependencies=[Depends(rate_limit("unsubscribe", max_requests=10, window_seconds=60))])
 def unsubscribe_email(
     email: str,
     db: Session = Depends(deps.get_db),

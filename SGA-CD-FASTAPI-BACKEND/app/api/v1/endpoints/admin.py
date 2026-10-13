@@ -6,6 +6,7 @@ from sqlalchemy import text
 from app import schemas, crud
 from app.models import user as user_model
 from app.api import deps
+from app.core.rate_limiter import rate_limit
 
 router = APIRouter()
 
@@ -24,7 +25,7 @@ def get_all_roles(
     return [row[0] for row in roles_result]
 
 
-@router.get("/users/by-empresa", response_model=List[schemas.User], summary="List users by company")
+@router.get("/users/by-empresa", response_model=List[schemas.User], summary="List users by company", dependencies=[Depends(rate_limit("admin_users_by_empresa", max_requests=30, window_seconds=60))])
 def get_users_by_empresa(
     db: Session = Depends(deps.get_db),
     current_user: user_model.Usuario = Depends(deps.get_current_active_user)
