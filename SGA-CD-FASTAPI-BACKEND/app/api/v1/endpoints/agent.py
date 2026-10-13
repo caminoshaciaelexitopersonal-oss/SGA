@@ -42,7 +42,7 @@ async def run_agent(prompt: str, thread_id: str, area: str):
     config = {"configurable": {"thread_id": thread_id}}
     app_context = {"api": None}
 
-    final_state = await cultura_colonel_agent.ainvoke(
+    final_state = cultura_colonel_agent.invoke(
         {"general_order": prompt, "app_context": app_context},
         config=config
     )
