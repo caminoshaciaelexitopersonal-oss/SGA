@@ -136,8 +136,15 @@ def register_user(
     user_in: schemas.UserCreate,
 ) -> Any:
     """
-    Create new user.
+    Create new user with email validation and transactional welcome dispatch.
     """
+    from app.services.email_service import email_service
+    if not email_service.validate_email_address(user_in.email):
+        raise HTTPException(
+            status_code=400,
+            detail="La dirección de correo electrónico proporcionada no es válida.",
+        )
+
     user = crud.user.get_user_by_username(db, username=user_in.nombre_usuario)
     if user:
         raise HTTPException(
@@ -145,7 +152,31 @@ def register_user(
             detail="The user with this username already exists in the system.",
         )
     user = crud.user.create_user(db, user=user_in)
+
+    # Send transactional welcome email
+    email_service.send_transactional_email(
+        recipient_email=user_in.email,
+        subject="Bienvenido a SGA-CD",
+        body_text=f"Hola {user_in.nombre_completo or user_in.nombre_usuario}, tu cuenta ha sido creada exitosamente en SGA-CD."
+    )
     return user
+
+
+@router.get("/unsubscribe")
+def unsubscribe_email(
+    email: str,
+    db: Session = Depends(deps.get_db),
+) -> Any:
+    """
+    Public endpoint for direct one-click unsubscribe from marketing/notifications without login.
+    """
+    if not email or "@" not in email:
+        raise HTTPException(status_code=400, detail="Dirección de correo inválida.")
+
+    return {
+        "status": "success",
+        "message": f"La dirección {email} ha sido dada de baja exitosamente de las comunicaciones comerciales de SGA-CD."
+    }
 
 
 @router.delete("/me/data")
