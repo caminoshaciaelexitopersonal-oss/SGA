@@ -114,3 +114,22 @@ def register_user(
         )
     user = crud.user.create_user(db, user=user_in)
     return user
+
+
+@router.delete("/me/data")
+def delete_my_data(
+    db: Session = Depends(deps.get_db),
+    current_user: models.user.Usuario = Depends(deps.get_current_active_user),
+) -> Any:
+    """
+    Derecho ARCO: Solicitud de eliminación/anonimización de datos personales.
+    Desactiva la cuenta y anonimiza los datos identificables.
+    """
+    import uuid
+    anon_id = str(uuid.uuid4())[:8]
+    current_user.activo = False
+    current_user.nombre_usuario = f"deleted_user_{anon_id}"
+    current_user.nombre_completo = "Usuario Anónimo (Datos Eliminados)"
+    db.add(current_user)
+    db.commit()
+    return {"status": "success", "message": "Tus datos personales han sido anonimizados y la cuenta ha sido desactivada conforme a la Política de Privacidad."}

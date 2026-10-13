@@ -52,6 +52,17 @@
                 <input type="email" id="correo_admin" placeholder="Tu Correo Electrónico" required>
                 <input type="password" id="password_admin" placeholder="Elige una Contraseña" required>
 
+                <div class="privacy-consent-group" style="margin: 1.5rem 0; font-size: 0.9rem; text-align: left;">
+                    <label style="display: block; margin-bottom: 0.5rem; cursor: pointer;">
+                        <input type="checkbox" id="declaracion_edad" required>
+                        Declaro ser mayor de edad o representante legal de la organización (el sistema atiende estudiantes desde los 5 años bajo tutela de sus padres/acudientes).
+                    </label>
+                    <label style="display: block; cursor: pointer;">
+                        <input type="checkbox" id="acepto_privacidad" required>
+                        Acepto la <a href="privacy.html" target="_blank" style="color:#00A651; font-weight:bold;">Política de Privacidad</a> y los <a href="terms.html" target="_blank" style="color:#00A651; font-weight:bold;">Términos del Servicio</a>.
+                    </label>
+                </div>
+
                 <div id="form-mensaje"></div>
                 <button type="submit">Comenzar Prueba Gratuita</button>
             </form>
@@ -59,11 +70,12 @@
     </main>
 
     <footer>
-        <p>&copy; 2025 SGA-CD. Todos los derechos reservados.</p>
+        <p>&copy; 2025 SGA-CD. Todos los derechos reservados. | <a href="privacy.html" style="color:#aaa;">Política de Privacidad</a> | <a href="terms.html" style="color:#aaa;">Términos del Servicio</a></p>
     </footer>
 
     <!-- Archivo de configuración global -->
     <script src="js/config.js"></script>
+    <script src="js/privacy.js"></script>
 
     <script src="js/register.js"></script>
 </body>

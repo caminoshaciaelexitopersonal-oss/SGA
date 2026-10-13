@@ -1,6 +1,6 @@
 import sqlite3
 from langgraph.graph import StateGraph, END
-from langgraph.checkpoint.sqlite import SqliteSaver
+from langgraph.checkpoint.memory import MemorySaver
 from typing import Any, TypedDict, List
 from pydantic import BaseModel, Field
 
@@ -109,11 +109,11 @@ def get_formacion_cultura_colonel_graph(db_path: str, llm: Any):
     async def estrategia_plataforma_node_wrapper(state: FormacionCulturaColonelState) -> FormacionCulturaColonelState:
         return await estrategia_plataforma_node(state, estrategia_plataforma_agent)
 
-    conn = sqlite3.connect(db_path, check_same_thread=False)
-    memory = SqliteSaver(conn)
+    memory = MemorySaver()
     workflow = StateGraph(FormacionCulturaColonelState)
 
-    planner_node = lambda state: create_tactical_plan(state, llm)
+    async def planner_node(state):
+        return await create_tactical_plan(state, llm)
 
     workflow.add_node("planner", planner_node)
     workflow.add_node("router", lambda state: state)
