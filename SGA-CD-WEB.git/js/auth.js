@@ -10,11 +10,23 @@ document.addEventListener('DOMContentLoaded', () => {
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+
+            const submitBtn = loginForm.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.dataset.origText = submitBtn.innerHTML;
+                submitBtn.innerHTML = 'Procesando...';
+            }
+
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
 
             if (!username || !password) {
                 showMessage('Por favor, ingresa usuario y contraseña.', 'error');
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = submitBtn.dataset.origText || 'Iniciar Sesión';
+                }
                 return;
             }
 
@@ -55,6 +67,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         } catch (e) {
                             console.error('Error decodificando el token:', e);
                             showMessage('Error al procesar la información del usuario.', 'error');
+                            if (submitBtn) {
+                                submitBtn.disabled = false;
+                                submitBtn.innerHTML = submitBtn.dataset.origText || 'Iniciar Sesión';
+                            }
                             return;
                         }
 
@@ -64,14 +80,26 @@ document.addEventListener('DOMContentLoaded', () => {
                         }, 1500);
                     } else {
                         showMessage('Respuesta inesperada del servidor.', 'error');
+                        if (submitBtn) {
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = submitBtn.dataset.origText || 'Iniciar Sesión';
+                        }
                     }
                 } else {
                     showMessage(data.detail || 'Credenciales inválidas.', 'error');
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = submitBtn.dataset.origText || 'Iniciar Sesión';
+                    }
                 }
 
             } catch (error) {
                 console.error('Error de inicio de sesión:', error);
                 showMessage('No se pudo conectar con el servidor.', 'error');
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = submitBtn.dataset.origText || 'Iniciar Sesión';
+                }
             }
         });
     }

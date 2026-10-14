@@ -3,10 +3,11 @@ const urlsToCache = [
   '/',
   'index.html',
   'register.html',
+  '404.html',
+  'offline.html',
   'css/style.css',
   'js/main.js',
-  'js/register.js',
-  '../assets/logo.png'
+  'js/register.js'
 ];
 
 // Install a service worker
@@ -20,18 +21,26 @@ self.addEventListener('install', event => {
   );
 });
 
-// Cache and return requests
+// Cache and return requests with offline fallback
 self.addEventListener('fetch', event => {
+  // Only handle GET requests for offline caching
+  if (event.request.method !== 'GET') {
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request)
       .then(function(response) {
-        // Cache hit - return response
         if (response) {
           return response;
         }
-        return fetch(event.request);
-      }
-    )
+        return fetch(event.request).catch(function() {
+          // If network fetch fails and request is for an HTML page, return offline.html
+          if (event.request.headers.get('accept') && event.request.headers.get('accept').includes('text/html')) {
+            return caches.match('offline.html');
+          }
+        });
+      })
   );
 });
 

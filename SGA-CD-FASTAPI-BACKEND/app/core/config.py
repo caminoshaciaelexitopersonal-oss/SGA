@@ -3,6 +3,8 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     PROJECT_NAME: str = "SGA-CD FastAPI Backend"
     API_V1_STR: str = "/api/v1"
+    TESTING: bool = False
+    ENVIRONMENT: str = "production"
 
     # Security
     SECRET_KEY: str
@@ -45,7 +47,8 @@ class Settings(BaseSettings):
 
     class Config:
         case_sensitive = True
-        env_file = "/app/.env"
+        env_file = ".env"
         env_file_encoding = 'utf-8'
+        extra = "ignore"
 
 settings = Settings()

@@ -86,21 +86,26 @@ class BillingService:
                 self.db, transaction_id=transaction_id
             )
 
-            if db_payment and db_payment.status == "pending":
-                crud_billing.update_payment_status(
-                    self.db, db_obj=db_payment, status="succeeded"
-                )
+            if db_payment:
+                if db_payment.status == "succeeded":
+                    # Idempotency check: Already processed, do not extend twice
+                    return {"status": "success", "message": "Evento ya procesado (idempotente)"}
 
-                # Extend subscription
-                subscription = db_payment.subscription
-                new_end_date = (subscription.end_date or datetime.utcnow()) + timedelta(
-                    days=30
-                )
-                sub_update = SubscriptionUpdate(end_date=new_end_date, status="active")
-                crud_billing.update_subscription(
-                    self.db, db_obj=subscription, obj_in=sub_update
-                )
-                print(f"Subscription for user {subscription.inquilino_id} extended.")
+                if db_payment.status == "pending":
+                    crud_billing.update_payment_status(
+                        self.db, db_obj=db_payment, status="succeeded"
+                    )
+
+                    # Extend subscription
+                    subscription = db_payment.subscription
+                    new_end_date = (subscription.end_date or datetime.utcnow()) + timedelta(
+                        days=30
+                    )
+                    sub_update = SubscriptionUpdate(end_date=new_end_date, status="active")
+                    crud_billing.update_subscription(
+                        self.db, db_obj=subscription, obj_in=sub_update
+                    )
+                    print(f"Subscription for user {subscription.inquilino_id} extended.")
 
         # TODO: Implement webhook handling for MercadoPago and Wompi
         print(f"Webhook event processed for {gateway_name}: {event.type}")

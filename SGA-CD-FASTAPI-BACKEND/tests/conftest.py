@@ -11,6 +11,8 @@ from sqlalchemy.pool import StaticPool
 # Add the directory containing the 'models' package to the Python path.
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'SGA-CD-DB.git')))
 
+from app.models import billing as _fastapi_billing_models, user as _fastapi_user_models
+from app.models.base import Base as AppBase
 from app.main import app
 from app.api import deps
 from models.base import Base
@@ -44,6 +46,7 @@ def db() -> Generator:
     Creates all SQLAlchemy model tables and populates the 12 official roles.
     """
     Base.metadata.create_all(bind=engine)
+    AppBase.metadata.create_all(bind=engine)
 
     with engine.connect() as connection:
         connection.execute(text("""

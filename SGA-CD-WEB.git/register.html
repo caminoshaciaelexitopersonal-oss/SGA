@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro de Nueva Empresa - SGA-CD</title>
+    <title>Registro de Organización — SGA-CD</title>
+    <meta name="description" content="Crea tu cuenta institucional en SGA-CD y gestiona programas culturales, deportivos y educativos.">
+    <link rel="canonical" href="https://sga-cd.org/register.html">
     <link rel="stylesheet" href="css/style.css">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#00A651">
@@ -28,20 +30,23 @@
 
             <form id="form-registro">
                 <h3>Elige tu Plan</h3>
-                <div class="plan-selection">
-                    <label>
+                <div class="plan-selection" style="text-align: left; background: #f8fafc; padding: 1rem; border-radius: 6px; border: 1px solid #e2e8f0; margin-bottom: 0.5rem;">
+                    <label style="display: block; margin-bottom: 0.75rem; cursor: pointer;">
                         <input type="radio" name="plan" value="gratis" checked>
-                        Plan Básico (Prueba de 60 días)
+                        <strong>Plan Básico (Prueba Gratuita 60 días)</strong> - $0 USD por 60 días. Renovación automática a $20 USD/mes. Cancela en cualquier momento sin penalizaciones.
                     </label>
-                    <label>
+                    <label style="display: block; margin-bottom: 0.75rem; cursor: pointer;">
                         <input type="radio" name="plan" value="pro_mensual">
-                        Plan Pro ($100/mes)
+                        <strong>Plan Pro Mensual</strong> - $100 USD/mes. Primer cobro hoy. Renovación mensual automática.
                     </label>
-                    <label>
+                    <label style="display: block; cursor: pointer;">
                         <input type="radio" name="plan" value="pro_anual">
-                        Plan Pro ($1000/año)
+                        <strong>Plan Pro Anual</strong> - $1,000 USD/año. Primer cobro hoy. Ahorro de $200 USD. Renovación anual automática.
                     </label>
                 </div>
+                <p style="font-size: 0.82rem; color: #64748b; text-align: left; margin-bottom: 1.5rem;">
+                    * Precios finales con impuestos incluidos. La suscripción se renueva automáticamente. Puedes cancelar desde tu panel institucional o enviando un correo a soporte antes del ciclo de cobro.
+                </p>
 
                 <h3>Datos de la Empresa</h3>
                 <input type="text" id="nombre_empresa" placeholder="Nombre de tu Empresa" required>
@@ -52,6 +57,25 @@
                 <input type="email" id="correo_admin" placeholder="Tu Correo Electrónico" required>
                 <input type="password" id="password_admin" placeholder="Elige una Contraseña" required>
 
+                <h3>Declaración de Edad / Rango Etario</h3>
+                <select id="rango_edad" style="width: 100%; padding: 0.8rem; margin-bottom: 1rem; border: 1px solid #ccc; border-radius: 4px;" required>
+                    <option value="">Selecciona el Rango de Edad del Usuario...</option>
+                    <option value="18+">Mayor de edad (18+ años - Administrador / Profesor)</option>
+                    <option value="13-17">Adolescente (13 a 17 años - Requiere Autorización del Acudiente)</option>
+                    <option value="5-12">Infantil (5 a 12 años - Requiere Tutoría del Acudiente)</option>
+                </select>
+
+                <div class="privacy-consent-group" style="margin: 1.5rem 0; font-size: 0.9rem; text-align: left;">
+                    <label style="display: block; margin-bottom: 0.5rem; cursor: pointer;">
+                        <input type="checkbox" id="declaracion_edad" required>
+                        Declaro ser mayor de edad o representante legal de la organización (el sistema atiende estudiantes desde los 5 años bajo tutela de sus padres/acudientes).
+                    </label>
+                    <label style="display: block; cursor: pointer;">
+                        <input type="checkbox" id="acepto_privacidad" required>
+                        Acepto la <a href="privacy.html" target="_blank" style="color:#00A651; font-weight:bold;">Política de Privacidad</a> y los <a href="terms.html" target="_blank" style="color:#00A651; font-weight:bold;">Términos del Servicio</a>.
+                    </label>
+                </div>
+
                 <div id="form-mensaje"></div>
                 <button type="submit">Comenzar Prueba Gratuita</button>
             </form>
@@ -59,11 +83,12 @@
     </main>
 
     <footer>
-        <p>&copy; 2025 SGA-CD. Todos los derechos reservados.</p>
+        <p>&copy; 2025 SGA-CD. Todos los derechos reservados. | <a href="privacy.html" style="color:#aaa;">Política de Privacidad</a> | <a href="terms.html" style="color:#aaa;">Términos del Servicio</a></p>
     </footer>
 
     <!-- Archivo de configuración global -->
     <script src="js/config.js"></script>
+    <script src="js/privacy.js"></script>
 
     <script src="js/register.js"></script>
 </body>

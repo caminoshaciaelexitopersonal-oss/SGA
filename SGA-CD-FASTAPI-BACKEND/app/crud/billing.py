@@ -30,7 +30,18 @@ def update_subscription(db: Session, *, db_obj: Suscripcion, obj_in: Subscriptio
 
 # --- Payment ---
 def create_payment(db: Session, *, obj_in: PaymentCreate) -> Factura:
-    db_obj = Factura(**obj_in.model_dump())
+    from datetime import datetime, timezone
+    data = obj_in.model_dump()
+    monto = data.pop("amount", 0.0)
+    status_val = data.pop("status", "pending")
+    sub_id = data.pop("subscription_id", None)
+    db_obj = Factura(
+        suscripcion_id=sub_id,
+        monto=monto,
+        fecha_emision=datetime.now(timezone.utc),
+        estado=status_val,
+        **{k: v for k, v in data.items() if hasattr(Factura, k)}
+    )
     db.add(db_obj)
     db.commit()
     db.refresh(db_obj)

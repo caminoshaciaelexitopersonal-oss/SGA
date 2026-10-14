@@ -3,13 +3,14 @@ from sqlalchemy.orm import Session
 from app import schemas, models
 from app.api import deps
 from app.services.billing_service import BillingService
+from app.core.rate_limiter import rate_limit
 
 router = APIRouter()
 
 # -------------------------------
 # Stripe
 # -------------------------------
-@router.post("/stripe/create-payment-intent", response_model=schemas.PaymentIntent)
+@router.post("/stripe/create-payment-intent", response_model=schemas.PaymentIntent, dependencies=[Depends(rate_limit("payment_intent", max_requests=10, window_seconds=60))])
 async def create_stripe_intent(
     db: Session = Depends(deps.get_db),
     payment_in: schemas.PaymentIntentCreate = None,
@@ -27,7 +28,7 @@ async def create_stripe_intent(
             gateway_name="stripe",
             amount=amount_in_cents,
             currency=payment_in.currency,
-            user_id=current_user.id
+            user_id=current_user.inquilino_id
         )
         return intent_details
     except ValueError as e:

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Plataforma SGA-CD</title>
+    <meta name="robots" content="noindex, nofollow">
     <link rel="stylesheet" href="css/app.css">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#00A651">
@@ -20,6 +21,9 @@
                 <!-- Los enlaces de navegación se insertarán aquí dinámicamente -->
             </nav>
             <div class="sidebar-footer">
+                <button id="arco-delete-btn" style="background-color:#dc2626; color:white; margin-bottom:0.5rem; width:100%; border:none; padding:0.5rem; border-radius:4px; font-size:0.85rem; cursor:pointer;">
+                    <i class="fas fa-user-slash"></i> Suprimir Datos (ARCO)
+                </button>
                 <button id="logout-btn">Cerrar Sesión</button>
             </div>
         </aside>
@@ -90,6 +94,7 @@
 
     <!-- Archivo de configuración global -->
     <script src="js/config.js"></script>
+    <script src="js/privacy.js"></script>
     <!-- Lógica de navegación -->
     <script src="js/navigation.js"></script>
     <!-- Lógica para renderizar vistas -->

@@ -9,3 +9,5 @@ class AgentInput(BaseModel):
 class AgentOutput(BaseModel):
     text: str
     image_url: Optional[str] = None
+    is_ai_generated: bool = True
+    disclaimer_ia: str = "Respuesta generada por Inteligencia Artificial SGA-CD. Requiere verificación humana."

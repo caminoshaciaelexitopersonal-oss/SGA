@@ -1,11 +1,68 @@
-/* General Body Styles */
+/* Root Color Variables Fallback */
+:root {
+    --color-primary: #00A651;
+    --color-secondary: #008040;
+    --color-background: #F8FAFC;
+    --color-surface: #FFFFFF;
+    --color-text-primary: #1E293B;
+    --color-text-secondary: #64748B;
+    --color-border: #E2E8F0;
+    --color-focus: #2563EB;
+}
+
+/* General Body & Reset Styles */
+html, body {
+    width: 100%;
+    overflow-x: hidden;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+*, *:before, *:after {
+    box-sizing: inherit;
+}
+
 body {
     font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     line-height: 1.7;
-    margin: 0;
-    padding: 0;
     background-color: var(--color-background);
     color: var(--color-text-primary);
+}
+
+/* WCAG 2.2 AA Focus Visible Indicator */
+:focus-visible {
+    outline: 3px solid var(--color-focus) !important;
+    outline-offset: 3px !important;
+}
+
+/* WCAG 2.2 Target Size (Minimum 44x44px for interactive elements) */
+button, a.cta-button, a.plan-button, input, select, textarea {
+    min-height: 44px;
+    min-width: 44px;
+}
+
+/* Screen Reader Only Utility */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* WCAG 2.2 Motion Reduction Support */
+@media (prefers-reduced-motion: reduce) {
+    *, ::before, ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
 }
 
 /* Header Styles */
@@ -117,19 +174,69 @@ footer a {
 
 /* Call to Action Button Styles */
 .cta-button, .plan-button {
-    display: inline-block;
-    padding: 1rem 2rem;
-    background: var(--color-secondary);
-    color: var(--color-text-primary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.85rem 1.75rem;
+    background: var(--color-primary);
+    color: #FFFFFF;
     text-decoration: none;
-    border-radius: 5px;
+    border-radius: 6px;
     font-weight: bold;
     margin-top: 1rem;
-    transition: transform 0.2s ease;
+    transition: transform 0.2s ease, background-color 0.2s ease;
 }
 
 .cta-button:hover, .plan-button:hover {
-    transform: scale(1.05);
+    background: var(--color-secondary);
+    transform: scale(1.03);
+}
+
+/* Responsive Media Queries (375px, 768px, 1024px, 1440px) */
+@media (max-width: 375px) {
+    header h1 {
+        font-size: 1.5rem;
+    }
+    header nav {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        padding: 0.5rem 0;
+    }
+    section {
+        padding: 2rem 1rem;
+    }
+    section h2 {
+        font-size: 1.75rem;
+    }
+    #ai-agent-chatbox {
+        width: 90vw;
+        right: 5vw;
+    }
+}
+
+@media (min-width: 376px) and (max-width: 768px) {
+    section {
+        padding: 3rem 1.5rem;
+    }
+    header nav {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.75rem;
+    }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+    .features-grid, .pricing-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 1025px) {
+    section {
+        max-width: 1320px;
+    }
 }
 
 /* FAQ Section */
