@@ -1,11 +1,11 @@
 import sqlite3
 import json
 
-conn = sqlite3.connect("sga_cd_main.db")
+conn = sqlite3.connect("test_simulation_disposable.db")
 cursor = conn.cursor()
 
 print("=" * 80)
-print("🔍 VERIFICACIÓN DE INTEGRIDAD Y PERFORMANCE TRAS LA SIMULACIÓN MASIVA")
+print("🔍 VERIFICACIÓN DE INTEGRIDAD Y PERFORMANCE EN BASE DESECHABLE TRAS LA SIMULACIÓN")
 print("=" * 80)
 
 # 1. Muestra de Entidades y aislamiento por Tenant

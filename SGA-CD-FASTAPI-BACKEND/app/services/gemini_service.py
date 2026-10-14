@@ -1,20 +1,27 @@
 import os
 import json
 import logging
-from typing import Dict, Any
-from google import genai
+from typing import Dict, Any, Optional
 from app.core.config import settings
 
 logger = logging.getLogger("gemini_service")
+
+# Safe dynamic import of google.genai to prevent startup crashes if SDK is absent
+genai_client_module = None
+try:
+    from google import genai
+    genai_client_module = genai
+except ImportError:
+    logger.warning("El paquete 'google-genai' no está instalado. Se utilizarán plantillas metodológicas estructuradas de respaldo.")
 
 class GeminiPlanService:
     def __init__(self):
         # Retrieve Gemini API Key securely from environment or settings
         self.api_key = getattr(settings, "GEMINI_API_KEY", os.getenv("GEMINI_API_KEY"))
         self.client = None
-        if self.api_key:
+        if self.api_key and genai_client_module:
             try:
-                self.client = genai.Client(api_key=self.api_key)
+                self.client = genai_client_module.Client(api_key=self.api_key)
             except Exception as e:
                 logger.error(f"Error al inicializar cliente Gemini: {e}")
 
@@ -67,7 +74,7 @@ class GeminiPlanService:
         """
 
         if self.client:
-            models_to_try = ["gemini-2.5-flash", "gemini-1.5-flash", "gemini-2.0-flash", "gemini-pro"]
+            models_to_try = ["gemini-1.5-flash", "gemini-2.0-flash", "gemini-pro"]
             for model_name in models_to_try:
                 try:
                     response = self.client.models.generate_content(
@@ -78,7 +85,7 @@ class GeminiPlanService:
                     if text.startswith("```json"):
                         text = text[7:]
                     if text.startswith("```"):
-                        text = text[3:]
+                        text = text[:-3]
                     if text.endswith("```"):
                         text = text[:-3]
 

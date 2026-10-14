@@ -2,6 +2,7 @@ import sys
 import os
 import time
 import json
+import copy
 from datetime import datetime, timezone
 
 sys.path.insert(0, 'SGA-CD-FASTAPI-BACKEND')
@@ -10,7 +11,8 @@ sys.path.insert(0, 'SGA-CD-DB.git')
 from sqlalchemy import create_engine, text
 from app.services.gemini_service import gemini_plan_service
 
-SQLALCHEMY_DATABASE_URL = "sqlite:///./sga_cd_main.db"
+# Dedicated Disposable Test Database for Mass Data Simulation
+SQLALCHEMY_DATABASE_URL = "sqlite:///./test_simulation_disposable.db"
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL,
     connect_args={"check_same_thread": False, "timeout": 60},
@@ -28,14 +30,15 @@ DISCIPLINAS_CULTURA = [
 
 def run_annual_simulation():
     print("=" * 80)
-    print("🚀 INICIANDO EJERCICIO DE SIMULACIÓN MASIVA ULTRARRÁPIDO - SGA-CD VISIÓN 0.1")
+    print("🚀 INICIANDO EJERCICIO DE SIMULACIÓN MASIVA EN BASE DE PRUEBA DESECHABLE")
+    print("   DATABASE: test_simulation_disposable.db")
     print("   ESCALA: 200 Empresas/Entidades | 4.000 Profesores | 200.000 Estudiantes")
     print("   CICLO: Enero (Inscripciones) a Diciembre (Noche de los Mejores & Premiación)")
     print("=" * 80)
 
     start_time = time.time()
 
-    # Apply High-Performance SQLite Pragmas
+    # Apply High-Performance SQLite Pragmas on Disposable DB
     raw_conn = engine.raw_connection()
     cursor = raw_conn.cursor()
     cursor.execute("PRAGMA synchronous = OFF;")
@@ -43,8 +46,8 @@ def run_annual_simulation():
     cursor.execute("PRAGMA cache_size = 100000;")
     raw_conn.commit()
 
-    # 1. Crear esquemas básicos si no existen
-    print("\n[FASE 1/5] Inicializando Tablas e Índices del Sistema...")
+    # 1. Crear esquemas en la base desechable
+    print("\n[FASE 1/5] Inicializando Tablas e Índices en Base de Datos Desechable...")
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS inquilinos (
             id INTEGER PRIMARY KEY,
@@ -117,7 +120,7 @@ def run_annual_simulation():
     """)
     raw_conn.commit()
 
-    print("✅ Tablas del sistema listas.")
+    print("✅ Tablas de la base desechable listas.")
 
     # 2. Obtener Planes de Trabajo por Disciplina
     print("\n[FASE 2/5] Generando Planes de Trabajo Maestros con Google Gemini API...")
@@ -127,13 +130,13 @@ def run_annual_simulation():
     gemini_culture_sample = gemini_plan_service.generate_annual_work_plan("Artes y Cultura", "Cultura")
 
     for disc in DISCIPLINAS_DEPORTES:
-        p = dict(gemini_sports_sample)
+        p = copy.deepcopy(gemini_sports_sample)
         p["disciplina"] = disc
         p["titulo_plan"] = f"Plan Anual de Formación Metodológica en {disc} (Deportes)"
         master_plans[disc] = p
 
     for disc in DISCIPLINAS_CULTURA:
-        p = dict(gemini_culture_sample)
+        p = copy.deepcopy(gemini_culture_sample)
         p["disciplina"] = disc
         p["titulo_plan"] = f"Plan Anual de Formación Metodológica en {disc} (Cultura)"
         master_plans[disc] = p
@@ -257,7 +260,7 @@ def run_annual_simulation():
             alumno_id += 1
             idx += 1
 
-    print(f"   -> Listas en memoria construidas ({idx} registros) en {round(time.time() - t0, 2)}s. Insertando en DB...")
+    print(f"   -> Listas en memoria construidas ({idx} registros) en {round(time.time() - t0, 2)}s. Insertando en DB desechable...")
     t0 = time.time()
 
     cursor.executemany("""
@@ -310,7 +313,7 @@ def run_annual_simulation():
     print(f"🎉 EJERCICIO DE SIMULACIÓN COMPLETADO CON ÉXITO EN {elapsed} SEGUNDOS")
     print("=" * 80)
 
-    # Verificar Conteos Finales en la Base de Datos
+    # Verificar Conteos Finales en la Base de Datos Desechable
     cursor.execute("SELECT COUNT(*) FROM inquilinos;")
     count_inq = cursor.fetchone()[0]
 
@@ -329,7 +332,7 @@ def run_annual_simulation():
     cursor.execute("SELECT COUNT(*) FROM noche_de_los_mejores_premiacion;")
     count_prem = cursor.fetchone()[0]
 
-    print("\n📊 RESUMEN DE REGISTROS EN BASE DE DATOS:")
+    print("\n📊 RESUMEN DE REGISTROS EN BASE DE DATOS DESECHABLE:")
     print(f"   • Empresas / Entidades (Tenants): {count_inq:,}")
     print(f"   • Profesores / Instructores:     {count_prof:,}")
     print(f"   • Planes de Trabajo Docentes:    {count_plan:,}")
