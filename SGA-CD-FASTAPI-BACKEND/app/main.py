@@ -98,12 +98,19 @@ async def add_security_headers(request: Request, call_next):
     )
     return response
 
+# Custom StaticFiles class to serve assets with Immutable Cache-Control headers
+class CachedStaticFiles(StaticFiles):
+    def file_response(self, *args, **kwargs) -> Response:
+        response = super().file_response(*args, **kwargs)
+        response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+        return response
+
 # Create static directory if it doesn't exist
 static_dir = "app/static"
 if not os.path.exists(static_dir):
     os.makedirs(static_dir)
 
-app.mount("/static", StaticFiles(directory=static_dir), name="static")
+app.mount("/static", CachedStaticFiles(directory=static_dir), name="static")
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
 

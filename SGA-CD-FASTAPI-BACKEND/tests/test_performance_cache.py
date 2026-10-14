@@ -79,3 +79,18 @@ def test_dropdown_endpoint_caching_performance(client, db):
     db.delete(item1)
     db.delete(user)
     db.commit()
+
+def test_static_files_cache_control_headers(client):
+    import os
+    test_file_path = "app/static/test_asset.txt"
+    with open(test_file_path, "w") as f:
+        f.write("static asset content")
+    try:
+        response = client.get("/static/test_asset.txt")
+        assert response.status_code == 200
+        assert "Cache-Control" in response.headers
+        assert "max-age=31536000" in response.headers["Cache-Control"]
+        assert "immutable" in response.headers["Cache-Control"]
+    finally:
+        if os.path.exists(test_file_path):
+            os.remove(test_file_path)
