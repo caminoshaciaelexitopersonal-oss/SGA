@@ -1,11 +1,72 @@
-from fastapi import FastAPI, Request, Response
+import os
+import time
+import uuid
+import logging
+from fastapi import FastAPI, Request, Response, status
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from app.api.v1.api import api_router
 from app.core.config import settings
-import os
+from app.core.logging_config import setup_logging
+
+# Initialize Structured Logging
+logger = setup_logging()
 
 app = FastAPI(title=settings.PROJECT_NAME)
+
+# Correlation ID and Request Latency Middleware
+@app.middleware("http")
+async def correlation_id_and_logging_middleware(request: Request, call_next):
+    correlation_id = request.headers.get("X-Correlation-ID") or str(uuid.uuid4())
+    request.state.correlation_id = correlation_id
+
+    start_time = time.time()
+    response: Response = await call_next(request)
+    duration_ms = round((time.time() - start_time) * 1000, 2)
+
+    response.headers["X-Correlation-ID"] = correlation_id
+
+    # Log request details with structured context
+    log_extra = {
+        "correlation_id": correlation_id,
+        "method": request.method,
+        "path": request.url.path,
+        "status_code": response.status_code,
+        "duration_ms": duration_ms,
+        "client_ip": request.client.host if request.client else "127.0.0.1"
+    }
+
+    if duration_ms > 1000:
+        logging.warning(
+            f"[OPERATIONAL ALERT / SLOW REQUEST] Path={request.url.path} Duration={duration_ms}ms",
+            extra=log_extra
+        )
+    else:
+        logging.info(
+            f"HTTP Request Processed: {request.method} {request.url.path} -> {response.status_code}",
+            extra=log_extra
+        )
+
+    return response
+
+# Global Unhandled Exception Handler
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    correlation_id = getattr(request.state, "correlation_id", str(uuid.uuid4()))
+    logging.error(
+        f"[UNHANDLED EXCEPTION] Path={request.url.path} Message={str(exc)}",
+        exc_info=exc,
+        extra={"correlation_id": correlation_id, "path": request.url.path}
+    )
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={
+            "detail": "Error interno del servidor. Por favor, contacte a soporte e indique el ID de correlación.",
+            "correlation_id": correlation_id
+        },
+        headers={"X-Correlation-ID": correlation_id}
+    )
 
 # CORS Configuration
 origins = getattr(settings, "BACKEND_CORS_ORIGINS", ["*"])
