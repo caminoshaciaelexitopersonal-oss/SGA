@@ -50,12 +50,12 @@ async def correlation_id_and_logging_middleware(request: Request, call_next):
 
     return response
 
-# Global Unhandled Exception Handler
+# Global Unhandled Exception Handler (500)
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
     correlation_id = getattr(request.state, "correlation_id", str(uuid.uuid4()))
     logging.error(
-        f"[UNHANDLED EXCEPTION] Path={request.url.path} Message={str(exc)}",
+        f"[UNHANDLED EXCEPTION 500] Path={request.url.path} Message={str(exc)}",
         exc_info=exc,
         extra={"correlation_id": correlation_id, "path": request.url.path}
     )
@@ -66,6 +66,19 @@ async def global_exception_handler(request: Request, exc: Exception):
             "correlation_id": correlation_id
         },
         headers={"X-Correlation-ID": correlation_id}
+    )
+
+# Service Unavailable Handler (503)
+@app.exception_handler(503)
+async def service_unavailable_handler(request: Request, exc: Exception):
+    correlation_id = getattr(request.state, "correlation_id", str(uuid.uuid4()))
+    return JSONResponse(
+        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+        content={
+            "detail": "El servicio se encuentra temporalmente en mantenimiento o no disponible.",
+            "correlation_id": correlation_id
+        },
+        headers={"X-Correlation-ID": correlation_id, "Retry-After": "60"}
     )
 
 # CORS Configuration
