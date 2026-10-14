@@ -160,7 +160,15 @@ def register_user(
         subject="Bienvenido a SGA-CD",
         body_text=f"Hola {user_in.nombre_completo or user_in.nombre_usuario}, tu cuenta ha sido creada exitosamente en SGA-CD."
     )
-    return user
+    return {
+        "id": user.id,
+        "email": user.correo,
+        "nombre_completo": user.nombre_completo,
+        "rango_edad": user_in.rango_edad,
+        "consentimiento_padre": user_in.consentimiento_padre,
+        "activo": user.activo,
+        "roles": [r.nombre for r in user.roles] if user.roles else [user_in.rol]
+    }
 
 
 @router.get("/unsubscribe", dependencies=[Depends(rate_limit("unsubscribe", max_requests=10, window_seconds=60))])
