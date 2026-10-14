@@ -10,9 +10,9 @@
 </head>
 <body>
 
-    <header>
+    <header role="banner">
         <h1 id="header-title">SGA-CD</h1>
-        <nav>
+        <nav role="navigation" aria-label="Navegación Principal">
             <a href="#funcionalidades">Funcionalidades</a>
             <a href="#partners">Nuestros Clientes</a>
             <a href="#faq">Preguntas</a>
@@ -21,7 +21,7 @@
         </nav>
     </header>
 
-    <main>
+    <main role="main">
         <section id="hero">
             <!-- El slider se insertará aquí dinámicamente -->
             <div id="hero-slider" class="slider-container"></div>
@@ -93,9 +93,9 @@
     </footer>
 
     <!-- AI Sales Agent Widget -->
-    <div id="ai-agent-widget">
-        <button id="ai-agent-toggle">🤖</button>
-        <div id="ai-agent-chatbox" class="hidden">
+    <div id="ai-agent-widget" role="region" aria-label="Asistente Virtual de Ventas">
+        <button id="ai-agent-toggle" aria-label="Abrir asistente de ventas por IA" aria-expanded="false">🤖</button>
+        <div id="ai-agent-chatbox" class="hidden" role="dialog" aria-label="Chat del Asistente Virtual">
             <div id="chatbox-header">
                 Asistente de Ventas
             </div>
