@@ -310,11 +310,11 @@ async function saveAttendanceOffline(record) {
         const db = await openAttendanceDB();
         const tx = db.transaction(STORE_NAME, 'readwrite');
         const store = tx.objectStore(STORE_NAME);
-        store.add({ ...record, synced: false, timestamp: new Date().toISOString() });
+        store.add({ ...record, synced: record.synced ?? false, timestamp: record.timestamp || new Date().toISOString() });
         return true;
     } catch (e) {
         const current = JSON.parse(localStorage.getItem('sga_offline_attendance') || '[]');
-        current.push({ ...record, synced: false, timestamp: new Date().toISOString() });
+        current.push({ ...record, synced: record.synced ?? false, timestamp: record.timestamp || new Date().toISOString() });
         localStorage.setItem('sga_offline_attendance', JSON.stringify(current));
         return true;
     }

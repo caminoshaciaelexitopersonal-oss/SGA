@@ -435,12 +435,12 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (e) {
             // Default high-performance fallback feed
             liveMonitorEvents = [
-                { id: 1, categoria: 'deporte', titulo: 'Copa Intercolegial de Taekwondo 2025', detalle: 'Fase eliminatoria regional - 48 atletas acreditados.', estado: 'En Vivo', icono: 'fa-solid fa-trophy' },
-                { id: 2, categoria: 'cultura', titulo: 'Encuentro Nacional de Músicas Colombianas', detalle: 'Taller de vallenato y música andina en auditorio central.', estado: 'Programado', icono: 'fa-solid fa-music' },
-                { id: 3, categoria: 'deporte', titulo: 'Torneo de Natación Infantil & Juvenil', detalle: 'Pruebas de 100m libres y relevos mixtos.', estado: 'En Vivo', icono: 'fa-solid fa-person-swimming' },
-                { id: 4, categoria: 'cultura', titulo: 'Exposición de Artes Plásticas & Escultura', detalle: 'Muestra estudiantil anual en galería institucional.', estado: 'Inscripciones', icono: 'fa-solid fa-palette' },
-                { id: 5, categoria: 'deporte', titulo: 'Liga de Baloncesto Institucional', detalle: 'Jornada 5: Selección A vs. Campus Norte.', estado: 'Programado', icono: 'fa-solid fa-basketball' },
-                { id: 6, categoria: 'cultura', titulo: 'Muestra de Danza Folclórica & Contemporánea', detalle: 'Gala nocturna de clausura académica.', estado: 'Próximo', icono: 'fa-solid fa-masks-theater' }
+                { id: 1, categoria: 'deporte', titulo: 'Disciplina Deportiva: Copa Intercolegial de Taekwondo 2025', detalle: 'Fase eliminatoria regional - 48 atletas acreditados.', estado: 'En Vivo', icono: 'fa-solid fa-trophy' },
+                { id: 2, categoria: 'cultura', titulo: 'Taller Cultural - Instrumentos: Músicas Colombianas (Guitarra/Arpa)', detalle: 'Modalidad de vallenato y música tradicional en auditorio central.', estado: 'Programado', icono: 'fa-solid fa-music' },
+                { id: 3, categoria: 'deporte', titulo: 'Disciplina Deportiva: Torneo de Natación Infantil & Juvenil', detalle: 'Pruebas de 100m libres y relevos mixtos.', estado: 'En Vivo', icono: 'fa-solid fa-person-swimming' },
+                { id: 4, categoria: 'cultura', titulo: 'Taller Cultural: Exposición de Artes Plásticas & Escultura', detalle: 'Muestra estudiantil anual en galería institucional.', estado: 'Inscripciones', icono: 'fa-solid fa-palette' },
+                { id: 5, categoria: 'deporte', titulo: 'Disciplina Deportiva: Liga de Baloncesto Institucional', detalle: 'Jornada 5: Selección A vs. Campus Norte.', estado: 'Programado', icono: 'fa-solid fa-basketball' },
+                { id: 6, categoria: 'cultura', titulo: 'Taller Cultural - Danza: Joropo/Llanera & Salsa', detalle: 'Gala nocturna de clausura académica.', estado: 'Próximo', icono: 'fa-solid fa-masks-theater' }
             ];
         }
 
@@ -475,7 +475,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const socialPayload = encodeURIComponent(`¡Orgullo Institucional SGA-CD! Sigue los detalles de: ${ev.titulo} — ${ev.detalle} #SGACD #Deporte #Cultura`);
 
             card.innerHTML = `
-                <div style="display:flex; justify-shadow:space-between; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
                     <i class="${cleanIcon}" style="font-size:1.8rem; margin-bottom:0;"></i>
                     <span style="font-size:0.75rem; font-weight:700; padding:0.25rem 0.65rem; border-radius:12px; background:rgba(56,189,248,0.15); color:var(--color-accent-cyan); border:1px solid var(--color-border-specular);">
                         ${cleanEstado}
@@ -528,7 +528,13 @@ document.addEventListener('DOMContentLoaded', () => {
             event: eventName,
             timestamp: new Date().toISOString(),
             url: window.location.href,
-            payload: payload
+            payload: {
+                ...payload,
+                taxonomy_domain: {
+                    cultura: "Talleres / Modalidades (Danza: Joropo/Llanera, Salsa, Vallenato | Instrumentos Culturales: Guitarra, Arpa)",
+                    deportes: "Disciplinas Deportivas"
+                }
+            }
         };
         console.log('[Agent-Reach Telemetry]:', telemetryData);
 

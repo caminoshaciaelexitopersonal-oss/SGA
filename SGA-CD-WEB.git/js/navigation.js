@@ -32,7 +32,7 @@ const navLinks = {
         { text: 'Dashboard', icon: 'fa-tachometer-alt' },
         { text: 'Supervisar Actividades', icon: 'fa-tasks' },
         { text: 'Gestionar Eventos', icon: 'fa-calendar-plus' },
-        { text: 'Gestionar Disciplinas', icon: 'fa-edit' },
+        { text: 'Gestionar Disciplinas Deportivas y Modalidades', icon: 'fa-edit' },
         { text: 'Reportes', icon: 'fa-chart-line' }
     ],
     // Rol 5: Técnico o Asistente de Área
@@ -40,7 +40,7 @@ const navLinks = {
         { text: 'Dashboard', icon: 'fa-tachometer-alt' },
         { text: 'Ver Actividades', icon: 'fa-eye' },
         { text: 'Gestionar Eventos', icon: 'fa-calendar-check' },
-        { text: 'Ver Disciplinas', icon: 'fa-search' },
+        { text: 'Ver Disciplinas Deportivas y Modalidades', icon: 'fa-search' },
         { text: 'Reportes', icon: 'fa-file-alt' }
     ],
     // Rol 6: Coordinador

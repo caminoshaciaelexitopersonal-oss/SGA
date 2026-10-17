@@ -97,17 +97,17 @@ async function renderGestionarEventosView(token) {
 }
 
 /**
- * Renderiza la vista para Gestionar Disciplinas.
+ * Renderiza la vista para Gestionar Disciplinas Deportivas y Modalidades.
  */
 async function renderGestionarDisciplinasView(token) {
     const contentArea = document.getElementById('content-area');
-    contentArea.innerHTML = `<div class="view-header"><h2><i class="fas fa-edit"></i> Gestionar Disciplinas</h2></div><p>Cargando disciplinas...</p>`;
+    contentArea.innerHTML = `<div class="view-header"><h2><i class="fas fa-edit"></i> Gestionar Disciplinas Deportivas y Modalidades</h2></div><p>Cargando disciplinas deportivas y modalidades culturales...</p>`;
 
     try {
         const response = await fetch(`${config.apiBaseUrl}/api/v1/disciplinas`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
-        if (!response.ok) throw new Error('No se pudo obtener la lista de disciplinas.');
+        if (!response.ok) throw new Error('No se pudo obtener la lista de disciplinas deportivas y modalidades.');
         const disciplinas = await response.json();
 
         const rows = disciplinas.map(item => `
@@ -118,20 +118,24 @@ async function renderGestionarDisciplinasView(token) {
                     <button class="btn-secondary btn-editar" data-id="${item.id}">Editar</button>
                 </td>
             </tr>
-        `).join('') || '<tr><td colspan="3">No hay disciplinas para gestionar.</td></tr>';
+        `).join('') || '<tr><td colspan="3">No hay disciplinas deportivas o modalidades registradas para gestionar.</td></tr>';
 
         contentArea.innerHTML = `
             <div class="view-header">
-                <h2><i class="fas fa-edit"></i> Gestionar Disciplinas</h2>
-                <button class="btn-primary">Crear Nueva Disciplina</button>
+                <h2><i class="fas fa-edit"></i> Gestionar Disciplinas Deportivas y Modalidades</h2>
+                <button class="btn-primary">Crear Disciplina Deportiva / Modalidad</button>
             </div>
+            <p style="color: var(--color-text-muted); font-size: 0.9rem;">
+                Área de Cultura: Talleres / Modalidades (Danza: Joropo/Llanera, Salsa, Vallenato | Instrumentos Culturales: Guitarra, Arpa)<br>
+                Área de Deportes: Disciplinas Deportivas.
+            </p>
             <table class="data-table">
                 <thead><tr><th>Nombre</th><th>Área</th><th>Acciones</th></tr></thead>
                 <tbody>${rows}</tbody>
             </table>
         `;
     } catch (error) {
-        contentArea.innerHTML = `<p class="message-error">Error al cargar las disciplinas: ${error.message}</p>`;
+        contentArea.innerHTML = `<p class="message-error">Error al cargar las disciplinas deportivas y modalidades: ${error.message}</p>`;
     }
 }
 
