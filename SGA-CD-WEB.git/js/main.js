@@ -483,7 +483,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
                 <h3>${cleanTitle}</h3>
                 <p style="font-size:0.9rem; margin-bottom:1rem;">${cleanDetalle}</p>
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:auto; pt:0.5rem;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:auto; padding-top:0.5rem;">
                     <a href="https://twitter.com/intent/tweet?text=${socialPayload}" target="_blank" rel="noopener noreferrer" class="social-share-btn" style="font-size:0.8rem; color:var(--color-accent-cyan); text-decoration:none; display:inline-flex; align-items:center; gap:0.35rem;">
                         <i class="fa-brands fa-x-twitter"></i> Compartir
                     </a>

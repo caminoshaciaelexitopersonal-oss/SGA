@@ -29,19 +29,19 @@ const navLinks = {
     ],
     // Rol 4: Profesional de Área
     profesional_area: [
-        { text: 'Dashboard', icon: 'fa-tachometer-alt' },
-        { text: 'Supervisar Actividades', icon: 'fa-tasks' },
-        { text: 'Gestionar Eventos', icon: 'fa-calendar-plus' },
-        { text: 'Gestionar Disciplinas Deportivas y Modalidades', icon: 'fa-edit' },
-        { text: 'Reportes', icon: 'fa-chart-line' }
+        { text: 'Dashboard', view: 'dashboard', icon: 'fa-tachometer-alt' },
+        { text: 'Supervisar Actividades', view: 'supervisar-actividades', icon: 'fa-tasks' },
+        { text: 'Gestionar Eventos', view: 'gestionar-eventos', icon: 'fa-calendar-plus' },
+        { text: 'Gestionar Disciplinas Deportivas y Modalidades', view: 'gestionar-disciplinas', icon: 'fa-edit' },
+        { text: 'Reportes', view: 'reportes-operativos', icon: 'fa-chart-line' }
     ],
     // Rol 5: Técnico o Asistente de Área
     tecnico_area: [
-        { text: 'Dashboard', icon: 'fa-tachometer-alt' },
-        { text: 'Ver Actividades', icon: 'fa-eye' },
-        { text: 'Gestionar Eventos', icon: 'fa-calendar-check' },
-        { text: 'Ver Disciplinas Deportivas y Modalidades', icon: 'fa-search' },
-        { text: 'Reportes', icon: 'fa-file-alt' }
+        { text: 'Dashboard', view: 'dashboard', icon: 'fa-tachometer-alt' },
+        { text: 'Ver Actividades', view: 'asistir-gestion-usuarios', icon: 'fa-eye' },
+        { text: 'Gestionar Eventos', view: 'gestionar-eventos', icon: 'fa-calendar-check' },
+        { text: 'Ver Disciplinas Deportivas y Modalidades', view: 'gestionar-disciplinas', icon: 'fa-search' },
+        { text: 'Reportes', view: 'reportes-operativos', icon: 'fa-file-alt' }
     ],
     // Rol 6: Coordinador
     coordinador: [
@@ -69,29 +69,29 @@ const navLinks = {
     ],
     // Rol 9: Padre o Acudiente
     padre_acudiente: [
-        { text: 'Mis Alumnos', icon: 'fa-child' },
-        { text: 'Inscripciones', icon: 'fa-file-signature' },
-        { text: 'Autorizaciones', icon: 'fa-user-edit' },
-        { text: 'Reportes de Progreso', icon: 'fa-chart-bar' }
+        { text: 'Mis Alumnos', view: 'mis-alumnos', icon: 'fa-child' },
+        { text: 'Inscripciones', view: 'mis-alumnos', icon: 'fa-file-signature' },
+        { text: 'Autorizaciones', view: 'mis-alumnos', icon: 'fa-user-edit' },
+        { text: 'Reportes de Progreso', view: 'mis-alumnos', icon: 'fa-chart-bar' }
     ],
     // Rol 10: Jefe de Almacén
     jefe_almacen: [
-        { text: 'Dashboard Inventario', icon: 'fa-boxes' },
-        { text: 'Registrar Movimientos', icon: 'fa-dolly-flatbed' },
-        { text: 'Stock y Reposición', icon: 'fa-sort-amount-up' },
-        { text: 'Hojas de Vida', icon: 'fa-file-invoice' },
-        { text: 'Reportes de Inventario', icon: 'fa-file-excel' }
+        { text: 'Dashboard Inventario', view: 'dashboard-inventario', icon: 'fa-boxes' },
+        { text: 'Registrar Movimientos', view: 'registrar-movimientos', icon: 'fa-dolly-flatbed' },
+        { text: 'Stock y Reposición', view: 'stock-y-reposicion', icon: 'fa-sort-amount-up' },
+        { text: 'Hojas de Vida', view: 'hojas-de-vida', icon: 'fa-file-invoice' },
+        { text: 'Reportes de Inventario', view: 'reportes-de-inventario', icon: 'fa-file-excel' }
     ],
     // Rol 11: Almacenista (hereda de jefe_almacen, pero con menos permisos)
     almacenista: [
-        { text: 'Ver Inventario', icon: 'fa-boxes' },
-        { text: 'Registrar Movimientos', icon: 'fa-dolly-flatbed' }
+        { text: 'Ver Inventario', view: 'ver-inventario', icon: 'fa-boxes' },
+        { text: 'Registrar Movimientos', view: 'registrar-movimientos', icon: 'fa-dolly-flatbed' }
     ],
     // Rol 12: Jefe de Escenarios
     jefe_escenarios: [
-        { text: 'Calendario de Escenarios', icon: 'fa-calendar-alt' },
-        { text: 'Asignar Espacios', icon: 'fa-map-marker-alt' },
-        { text: 'Mantenimiento', icon: 'fa-tools' }
+        { text: 'Calendario de Escenarios', view: 'calendario-de-escenarios', icon: 'fa-calendar-alt' },
+        { text: 'Asignar Espacios', view: 'asignar-espacios', icon: 'fa-map-marker-alt' },
+        { text: 'Mantenimiento', view: 'mantenimiento', icon: 'fa-tools' }
     ],
     // Rol por defecto si no se encuentra uno
     default: [

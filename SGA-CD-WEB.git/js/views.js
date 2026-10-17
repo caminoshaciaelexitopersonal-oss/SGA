@@ -40,8 +40,22 @@ async function renderContentForView(viewName, token, roleName = 'default') {
         if (typeof renderer === 'function') {
             await renderer(token, roleName);
         } else {
-            console.warn(`No se encontró un renderer para la vista '${viewName}' para el rol '${roleName}' o en común.`);
-            contentArea.innerHTML = `<div class="view-error"><h2><i class="fas fa-exclamation-triangle"></i> Vista no encontrada</h2><p>La vista solicitada (<strong>${viewName}</strong>) no está implementada para su rol.</p></div>`;
+            // Fallback routing: look for default/dashboard or any common view registered for this role
+            const roleViews = window.sgaViewRegistry[roleName];
+            if (roleViews && typeof Object.values(roleViews)[0] === 'function') {
+                console.warn(`Vista '${viewName}' no encontrada para '${roleName}'. Redirigiendo a vista por defecto.`);
+                await Object.values(roleViews)[0](token, roleName);
+            } else {
+                console.warn(`No se encontró un renderer para la vista '${viewName}' para el rol '${roleName}' o en común.`);
+                contentArea.innerHTML = `
+                    <div class="card" style="text-align:center; padding:3rem; background:var(--color-surface-card); border:1px solid var(--color-border-specular);">
+                        <h2><i class="fas fa-compass" style="color:var(--color-accent-cyan);"></i> Vista del Módulo Institucional</h2>
+                        <p style="color:var(--color-text-muted); margin:1rem 0;">La sección (<strong>${viewName}</strong>) está configurada para el rol <strong>${roleName}</strong> en el Área de Deportes y Cultura.</p>
+                        <button class="btn-primary" onclick="renderContentForView('dashboard', '${token}', '${roleName}')">
+                            <i class="fas fa-arrow-left"></i> Volver al Panel Principal
+                        </button>
+                    </div>`;
+            }
         }
     } catch (error) {
         console.error(`Error al renderizar la vista '${viewName}':`, error);
