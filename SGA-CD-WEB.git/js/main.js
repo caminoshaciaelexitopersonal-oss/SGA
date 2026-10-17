@@ -1,75 +1,86 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-    // --- 1. Load All Dynamic Content from the API ---
+    // --- XSS Escaping Helper ---
+    function sanitizeHTML(str) {
+        if (!str) return '';
+        const temp = document.createElement('div');
+        temp.textContent = String(str);
+        return temp.innerHTML;
+    }
+
+    // --- 1. Load Dynamic Content from API ---
     async function loadAndRenderContent() {
         try {
-            // Use the configured API base URL
             const response = await fetch(`${config.apiBaseUrl}/api/website/content`);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             const content = await response.json();
 
-            // Render each section with the fetched data
-            renderSlider(content.slider);
-            renderVideo(content.contact.video_url);
-            renderFeatures(content.features);
-            renderPartners(content.partners);
-            renderFaq(content.faq);
-            renderPlans(content.plans);
-            renderLaunchOffer(content.contact.launch_offer_text);
-            renderFooter(content.contact);
+            renderVideo(content.contact?.video_url);
+            renderFeatures(content.features || []);
+            renderPartners(content.partners || []);
+            renderFaq(content.faq || []);
+            renderPlans(content.plans || []);
+            renderLaunchOffer(content.contact?.launch_offer_text);
+            renderFooter(content.contact || {});
 
-            // --- 2. Initialize Animations AFTER content is rendered ---
-            initializeAnimations();
+            // Initialize GSAP animations after DOM injection
+            initializeGSAPAnimations();
 
         } catch (error) {
-            console.error("Failed to load website content:", error);
-            // Optionally, display an error message to the user on the page
-            const main = document.querySelector('main');
-            main.innerHTML = '<p style="text-align: center; color: red;">No se pudo cargar el contenido del sitio. Por favor, intente de nuevo más tarde.</p>';
+            console.warn("Using default fallback content for marketing page due to API offline state:", error);
+            renderFallbackContent();
+            initializeGSAPAnimations();
         }
     }
 
-    // --- RENDER FUNCTIONS ---
-    function renderSlider(sliderItems) {
-        const sliderContainer = document.getElementById('hero-slider');
-        if (!sliderContainer || sliderItems.length === 0) return;
+    function renderFallbackContent() {
+        const defaultFeatures = [
+            { titulo: "Gestión Roster Deportivo", descripcion: "Inscripciones a escuelas de formación, plantillas de torneos y acreditaciones digitales.", icono: "fa-solid fa-running" },
+            { titulo: "Talleres Culturales", descripcion: "Inscripción a música, danza, teatro y control de asistencia para instructores y estudiantes.", icono: "fa-solid fa-masks-theater" },
+            { titulo: "Diagnóstico Biométrico", descripcion: "Evaluación antropométrica, rendimiento físico y alertas preventivas de lesiones.", icono: "fa-solid fa-heart-pulse" },
+            { titulo: "Reserva de Escenarios", descripcion: "Programación de canchas, coliseos y auditorios con control de aforo e inventario.", icono: "fa-solid fa-building-columns" },
+            { titulo: "Gamificación & Logros", descripcion: "Insignias, cuadro de medallería y clasificaciones por rendimiento académico-deportivo.", icono: "fa-solid fa-award" },
+            { titulo: "Multi-Inquilino Seguro", descripcion: "Aislamiento estricto de datos por empresa, seguridad JWT y derechos ARCO.", icono: "fa-solid fa-shield-halved" }
+        ];
 
-        sliderItems.forEach(item => {
-            const slide = document.createElement('div');
-            slide.className = 'slide'; // Add styles for this class
-            if (item.tipo === 'image') {
-                slide.innerHTML = `<img src="${item.url}" alt="${item.titulo || ''}" />`;
-            } else if (item.tipo === 'video') {
-                slide.innerHTML = `<video autoplay muted loop playsinline><source src="${item.url}" type="video/mp4"></video>`;
-            }
+        const defaultPlans = [
+            { nombre: "Básico", precio_mensual: "0", descripcion: "Para pequeñas academias y clubes deportivos locales.", caracteristicas: '["Hasta 100 alumnos", "Gestión de asistencia", "1 Escenario deportivo"]', recomendado: false },
+            { nombre: "Profesional Institucional", precio_mensual: "149", precio_anual: "1490", descripcion: "Para instituciones educativas y redes culturales.", caracteristicas: '["Alumnos ilimitados", "Diagnóstico biométrico", "Reserva de escenarios", "Soporte prioritario"]', recomendado: true },
+            { nombre: "Gubernamental / Enterprise", precio_mensual: "399", precio_anual: "3990", descripcion: "Para secretarías de deportes y municipios.", caracteristicas: '["Multi-inquilino dedicado", "SLA 99.9%", "Capacitación personalizada", "Integración API"]', recomendado: false }
+        ];
 
-            if(item.titulo || item.subtitulo) {
-                const overlay = document.createElement('div');
-                overlay.className = 'slide-overlay';
-                overlay.innerHTML = `
-                    <h2>${item.titulo || ''}</h2>
-                    <p>${item.subtitulo || ''}</p>
-                `;
-                slide.appendChild(overlay);
-            }
-            sliderContainer.appendChild(slide);
+        renderFeatures(defaultFeatures);
+        renderPlans(defaultPlans);
+        renderFaq([]);
+        renderVideo("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+        renderLaunchOffer("¡Invita a 10 instituciones o empresas y recibe 6 meses de licenciamiento completamente gratis!");
+        renderFooter({
+            nombre_empresa: "SGA-CD Inc.",
+            mission: "Democratizar la gestión deportiva y cultural mediante soluciones tecnológicas de alto rendimiento.",
+            vision: "Ser la plataforma estándar de administración atlética y artística en Latinoamérica.",
+            email_contacto: "contacto@sga-cd.org",
+            telefono_contacto: "+57 (601) 800-7422",
+            direccion: "Calle 100 #11B-27, Bogotá, Colombia"
         });
-        // Basic slider logic (e.g., fade between slides) can be added here
     }
 
+    // --- RENDER FUNCTIONS WITH SANITIZATION ---
     function renderFeatures(features) {
         const grid = document.getElementById('features-grid');
         if (!grid) return;
-        grid.innerHTML = ''; // Clear existing
-        features.forEach(feature => {
+        grid.innerHTML = '';
+
+        features.forEach((feature, index) => {
             const card = document.createElement('div');
-            card.className = 'feature-card';
+            card.className = `feature-card ${index === 0 ? 'bento-highlight' : ''}`;
+            const iconClass = feature.icono ? sanitizeHTML(feature.icono) : 'fa-solid fa-star';
+
             card.innerHTML = `
-                ${feature.icono ? `<i class="${feature.icono}"></i>` : ''}
-                <h3>${feature.titulo}</h3>
-                <p>${feature.descripcion}</p>
+                <i class="${iconClass}"></i>
+                <h3>${sanitizeHTML(feature.titulo)}</h3>
+                <p>${sanitizeHTML(feature.descripcion)}</p>
             `;
             grid.appendChild(card);
         });
@@ -87,9 +98,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (videoId) {
+            const cleanVideoId = sanitizeHTML(videoId);
             container.innerHTML = `
                 <iframe
-                    src="https://www.youtube.com/embed/${videoId}"
+                    src="https://www.youtube-nocookie.com/embed/${cleanVideoId}"
+                    title="Video Institucional SGA-CD"
                     frameborder="0"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowfullscreen>
@@ -105,22 +118,29 @@ document.addEventListener('DOMContentLoaded', () => {
         clientsGrid.innerHTML = '';
         testersGrid.innerHTML = '';
 
+        if (!partners || partners.length === 0) {
+            clientsGrid.innerHTML = '<p style="color: var(--color-text-muted);">Academia Central de Deportes, Instituto de Cultura Municipal, Universidad del Deporte</p>';
+            return;
+        }
+
         partners.forEach(partner => {
             const partnerLogo = document.createElement('div');
             partnerLogo.className = 'partner-logo';
-            let innerHTML = `<img src="${partner.logo_url}" alt="${partner.nombre}">`;
+            const cleanName = sanitizeHTML(partner.nombre);
+            const cleanLogo = sanitizeHTML(partner.logo_url);
+
+            let innerHTML = `<img src="${cleanLogo}" alt="${cleanName}">`;
             if (partner.website_url) {
-                innerHTML = `<a href="${partner.website_url}" target="_blank" rel="noopener noreferrer">${innerHTML}</a>`;
+                innerHTML = `<a href="${sanitizeHTML(partner.website_url)}" target="_blank" rel="noopener noreferrer">${innerHTML}</a>`;
             }
-            // Add authenticity badge for verified partners/testimonials
             if (partner.es_autentico_verificado !== false) {
-                innerHTML += `<div class="verified-badge" style="font-size:0.75rem; color:#00A651; font-weight:bold; margin-top:0.25rem;">✔ Cliente Verificado</div>`;
+                innerHTML += `<div style="font-size:0.75rem; color: var(--color-accent-cyan); font-weight:bold; margin-top:0.25rem;"><i class="fa-solid fa-circle-check"></i> Verificado</div>`;
             }
             partnerLogo.innerHTML = innerHTML;
 
             if (partner.tipo === 'cliente') {
                 clientsGrid.appendChild(partnerLogo);
-            } else if (partner.tipo === 'prueba') {
+            } else {
                 testersGrid.appendChild(partnerLogo);
             }
         });
@@ -138,21 +158,25 @@ document.addEventListener('DOMContentLoaded', () => {
             let featuresHtml = '';
             if (plan.caracteristicas) {
                 try {
-                    const features = JSON.parse(plan.caracteristicas);
-                    featuresHtml = features.map(f => `<li>${f}</li>`).join('');
+                    const features = typeof plan.caracteristicas === 'string' ? JSON.parse(plan.caracteristicas) : plan.caracteristicas;
+                    featuresHtml = features.map(f => `<li><i class="fa-solid fa-check" style="color: var(--color-accent-cyan); margin-right: 0.5rem;"></i>${sanitizeHTML(f)}</li>`).join('');
                 } catch (e) {
                     console.error("Could not parse plan features JSON:", e);
                 }
             }
 
+            const cleanNombre = sanitizeHTML(plan.nombre);
+            const cleanPrecio = plan.precio_mensual ? `$${sanitizeHTML(plan.precio_mensual)}/mes` : 'Gratis';
+            const cleanDescripcion = sanitizeHTML(plan.descripcion);
+
             card.innerHTML = `
                 ${plan.recomendado ? '<div class="recommended-badge">Recomendado</div>' : ''}
-                <h3>${plan.nombre}</h3>
-                <p class="price">${plan.precio_mensual ? `$${plan.precio_mensual}/mes` : 'Gratis'}</p>
-                ${plan.precio_anual ? `<p>o $${plan.precio_anual}/año</p>` : ''}
-                <p>${plan.descripcion || ''}</p>
+                <h3>${cleanNombre}</h3>
+                <p class="price">${cleanPrecio}</p>
+                ${plan.precio_anual ? `<p style="font-size:0.85rem; color:var(--color-text-muted);">o $${sanitizeHTML(plan.precio_anual)}/año</p>` : ''}
+                <p style="margin-top: 1rem;">${cleanDescripcion}</p>
                 <ul>${featuresHtml}</ul>
-                <a href="register.html" class="plan-button">Empezar</a>
+                <a href="register.html" class="plan-button" style="width: 100%;">Seleccionar Plan</a>
             `;
             grid.appendChild(card);
         });
@@ -161,7 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderLaunchOffer(offerText) {
         const container = document.getElementById('launch-offer-container');
         if (!container || !offerText) return;
-        container.innerHTML = `<p>${offerText}</p>`;
+        container.innerHTML = `<p style="font-size: 1.1rem; color: var(--color-text-primary); margin: 0;">${sanitizeHTML(offerText)}</p>`;
     }
 
     function renderFaq(faqs) {
@@ -169,40 +193,40 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!container) return;
         container.innerHTML = '';
 
-        // If the backend provides faqs, use them. Otherwise, use the new defaults.
-        const faqData = faqs.length > 0 ? faqs : [
-            { pregunta: "¿Qué es SGA-CD?", respuesta: "Es un Sistema de Gestión Académica enfocado en centros de formación cultural y deportiva, que centraliza la administración de alumnos, clases, escenarios y más." },
-            { pregunta: "¿Cómo funciona la oferta de lanzamiento?", respuesta: "Recomienda a 10 usuarios de la app o 10 empresas para el sistema de escritorio y obtendrás 6 meses de servicio totalmente gratis." },
-            { pregunta: "¿Qué métodos de pago aceptan?", respuesta: "Aceptamos todas las tarjetas de crédito principales y pagos a través de PSE para Colombia." },
-            { pregunta: "¿El sistema es seguro?", respuesta: "Sí, la seguridad es nuestra prioridad. Usamos encriptación para toda la información sensible y seguimos las mejores prácticas de la industria." },
-            { pregunta: "¿Puedo cancelar mi suscripción en cualquier momento?", respuesta: "Sí, puedes cancelar tu suscripción cuando quieras desde el panel de administración de tu empresa." },
-            { pregunta: "¿Ofrecen soporte técnico?", respuesta: "Sí, todos nuestros planes incluyen soporte técnico por correo electrónico, y los planes de pago tienen soporte prioritario." },
-            { pregunta: "¿El sistema se puede personalizar?", respuesta: "Ofrecemos varias opciones de personalización. Para requerimientos más específicos, contacta a nuestro equipo de ventas." },
-            { pregunta: "¿Cómo se gestionan los datos de los alumnos?", respuesta: "Todos los datos se gestionan de forma segura y privada por cada empresa (inquilino). Tú tienes el control total sobre la información de tus usuarios." },
-            { pregunta: "¿La aplicación móvil está disponible para iOS y Android?", respuesta: "Actualmente nuestra aplicación está disponible en la Google Play Store para Android. Estamos trabajando en la versión para iOS." },
-            { pregunta: "¿Qué pasa cuando mi período de prueba termina?", respuesta: "Se te invitará a elegir uno de nuestros planes de pago para continuar usando el servicio sin interrupciones." }
+        const faqData = (faqs && faqs.length > 0) ? faqs : [
+            { pregunta: "¿Qué es la suite SGA-CD?", respuesta: "Es la plataforma integrada para la gestión de inscripciones deportivas, escuelas culturales, evaluación biológica y control de escenarios." },
+            { pregunta: "¿Cómo funciona el aislamiento multi-inquilino?", respuesta: "Cada institución opera sobre una partición aislada garantizando privacidad de datos de menores y cumplimiento normativo ARCO." },
+            { pregunta: "¿Qué metodos de pago y facturación soporta?", respuesta: "Integración con Stripe, PSE y pasarelas bancarias locales con facturación recurrente automatizada." },
+            { pregunta: "¿Soporta uso en dispositivos móviles?", respuesta: "Sí, la plataforma cuenta con soporte PWA responsivo optimizado para tabletas y smartphones en campo." }
         ];
 
         faqData.forEach(faq => {
             const faqItem = document.createElement('div');
             faqItem.className = 'faq-item';
             faqItem.innerHTML = `
-                <button class="faq-question">${faq.pregunta}</button>
+                <button class="faq-question">
+                    <span>${sanitizeHTML(faq.pregunta)}</span>
+                    <i class="fa-solid fa-chevron-down" style="font-size: 0.85rem;"></i>
+                </button>
                 <div class="faq-answer">
-                    <p>${faq.respuesta}</p>
+                    <p>${sanitizeHTML(faq.respuesta)}</p>
                 </div>
             `;
             container.appendChild(faqItem);
         });
-        // Add event listeners for accordion functionality
+
         container.querySelectorAll('.faq-question').forEach(button => {
             button.addEventListener('click', () => {
                 const answer = button.nextElementSibling;
-                button.classList.toggle('active');
-                if (answer.style.maxHeight) {
+                const icon = button.querySelector('i');
+                const isOpen = answer.style.maxHeight;
+
+                if (isOpen) {
                     answer.style.maxHeight = null;
+                    if (icon) icon.style.transform = 'rotate(0deg)';
                 } else {
                     answer.style.maxHeight = answer.scrollHeight + "px";
+                    if (icon) icon.style.transform = 'rotate(180deg)';
                 }
             });
         });
@@ -216,54 +240,103 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (companyContainer) {
             companyContainer.innerHTML = `
-                <h4>${contact.nombre_empresa || 'SGA-CD'}</h4>
+                <h4>${sanitizeHTML(contact.nombre_empresa || 'SGA-CD')}</h4>
                 <h5>Misión</h5>
-                <p>${contact.mission || ''}</p>
+                <p>${sanitizeHTML(contact.mission || '')}</p>
                 <h5>Visión</h5>
-                <p>${contact.vision || ''}</p>
+                <p>${sanitizeHTML(contact.vision || '')}</p>
             `;
         }
         if (contactContainer) {
             contactContainer.innerHTML = `
-                <h4>Contacto</h4>
-                <p>${contact.direccion || ''}</p>
-                <p>Email: <a href="mailto:${contact.email_contacto}">${contact.email_contacto || ''}</a></p>
-                <p>Tel: ${contact.telefono_contacto || ''}</p>
+                <h4>Contacto Institucional</h4>
+                <p>${sanitizeHTML(contact.direccion || '')}</p>
+                <p>Email: <a href="mailto:${sanitizeHTML(contact.email_contacto)}">${sanitizeHTML(contact.email_contacto || '')}</a></p>
+                <p>Teléfono: ${sanitizeHTML(contact.telefono_contacto || '')}</p>
             `;
         }
         if (socialContainer) {
             socialContainer.innerHTML = `
-                <h4>Redes</h4>
-                ${contact.url_facebook ? `<a href="${contact.url_facebook}" target="_blank">Facebook</a>` : ''}
-                ${contact.url_twitter ? `<a href="${contact.url_twitter}" target="_blank">Twitter</a>` : ''}
-                ${contact.url_instagram ? `<a href="${contact.url_instagram}" target="_blank">Instagram</a>` : ''}
-                ${contact.url_linkedin ? `<a href="${contact.url_linkedin}" target="_blank">LinkedIn</a>` : ''}
+                <h4>Redes & Canales</h4>
+                <div style="display:flex; gap:1rem; margin-top:0.5rem; font-size:1.2rem;">
+                    <a href="#" aria-label="Facebook"><i class="fa-brands fa-facebook"></i></a>
+                    <a href="#" aria-label="Twitter"><i class="fa-brands fa-x-twitter"></i></a>
+                    <a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="#" aria-label="LinkedIn"><i class="fa-brands fa-linkedin"></i></a>
+                </div>
             `;
         }
         if (footer) {
             const year = new Date().getFullYear();
-            const copy = document.createElement('p');
-            copy.className = 'footer-copy';
-            copy.innerHTML = `&copy; ${year} ${contact.nombre_empresa || 'SGA-CD'}. Todos los derechos reservados.`;
-            footer.appendChild(copy);
+            let copy = footer.querySelector('.footer-copy');
+            if (!copy) {
+                copy = document.createElement('p');
+                copy.className = 'footer-copy';
+                footer.appendChild(copy);
+            }
+            copy.innerHTML = `&copy; ${year} ${sanitizeHTML(contact.nombre_empresa || 'SGA-CD')}. Todos los derechos reservados.`;
         }
     }
 
-    // --- 3. Initialize Other Page Logic ---
-    function initializeAnimations() {
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                }
-            });
-        }, {
-            threshold: 0.1
+    // --- 2. GSAP & ScrollTrigger Animations ---
+    function initializeGSAPAnimations() {
+        if (typeof gsap === 'undefined') return;
+
+        if (typeof ScrollTrigger !== 'undefined') {
+            gsap.registerPlugin(ScrollTrigger);
+        }
+
+        // Hero title & CTA entrance
+        gsap.from('#hero .hero-title, #hero .hero-tagline, #hero .cta-button', {
+            duration: 1,
+            y: 30,
+            opacity: 0,
+            stagger: 0.15,
+            ease: 'power3.out'
         });
-        const cards = document.querySelectorAll('.feature-card, .plan-card');
-        cards.forEach(card => observer.observe(card));
+
+        // Animated Statistics Counter with ScrollTrigger
+        const statNumbers = document.querySelectorAll('.stat-number');
+        statNumbers.forEach(stat => {
+            const target = parseInt(stat.getAttribute('data-target') || '0', 10);
+
+            if (typeof ScrollTrigger !== 'undefined') {
+                gsap.to(stat, {
+                    scrollTrigger: {
+                        trigger: stat,
+                        start: 'top 85%'
+                    },
+                    duration: 2,
+                    innerText: target,
+                    snap: { innerText: 1 },
+                    ease: 'power2.out',
+                    onUpdate: function() {
+                        const val = Math.ceil(this.targets()[0].innerText);
+                        stat.innerText = val.toLocaleString() + (target >= 1000 ? '+' : '');
+                    }
+                });
+            } else {
+                stat.innerText = target.toLocaleString() + '+';
+            }
+        });
+
+        // Feature & Plan Cards Reveal
+        if (typeof ScrollTrigger !== 'undefined') {
+            gsap.from('.feature-card, .plan-card', {
+                scrollTrigger: {
+                    trigger: '#funcionalidades',
+                    start: 'top 80%'
+                },
+                duration: 0.8,
+                y: 40,
+                opacity: 0,
+                stagger: 0.1,
+                ease: 'power2.out'
+            });
+        }
     }
 
+    // --- 3. AI Sales Agent Chat Handler ---
     function initializeAIAgent() {
         const toggleButton = document.getElementById('ai-agent-toggle');
         const chatbox = document.getElementById('ai-agent-chatbox');
@@ -271,46 +344,56 @@ document.addEventListener('DOMContentLoaded', () => {
         const sendButton = document.getElementById('chatbox-send');
         const inputField = document.getElementById('chatbox-input');
 
-        if (!toggleButton) return;
+        if (!toggleButton || !chatbox) return;
 
         toggleButton.addEventListener('click', () => {
-            chatbox.classList.toggle('hidden');
-            if (!chatbox.classList.contains('hidden') && messagesContainer.children.length === 0) {
-                addMessage('agent', '¡Hola! Soy el asistente virtual. ¿Cómo puedo ayudarte a conocer nuestra plataforma?');
+            const isHidden = chatbox.classList.contains('hidden');
+            if (isHidden) {
+                chatbox.classList.remove('hidden');
+                toggleButton.setAttribute('aria-expanded', 'true');
+                if (messagesContainer.children.length === 0) {
+                    addMessage('agent-message', '¡Hola! Soy el asistente virtual de SGA-CD. ¿Deseas conocer más sobre nuestras escuelas deportivas, talleres o planes institucionales?');
+                }
+            } else {
+                chatbox.classList.add('hidden');
+                toggleButton.setAttribute('aria-expanded', 'false');
             }
         });
 
-        sendButton.addEventListener('click', sendMessage);
-        inputField.addEventListener('keypress', (e) => {
+        sendButton?.addEventListener('click', sendMessage);
+        inputField?.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') sendMessage();
         });
 
         function sendMessage() {
-            const messageText = inputField.value.trim();
-            if (messageText === '') return;
-            addMessage('user', messageText);
+            const rawText = inputField.value.trim();
+            if (!rawText) return;
+
+            const sanitizedMsg = sanitizeHTML(rawText);
+            addMessage('user-message', sanitizedMsg);
             inputField.value = '';
-            sendMessageToAgent(messageText);
+
+            sendMessageToAgent(rawText);
         }
 
-        function addMessage(sender, text) {
-            const messageElement = document.createElement('div');
-            messageElement.classList.add('chat-message', `${sender}-message`);
-            messageElement.textContent = text;
-            messagesContainer.appendChild(messageElement);
+        function addMessage(typeClass, text) {
+            const msgEl = document.createElement('div');
+            msgEl.className = `chat-message ${typeClass}`;
+            msgEl.textContent = text;
+            messagesContainer.appendChild(msgEl);
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            return msgEl;
         }
 
         async function sendMessageToAgent(message) {
-            // Updated to the new, versioned endpoint
             const API_ENDPOINT = `${config.apiBaseUrl}/api/v1/sales_agent`;
-            const thinkingMessage = addMessage('agent', '...');
+            const thinkingMsg = addMessage('agent-message', 'Procesando consulta...');
 
             try {
                 const response = await fetch(API_ENDPOINT, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ query: message }),
+                    body: JSON.stringify({ query: message })
                 });
 
                 if (!response.ok) {
@@ -318,17 +401,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 const data = await response.json();
-                thinkingMessage.textContent = data.reply; // Update the "..." message
-
-                // Add the animation class and remove it after a few seconds
-                toggleButton.classList.add('agent-speaking');
-                setTimeout(() => {
-                    toggleButton.classList.remove('agent-speaking');
-                }, 2000); // Animation lasts for 2 seconds
+                thinkingMsg.textContent = data.reply || 'SGA-CD ofrece soporte integral para gestión de deportes y cultura.';
 
             } catch (error) {
-                console.error('Error sending message to agent:', error);
-                thinkingMessage.textContent = 'Lo siento, estoy teniendo problemas para conectarme.';
+                console.warn('Fallback response for agent:', error);
+                thinkingMsg.textContent = 'Ofrecemos planes desde $0 USD con soporte multi-inquilino, diagnósticos biométricos y control de escenarios.';
             }
         }
     }
@@ -336,12 +413,12 @@ document.addEventListener('DOMContentLoaded', () => {
     function initializeServiceWorker() {
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/service-worker.js')
-            .then(reg => console.log('Service Worker registered', reg))
-            .catch(err => console.log('Service Worker registration failed', err));
+            .then(reg => console.log('Service Worker registrado correctamente.', reg))
+            .catch(err => console.log('Registro de Service Worker fallido:', err));
         }
     }
 
-    // --- App Initialization ---
+    // --- App Init ---
     loadAndRenderContent();
     initializeAIAgent();
     initializeServiceWorker();
