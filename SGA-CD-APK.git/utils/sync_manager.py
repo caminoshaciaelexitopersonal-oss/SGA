@@ -100,8 +100,70 @@ class SyncManager:
             self.page.update()
             return False
 
+        # 3. Sincronizar registros de asistencia PWA / Flet local
+        self.sync_offline_attendance()
+
         print("--- Ciclo de sincronización completado ---")
         self.page.snack_bar = ft.SnackBar(ft.Text("¡Sincronización completada!"), bgcolor="green")
         self.page.snack_bar.open = True
         self.page.update()
         return True
+
+    @staticmethod
+    def format_attendance_payload(actividad: str = "Entrenamiento Deportivo / Taller Cultural",
+                                  ubicacion: str = "Escenario Central",
+                                  latitud: float = 4.6097,
+                                  longitud: float = -74.0817) -> dict:
+        """
+        Modelo de serialización estandarizado para check-in de asistencia,
+        idéntico al esquema de la PWA Web (POST /api/v1/alumno/asistencia).
+        """
+        import datetime
+        return {
+            "actividad": actividad,
+            "ubicacion": ubicacion,
+            "latitud": latitud,
+            "longitud": longitud,
+            "timestamp": datetime.datetime.utcnow().isoformat()
+        }
+
+    def sync_offline_attendance(self) -> bool:
+        """
+        Envía los registros de asistencia locales almacenados en SQLite
+        hacia la API central /api/v1/alumno/asistencia.
+        """
+        try:
+            conn = get_db_connection(self.page)
+            cursor = conn.cursor()
+            # Crear tabla local de asistencia si no existe
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS asistencia_local (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    actividad TEXT,
+                    ubicacion TEXT,
+                    latitud REAL,
+                    longitud REAL,
+                    timestamp TEXT,
+                    synced INTEGER DEFAULT 0
+                )
+            """)
+            conn.commit()
+
+            unsynced = cursor.execute("SELECT * FROM asistencia_local WHERE synced = 0").fetchall()
+            for row in unsynced:
+                payload = {
+                    "actividad": row["actividad"],
+                    "ubicacion": row["ubicacion"],
+                    "latitud": row["latitud"],
+                    "longitud": row["longitud"],
+                    "timestamp": row["timestamp"]
+                }
+                res = self.api_client.post("/api/v1/alumno/asistencia", payload)
+                if res and res.status_code == 200:
+                    cursor.execute("UPDATE asistencia_local SET synced = 1 WHERE id = ?", (row["id"],))
+            conn.commit()
+            conn.close()
+            return True
+        except Exception as e:
+            print(f"Error sincronizando asistencias locales Flet: {e}")
+            return False
