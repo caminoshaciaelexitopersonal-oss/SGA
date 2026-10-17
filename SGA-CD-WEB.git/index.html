@@ -54,6 +54,7 @@
         <header role="banner">
             <h1 id="header-title"><i class="fa-solid fa-trophy"></i> SGA-CD</h1>
             <nav role="navigation" aria-label="Navegación Principal">
+                <a href="#monitor-vivo">Monitor en Vivo</a>
                 <a href="#funcionalidades">Funcionalidades</a>
                 <a href="#estadisticas">Métricas</a>
                 <a href="#partners">Clientes</a>
@@ -104,6 +105,25 @@
                 <p class="section-subtitle">Descubre cómo nuestra suite optimiza la administración de escenarios deportivos y auditorios culturales en tiempo real.</p>
                 <div id="video-container" class="video-container">
                     <!-- Dynamic video frame -->
+                </div>
+            </section>
+
+            <!-- Live Monitor Athletic & Cultural Feed Section -->
+            <section id="monitor-vivo">
+                <h2>Monitor en Vivo Atlético y Cultural</h2>
+                <p class="section-subtitle">Feeds de torneos, talleres y medallero institucional en tiempo real con filtrado dinámico.</p>
+
+                <div class="filter-tabs" role="tablist" aria-label="Filtro de Monitor">
+                    <button class="filter-btn active" data-filter="all" role="tab" aria-selected="true"><i class="fa-solid fa-layer-group"></i> Todos</button>
+                    <button class="filter-btn" data-filter="deporte" role="tab" aria-selected="false"><i class="fa-solid fa-trophy"></i> Deportes</button>
+                    <button class="filter-btn" data-filter="cultura" role="tab" aria-selected="false"><i class="fa-solid fa-masks-theater"></i> Cultura</button>
+                </div>
+
+                <div id="monitor-grid" class="monitor-grid">
+                    <!-- Skeleton Loader blocks before data resolution -->
+                    <div class="skeleton-card"></div>
+                    <div class="skeleton-card"></div>
+                    <div class="skeleton-card"></div>
                 </div>
             </section>
 

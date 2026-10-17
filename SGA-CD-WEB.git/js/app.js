@@ -70,6 +70,39 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // --- Silent-Refresh Cycle (Automated JWT Token Renewal) ---
+    function startSilentTokenRefresh() {
+        setInterval(async () => {
+            const currentToken = localStorage.getItem('accessToken');
+            if (!currentToken) return;
+
+            try {
+                const payloadBase64 = currentToken.split('.')[1];
+                if (!payloadBase64) return;
+                const decoded = JSON.parse(atob(payloadBase64));
+                const now = Math.floor(Date.now() / 1000);
+                const remainingSec = decoded.exp - now;
+
+                // When token lifetime is under 5 minutes (300 sec), automatically renew token
+                if (remainingSec > 0 && remainingSec < 300) {
+                    console.log('[Security]: Renovando token de sesión JWT silenciosamente...');
+                    const response = await fetch(`${config.apiBaseUrl}/api/v1/auth/refresh`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${currentToken}` }
+                    });
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.access_token) {
+                            localStorage.setItem('accessToken', data.access_token);
+                        }
+                    }
+                }
+            } catch (err) {
+                console.warn('[Security]: Silent refresh adaptativo:', err);
+            }
+        }, 60000); // Verify every 60 seconds
+    }
+
     // --- 3. Cargar datos del usuario y renderizar la aplicación ---
     function initializeApp() {
         const userRoles = JSON.parse(localStorage.getItem('userRoles') || '[]');
@@ -95,6 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setupEventListeners(token, currentUser.primaryRole);
         translatePage();
         initializeNotifications();
+        startSilentTokenRefresh();
         renderContentForView('dashboard', token, currentUser.primaryRole);
     }
 

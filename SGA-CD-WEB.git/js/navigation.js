@@ -62,6 +62,7 @@ const navLinks = {
         { text: 'Mis Cursos', view: 'mis-cursos', icon: 'fa-book-reader' },
         { text: 'Mi Horario', view: 'mi-horario', icon: 'fa-clock' },
         { text: 'Mis Calificaciones', view: 'mis-calificaciones', icon: 'fa-star' },
+        { text: 'Asistencia PWA', view: 'mi-asistencia', icon: 'fa-check-circle' },
         { text: 'Mi Progreso', view: 'mi-progreso', icon: 'fa-gamepad' },
         { text: 'Misiones', view: 'misiones', icon: 'fa-tasks' },
         { text: 'Mercado de Puntos', view: 'mercado', icon: 'fa-store' }

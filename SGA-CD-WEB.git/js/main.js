@@ -418,8 +418,137 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // --- 4. Live Monitor & Telemetry Engine (Agent-Reach Integration) ---
+    let liveMonitorEvents = [];
+
+    async function loadLiveMonitor() {
+        const monitorGrid = document.getElementById('monitor-grid');
+        if (!monitorGrid) return;
+
+        try {
+            const response = await fetch(`${config.apiBaseUrl}/api/v1/public/events`);
+            if (response.ok) {
+                liveMonitorEvents = await response.json();
+            } else {
+                throw new Error('API offline');
+            }
+        } catch (e) {
+            // Default high-performance fallback feed
+            liveMonitorEvents = [
+                { id: 1, categoria: 'deporte', titulo: 'Copa Intercolegial de Taekwondo 2025', detalle: 'Fase eliminatoria regional - 48 atletas acreditados.', estado: 'En Vivo', icono: 'fa-solid fa-trophy' },
+                { id: 2, categoria: 'cultura', titulo: 'Encuentro Nacional de Músicas Colombianas', detalle: 'Taller de vallenato y música andina en auditorio central.', estado: 'Programado', icono: 'fa-solid fa-music' },
+                { id: 3, categoria: 'deporte', titulo: 'Torneo de Natación Infantil & Juvenil', detalle: 'Pruebas de 100m libres y relevos mixtos.', estado: 'En Vivo', icono: 'fa-solid fa-person-swimming' },
+                { id: 4, categoria: 'cultura', titulo: 'Exposición de Artes Plásticas & Escultura', detalle: 'Muestra estudiantil anual en galería institucional.', estado: 'Inscripciones', icono: 'fa-solid fa-palette' },
+                { id: 5, categoria: 'deporte', titulo: 'Liga de Baloncesto Institucional', detalle: 'Jornada 5: Selección A vs. Campus Norte.', estado: 'Programado', icono: 'fa-solid fa-basketball' },
+                { id: 6, categoria: 'cultura', titulo: 'Muestra de Danza Folclórica & Contemporánea', detalle: 'Gala nocturna de clausura académica.', estado: 'Próximo', icono: 'fa-solid fa-masks-theater' }
+            ];
+        }
+
+        renderLiveMonitor('all');
+        setupFilterTabs();
+    }
+
+    function renderLiveMonitor(filterCategory) {
+        const monitorGrid = document.getElementById('monitor-grid');
+        if (!monitorGrid) return;
+
+        const filtered = filterCategory === 'all'
+            ? liveMonitorEvents
+            : liveMonitorEvents.filter(ev => ev.categoria === filterCategory);
+
+        monitorGrid.innerHTML = '';
+
+        if (filtered.length === 0) {
+            monitorGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--color-text-muted);">No hay eventos disponibles en esta categoría.</p>';
+            return;
+        }
+
+        filtered.forEach(ev => {
+            const card = document.createElement('div');
+            card.className = 'feature-card monitor-card';
+            card.setAttribute('data-category', ev.categoria);
+
+            const cleanTitle = sanitizeHTML(ev.titulo);
+            const cleanDetalle = sanitizeHTML(ev.detalle);
+            const cleanEstado = sanitizeHTML(ev.estado);
+            const cleanIcon = sanitizeHTML(ev.icono || 'fa-solid fa-star');
+            const socialPayload = encodeURIComponent(`¡Orgullo Institucional SGA-CD! Sigue los detalles de: ${ev.titulo} — ${ev.detalle} #SGACD #Deporte #Cultura`);
+
+            card.innerHTML = `
+                <div style="display:flex; justify-shadow:space-between; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+                    <i class="${cleanIcon}" style="font-size:1.8rem; margin-bottom:0;"></i>
+                    <span style="font-size:0.75rem; font-weight:700; padding:0.25rem 0.65rem; border-radius:12px; background:rgba(56,189,248,0.15); color:var(--color-accent-cyan); border:1px solid var(--color-border-specular);">
+                        ${cleanEstado}
+                    </span>
+                </div>
+                <h3>${cleanTitle}</h3>
+                <p style="font-size:0.9rem; margin-bottom:1rem;">${cleanDetalle}</p>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:auto; pt:0.5rem;">
+                    <a href="https://twitter.com/intent/tweet?text=${socialPayload}" target="_blank" rel="noopener noreferrer" class="social-share-btn" style="font-size:0.8rem; color:var(--color-accent-cyan); text-decoration:none; display:inline-flex; align-items:center; gap:0.35rem;">
+                        <i class="fa-brands fa-x-twitter"></i> Compartir
+                    </a>
+                    <button onclick="window.trackEvent('event_interest_click', { event_id: ${ev.id}, event_title: '${cleanTitle}' })" class="cta-button" style="padding:0.3rem 0.8rem; font-size:0.8rem; min-height:unset;">
+                        Detalles
+                    </button>
+                </div>
+            `;
+            monitorGrid.appendChild(card);
+        });
+
+        // GSAP smooth transition for filtered items
+        if (typeof gsap !== 'undefined') {
+            gsap.fromTo('.monitor-card',
+                { opacity: 0, y: 20, scale: 0.95 },
+                { opacity: 1, y: 0, scale: 1, duration: 0.5, stagger: 0.08, ease: 'power2.out' }
+            );
+        }
+    }
+
+    function setupFilterTabs() {
+        const tabs = document.querySelectorAll('.filter-tabs .filter-btn');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => {
+                    t.classList.remove('active');
+                    t.setAttribute('aria-selected', 'false');
+                });
+                tab.classList.add('active');
+                tab.setAttribute('aria-selected', 'true');
+
+                const category = tab.getAttribute('data-filter');
+                window.trackEvent('filter_monitor_category', { category });
+                renderLiveMonitor(category);
+            });
+        });
+    }
+
+    // Agent-Reach Telemetry Analytics Tracker
+    window.trackEvent = function(eventName, payload = {}) {
+        const telemetryData = {
+            event: eventName,
+            timestamp: new Date().toISOString(),
+            url: window.location.href,
+            payload: payload
+        };
+        console.log('[Agent-Reach Telemetry]:', telemetryData);
+
+        // Dispatch async telemetry beacon if endpoint is configured
+        if (navigator.sendBeacon) {
+            navigator.sendBeacon(`${config.apiBaseUrl}/api/v1/telemetry`, JSON.stringify(telemetryData));
+        }
+    };
+
+    // Attach telemetry tracking to public CTA buttons
+    document.querySelectorAll('.cta-button, .plan-button').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const btnText = e.currentTarget.textContent.trim();
+            window.trackEvent('cta_click', { button_text: btnText, target_href: e.currentTarget.getAttribute('href') });
+        });
+    });
+
     // --- App Init ---
     loadAndRenderContent();
+    loadLiveMonitor();
     initializeAIAgent();
     initializeServiceWorker();
 });

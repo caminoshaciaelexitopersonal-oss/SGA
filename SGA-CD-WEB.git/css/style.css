@@ -166,11 +166,54 @@ p {
 }
 
 /* Bento Grid Layout System */
-.bento-grid, .features-grid, .pricing-grid {
+.bento-grid, .features-grid, .pricing-grid, .monitor-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 1.75rem;
     margin-top: 2.5rem;
+}
+
+/* Skeleton Loaders for Zero-CLS Loading */
+.skeleton-card {
+    background: linear-gradient(90deg, rgba(13, 20, 36, 0.8) 25%, rgba(56, 189, 248, 0.08) 50%, rgba(13, 20, 36, 0.8) 75%);
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.8s infinite;
+    border-radius: 16px;
+    min-height: 220px;
+    border: 1px solid var(--color-border-specular);
+}
+
+@keyframes skeleton-shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* Dynamic Live Monitor Filter Tabs */
+.filter-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    background: rgba(13, 20, 36, 0.8);
+    border: 1px solid var(--color-border-specular);
+    color: var(--color-text-muted);
+    padding: 0.6rem 1.5rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: var(--font-size-small);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.filter-btn:hover, .filter-btn.active {
+    background: var(--color-accent-cyan);
+    color: #070B14;
+    border-color: var(--color-accent-cyan);
+    box-shadow: 0 0 15px var(--color-accent-glow);
 }
 
 /* Glassmorphic Cards & Specular Highlights */

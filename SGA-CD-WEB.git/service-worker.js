@@ -1,12 +1,18 @@
-const CACHE_NAME = 'gestion-app-website-v1';
+const CACHE_NAME = 'sga-cd-pwa-v2';
 const urlsToCache = [
   '/',
   'index.html',
+  'app.html',
+  'login.html',
   'register.html',
   '404.html',
   'offline.html',
   'css/style.css',
+  'css/app.css',
   'js/main.js',
+  'js/app.js',
+  'js/navigation.js',
+  'js/views/alumno.js',
   'js/register.js'
 ];
 
