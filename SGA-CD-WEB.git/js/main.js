@@ -546,9 +546,92 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // --- 5. GPU-Bound GSAP Carousel Component ---
+    function initializeGPUCarousel() {
+        const track = document.getElementById('carousel-track');
+        const prevBtn = document.getElementById('carousel-prev');
+        const nextBtn = document.getElementById('carousel-next');
+
+        if (!track || !prevBtn || !nextBtn) return;
+
+        const slidesData = [
+            { titulo: 'Acreditación Atlética Nacional', cita: 'SGA-CD nos permitió gestionar el perfil biométrico de más de 1,200 atletas sin fallas de concurrencia.', autor: 'Dra. María Fernanda López — Dir. Deportes Campus' },
+            { titulo: 'Gala Anual de Danza y Teatro', cita: 'El control de aforo y asistencia de talleres culturales se automatizó por completo desde el primer mes.', autor: 'Prof. Jorge Restrepo — Coordinador Cultural' },
+            { titulo: 'Torneo Intercolegial 2025', cita: 'La programación de escenarios y el medallero en tiempo real mantuvieron informadas a 45 instituciones.', autor: 'Lic. Claudia Morales — Secretaría de Deportes' }
+        ];
+
+        track.innerHTML = '';
+        slidesData.forEach((slide) => {
+            const slideEl = document.createElement('div');
+            slideEl.className = 'carousel-slide';
+            slideEl.innerHTML = `
+                <h3 style="color:var(--color-accent-cyan); margin-top:0;"><i class="fa-solid fa-quote-left" style="font-size:1.5rem; margin-right:0.5rem;"></i>${sanitizeHTML(slide.titulo)}</h3>
+                <p style="font-style:italic; font-size:1rem; margin-bottom:1.5rem;">"${sanitizeHTML(slide.cita)}"</p>
+                <p style="font-size:0.85rem; font-weight:700; color:var(--color-text-primary); margin:0;">— ${sanitizeHTML(slide.autor)}</p>
+            `;
+            track.appendChild(slideEl);
+        });
+
+        let currentIndex = 0;
+        let autoLoopTimer = null;
+        const totalSlides = slidesData.length;
+
+        function updateSlide(index) {
+            currentIndex = (index + totalSlides) % totalSlides;
+            const slideWidth = window.innerWidth >= 768 ? 50 : 100;
+            const offset = currentIndex * slideWidth;
+
+            if (typeof gsap !== 'undefined') {
+                gsap.to(track, {
+                    xPercent: -offset,
+                    duration: 0.7,
+                    ease: 'power2.out'
+                });
+            } else {
+                track.style.transform = `translate3d(-${offset}%, 0, 0)`;
+            }
+        }
+
+        function startAutoLoop() {
+            stopAutoLoop();
+            autoLoopTimer = setInterval(() => {
+                updateSlide(currentIndex + 1);
+            }, 5000);
+        }
+
+        function stopAutoLoop() {
+            if (autoLoopTimer) {
+                clearInterval(autoLoopTimer);
+                autoLoopTimer = null;
+            }
+        }
+
+        prevBtn.addEventListener('click', () => {
+            updateSlide(currentIndex - 1);
+            startAutoLoop();
+        });
+
+        nextBtn.addEventListener('click', () => {
+            updateSlide(currentIndex + 1);
+            startAutoLoop();
+        });
+
+        // Tab visibility listener to prevent memory leaks and unnecessary GPU cycles
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                stopAutoLoop();
+            } else {
+                startAutoLoop();
+            }
+        });
+
+        startAutoLoop();
+    }
+
     // --- App Init ---
     loadAndRenderContent();
     loadLiveMonitor();
+    initializeGPUCarousel();
     initializeAIAgent();
     initializeServiceWorker();
 });

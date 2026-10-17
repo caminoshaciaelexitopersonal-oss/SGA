@@ -133,7 +133,9 @@ class SyncManager:
         hacia la API central /api/v1/alumno/asistencia.
         """
         try:
+            import sqlite3
             conn = get_db_connection(self.page)
+            conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
             # Crear tabla local de asistencia si no existe
             cursor.execute("""

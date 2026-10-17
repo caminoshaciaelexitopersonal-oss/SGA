@@ -216,9 +216,14 @@ p {
     box-shadow: 0 0 15px var(--color-accent-glow);
 }
 
-/* Glassmorphic Cards & Specular Highlights */
-.feature-card, .plan-card, .glass-panel, .stat-card {
-    background: var(--color-surface-card);
+/* Layered Anodized Dark Metal Background Extensions */
+.bg-anodized-panel, .glass-panel, .feature-card, .stat-card, .plan-card, .monitor-card {
+    background-image:
+        radial-gradient(ellipse at top left, rgba(56, 189, 248, 0.08) 0%, transparent 60%),
+        linear-gradient(180deg, rgba(13, 20, 36, 0.85) 0%, rgba(7, 11, 20, 0.95) 100%);
+    background-position: center center;
+    background-size: cover;
+    background-repeat: no-repeat;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--color-border-specular);
@@ -423,8 +428,9 @@ p {
     margin: 0;
 }
 
-/* Video Frame Container */
+/* Video Frame Container & Pointer Shield Overlay */
 .video-container {
+    position: relative;
     max-width: 900px;
     margin: 2rem auto;
     border-radius: 16px;
@@ -434,10 +440,77 @@ p {
     aspect-ratio: 16 / 9;
 }
 
+.video-pointer-shield {
+    pointer-events: none;
+    user-select: none;
+}
+
 .video-container iframe {
     width: 100%;
     height: 100%;
     border: none;
+}
+
+/* GPU-Bound GSAP Carousel Styles */
+.carousel-wrapper {
+    position: relative;
+    max-width: 1100px;
+    margin: 2rem auto;
+    overflow: hidden;
+    padding: 1rem 3.5rem;
+}
+
+.carousel-track {
+    display: flex;
+    gap: 1.5rem;
+    will-change: transform;
+}
+
+.carousel-slide {
+    flex: 0 0 100%;
+    max-width: 100%;
+    background: var(--color-surface-card);
+    border: 1px solid var(--color-border-specular);
+    border-radius: 16px;
+    padding: 2.5rem;
+    backdrop-filter: blur(12px);
+    box-shadow: var(--shadow-card-default);
+    will-change: transform, opacity;
+}
+
+@media (min-width: 768px) {
+    .carousel-slide {
+        flex: 0 0 calc(50% - 0.75rem);
+        max-width: calc(50% - 0.75rem);
+    }
+}
+
+.carousel-control {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(13, 20, 36, 0.95);
+    border: 1px solid var(--color-accent-cyan);
+    color: var(--color-accent-cyan);
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
+    transition: transform 0.3s ease, background 0.3s ease;
+}
+
+#carousel-prev { left: 5px; }
+#carousel-next { right: 5px; }
+
+.carousel-control:hover {
+    background: var(--color-accent-cyan);
+    color: #070B14;
+    transform: translateY(-50%) scale(1.1);
 }
 
 /* Partners & Testimonials Logo Grid */
