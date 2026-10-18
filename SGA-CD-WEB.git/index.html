@@ -218,12 +218,72 @@
                 </div>
             </section>
 
-            <!-- Verified Clients & Testers -->
+            <!-- Verified Clients & Corporate Allies Matrix -->
             <section id="partners">
                 <h2>Instituciones que Confían en SGA-CD</h2>
                 <div id="clients-grid" class="partners-grid"></div>
+
+                <h2 style="text-align: center; color: #38BDF8; margin-top: 4rem; font-size: 2rem; font-weight: 800;">
+                    <i class="fa-solid fa-handshake-angle" style="margin-right: 0.5rem;"></i> Empresas Aliadas Corporativas & Co-Patrocinadores
+                </h2>
+                <p class="section-subtitle" style="text-align: center;">Alianzas estratégicas que impulsan el desarrollo atlético y cultural en las regiones.</p>
+
+                <div id="corporate-allies-grid" class="allies-grid">
+                    <!-- Dynamic rendering of corporate allies cards -->
+                </div>
+
                 <h3 style="text-align: center; color: var(--color-text-muted); margin-top: 3rem; font-size: 1.1rem;">Organizaciones en Período de Prueba</h3>
                 <div id="testers-grid" class="partners-grid"></div>
+            </section>
+
+            <!-- Admin Control Panel for Territorial Jurisdiction Asset Management -->
+            <section id="admin-territorial-control" style="margin: 4rem 0;">
+                <div class="admin-panel-card glass-panel">
+                    <h2 style="color:#38BDF8; font-size:1.6rem; font-weight:800; margin-top:0; display:flex; align-items:center; gap:0.5rem;">
+                        <i class="fa-solid fa-sliders"></i> Panel Administrativo Territorial (Nacional, Departamental y Municipal)
+                    </h2>
+                    <p style="color:#94A3B8; font-size:0.95rem; margin-bottom:1.5rem;">
+                        Gestión en tiempo real de galerías multifoto de talleres/deportes y marcas de empresas aliadas jurisdiccionales.
+                    </p>
+
+                    <form id="admin-asset-form" onsubmit="event.preventDefault(); window.handleAdminAssetSubmit();">
+                        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:1rem;">
+                            <div class="admin-form-group">
+                                <label for="admin-jurisdiction">Nivel Territorial</label>
+                                <select id="admin-jurisdiction" class="admin-input">
+                                    <option value="nacional">Nacional (Ministerio / Federación)</option>
+                                    <option value="departamental">Departamental (Gobernación / Inder)</option>
+                                    <option value="municipal" selected>Municipal (Alcaldía / Instituto)</option>
+                                </select>
+                            </div>
+
+                            <div class="admin-form-group">
+                                <label for="admin-activity-target">Actividad / Taller Objetivo</label>
+                                <select id="admin-activity-target" class="admin-input">
+                                    <option value="taekwondo">Taekwondo (Deporte)</option>
+                                    <option value="joropo">Danza: Joropo/Llanera (Cultura)</option>
+                                    <option value="vallenato">Danza: Vallenato (Cultura)</option>
+                                    <option value="guitarra">Instrumentos: Guitarra (Cultura)</option>
+                                    <option value="arpa">Instrumentos: Arpa (Cultura)</option>
+                                </select>
+                            </div>
+
+                            <div class="admin-form-group">
+                                <label for="admin-photos-count">Fotos Cargadas en Galería</label>
+                                <input type="text" id="admin-photos-count" class="admin-input" value="5 / 5 Fotos Verificadas WebP" readonly>
+                            </div>
+                        </div>
+
+                        <div style="display:flex; gap:1rem; margin-top:1.2rem; align-items:center;">
+                            <button type="submit" class="cta-button" style="padding:0.6rem 1.4rem; font-size:0.9rem; min-height:44px;">
+                                <i class="fa-solid fa-cloud-arrow-up" style="margin-right:0.4rem;"></i> Sincronizar Assets Territorial
+                            </button>
+                            <span id="admin-shield-status" style="color:#38BDF8; font-size:0.85rem; font-weight:700;">
+                                <i class="fa-solid fa-shield-halved"></i> AgentShield ECC Protegido
+                            </span>
+                        </div>
+                    </form>
+                </div>
             </section>
 
             <!-- FAQ Section -->

@@ -130,3 +130,209 @@
     -webkit-text-fill-color: transparent;
     letter-spacing: -0.02em;
 }
+
+/* 5. Micro-Carrusel Multifoto (5 Fotos por Tarjeta) */
+.multi-photo-card {
+    position: relative;
+    background: #0D1424;
+    border: 1px solid rgba(56, 189, 248, 0.2);
+    border-radius: 18px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.multi-photo-card:hover {
+    border-color: #38BDF8;
+    box-shadow: 0 10px 30px rgba(56, 189, 248, 0.25);
+    transform: translateY(-4px);
+}
+
+.card-gallery-wrapper {
+    position: relative;
+    width: 100%;
+    height: 180px;
+    overflow: hidden;
+    background: #070B14;
+}
+
+.card-gallery-strip {
+    display: flex;
+    width: 500%;
+    height: 100%;
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: transform;
+}
+
+.card-gallery-img {
+    width: 20%;
+    height: 100%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.gallery-nav-dots {
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 6px;
+    z-index: 5;
+    background: rgba(7, 11, 20, 0.65);
+    padding: 4px 8px;
+    border-radius: 12px;
+    backdrop-filter: blur(8px);
+}
+
+.gallery-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.35);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.gallery-dot.active {
+    background: #38BDF8;
+    width: 16px;
+    border-radius: 6px;
+    box-shadow: 0 0 8px rgba(56, 189, 248, 0.8);
+}
+
+.gallery-arrow-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(13, 20, 36, 0.75);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    color: #38BDF8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 6;
+    opacity: 0;
+    transition: opacity 0.3s ease, background 0.2s ease;
+}
+
+.card-gallery-wrapper:hover .gallery-arrow-btn {
+    opacity: 1;
+}
+
+.gallery-arrow-btn.prev { left: 8px; }
+.gallery-arrow-btn.next { right: 8px; }
+
+/* 6. Matriz de Empresas Aliadas Corporativas */
+.allies-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.ally-card {
+    background: #0D1424;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(56, 189, 248, 0.2);
+    border-radius: 16px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    position: relative;
+    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ally-card:hover {
+    border-color: #38BDF8;
+    box-shadow: 0 0 25px rgba(56, 189, 248, 0.3);
+    transform: translateY(-5px);
+}
+
+.ally-card-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: rgba(56, 189, 248, 0.15);
+    color: #38BDF8;
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    border-radius: 12px;
+    padding: 2px 8px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+}
+
+.ally-logo-container {
+    width: 64px;
+    height: 64px;
+    border-radius: 14px;
+    background: rgba(7, 11, 20, 0.8);
+    border: 1px solid rgba(56, 189, 248, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    color: #38BDF8;
+    font-size: 1.8rem;
+}
+
+.ally-card h3 {
+    color: #E2E8F0;
+    font-size: 1.15rem;
+    font-weight: 800;
+    margin: 0 0 0.4rem 0;
+}
+
+.ally-card p {
+    color: #94A3B8;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    margin: 0 0 1rem 0;
+}
+
+/* 7. Panel Administrativo Territorial Styles */
+.admin-panel-card {
+    background: #0D1424;
+    border: 1px solid rgba(56, 189, 248, 0.25);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-top: 2rem;
+}
+
+.admin-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-bottom: 1rem;
+}
+
+.admin-form-group label {
+    color: #38BDF8;
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.admin-input {
+    background: #070B14;
+    border: 1px solid rgba(56, 189, 248, 0.2);
+    border-radius: 8px;
+    padding: 0.6rem 1rem;
+    color: #E2E8F0;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+.admin-input:focus {
+    border-color: #38BDF8;
+    box-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
+}
