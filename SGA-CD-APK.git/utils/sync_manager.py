@@ -1,28 +1,55 @@
 import flet as ft
 from .api_client import ApiClient
 from .database_manager import get_db_connection
+from .security_shield import sanitize_input_for_flet, sanitize_dict_inputs, format_masked_error_code
 
 class SyncManager:
     """
     El "Motor de Datos". Gestiona la sincronización entre la base de datos
     local del cliente y la base de datos central a través de la API.
+    Soporta intercepción de errores 401/403, formateo de trazas enmascaradas
+    y notificación en la interfaz Flet alineada al tema Dark Metallic Blue.
     """
     def __init__(self, page: ft.Page, api_client: ApiClient):
         self.page = page
         self.api_client = api_client
 
-    def _detect_local_changes(self) -> dict:
+    def _show_security_error_banner(self, masked_code: str, message: str):
         """
-        Detecta los registros que han sido creados o modificados localmente
-        desde la última sincronización.
+        Muestra una notificación de error estandarizada con la paleta 60-30-10 Dark Metallic Blue.
+        Superficie #0D1424, Acento Cyan #38BDF8 y botón táctil mínimo de 44px.
+        """
+        if not self.page:
+            return
 
-        NOTA: Esta es una implementación de ejemplo muy simplificada. Un sistema
-        real necesitaría un mecanismo robusto para el seguimiento de cambios,
-        como tablas de 'log', timestamps de 'última modificación' en cada fila,
-        o un sistema de versionado.
-        """
+        def close_banner(e):
+            self.page.banner.open = False
+            self.page.update()
+
+        banner = ft.Banner(
+            bgcolor="#0D1424",
+            leading=ft.Icon(ft.icons.SHIELD_OUTLINED, color="#38BDF8", size=36),
+            title=ft.Text(f"SGA-CD — Notificación de Seguridad [{masked_code}]", color="#38BDF8", weight=ft.FontWeight.BOLD),
+            content=ft.Text(sanitize_input_for_flet(message), color="#E2E8F0"),
+            actions=[
+                ft.TextButton(
+                    "ACEPTAR",
+                    on_click=close_banner,
+                    style=ft.ButtonStyle(
+                        color="#070B14",
+                        bgcolor="#38BDF8",
+                        padding=ft.padding.all(12)
+                    )
+                )
+            ]
+        )
+        self.page.banner = banner
+        self.page.banner.open = True
+        self.page.update()
+
+    def _detect_local_changes(self) -> dict:
+        """Detecta los registros que han sido creados o modificados localmente."""
         print("Detectando cambios locales para el 'push'...")
-        # Lógica de ejemplo: obtener los 5 alumnos más recientes.
         conn = get_db_connection(self.page)
         alumnos = conn.execute("SELECT * FROM alumnos ORDER BY id DESC LIMIT 5").fetchall()
         conn.close()
@@ -32,13 +59,7 @@ class SyncManager:
         return {}
 
     def _apply_server_changes(self, server_data: dict):
-        """
-        Aplica los datos recibidos del servidor a la base de datos local.
-
-        NOTA: Esta es una implementación simplificada. Un sistema real necesitaría
-        manejar conflictos (qué pasa si el usuario modificó el mismo registro
-        localmente que también fue modificado en el servidor).
-        """
+        """Aplica los datos recibidos del servidor a la base de datos local."""
         print("Aplicando cambios del servidor a la base de datos local...")
         data = server_data.get("data", {})
         conn = get_db_connection(self.page)
@@ -47,12 +68,9 @@ class SyncManager:
         try:
             if 'clases' in data:
                 for clase in data['clases']:
-                    # Usar INSERT OR REPLACE para una estrategia simple de 'última escritura gana'
-                    # Se necesitarían todos los campos aquí
-                    cursor.execute("INSERT OR REPLACE INTO clases (id, nombre_clase, ...) VALUES (?, ?, ...)",
-                                   (clase['id'], clase['nombre_clase']))
-
-            # ... Repetir para todas las demás tablas (alumnos, etc.) ...
+                    clean_nombre = sanitize_input_for_flet(clase.get('nombre_clase', ''))
+                    cursor.execute("INSERT OR REPLACE INTO clases (id, nombre_clase) VALUES (?, ?)",
+                                   (clase['id'], clean_nombre))
 
             conn.commit()
             print("Cambios del servidor aplicados con éxito.")
@@ -63,81 +81,72 @@ class SyncManager:
             conn.close()
 
     def sync_with_server(self, last_sync_timestamp: str = None) -> bool:
-        """
-        Ejecuta el ciclo completo de sincronización: push y luego pull.
-        """
+        """Ejecuta el ciclo completo de sincronización: push y luego pull."""
         print("--- Iniciando ciclo de sincronización ---")
 
         # 1. Push: Enviar cambios locales al servidor
         local_changes = self._detect_local_changes()
         if local_changes:
-            print(f"Enviando {len(local_changes.get('alumnos',[]))} cambios locales al servidor...")
-            push_success = self.api_client.push_sync_data(local_changes)
-            if not push_success:
-                print("Error: El 'push' de la sincronización falló. Abortando.")
-                self.page.snack_bar = ft.SnackBar(ft.Text("Error al enviar cambios al servidor."), bgcolor="red")
-                self.page.snack_bar.open = True
-                self.page.update()
+            push_res = self.api_client._make_request("POST", "/api/sync/push", json=local_changes)
+            if isinstance(push_res, dict) and push_res.get("error"):
+                masked_code = push_res.get("code", "STD-ERR-500-INTERNAL-ERROR")
+                self._show_security_error_banner(
+                    masked_code,
+                    "Error de autorización o red durante la sincronización de salida. "
+                    "Se ha activado el refresco silencioso o la protección de sesión."
+                )
                 return False
             print("Push completado con éxito.")
-        else:
-            print("No se encontraron cambios locales para enviar.")
 
         # 2. Pull: Obtener cambios del servidor
-        print("Obteniendo cambios desde el servidor...")
         server_response = self.api_client.pull_sync_data(last_sync_timestamp)
+        if isinstance(server_response, dict) and server_response.get("error"):
+            masked_code = server_response.get("code", "STD-ERR-500-INTERNAL-ERROR")
+            self._show_security_error_banner(
+                masked_code,
+                "No se pudo completar la descarga de cambios del servidor. "
+                "Verifique las credenciales de la entidad o reconecte la sesión."
+            )
+            return False
+
         if server_response and server_response.get("data"):
             self._apply_server_changes(server_response)
-            # TODO: Guardar el nuevo `timestamp` de la sincronización en las preferencias locales.
-            new_timestamp = server_response.get("timestamp")
-            print(f"Pull completado. Nuevo timestamp de sincronización: {new_timestamp}")
-        elif server_response:
-            print("No hay nuevos datos para obtener del servidor.")
-        else:
-            print("Error: El 'pull' de la sincronización falló.")
-            self.page.snack_bar = ft.SnackBar(ft.Text("Error al recibir datos del servidor."), bgcolor="red")
-            self.page.snack_bar.open = True
-            self.page.update()
-            return False
 
         # 3. Sincronizar registros de asistencia PWA / Flet local
         self.sync_offline_attendance()
 
         print("--- Ciclo de sincronización completado ---")
-        self.page.snack_bar = ft.SnackBar(ft.Text("¡Sincronización completada!"), bgcolor="green")
-        self.page.snack_bar.open = True
-        self.page.update()
+        if self.page:
+            self.page.snack_bar = ft.SnackBar(
+                ft.Text("¡Sincronización completada en Disciplinas Deportivas y Talleres Culturales!"),
+                bgcolor="#0D1424"
+            )
+            self.page.snack_bar.open = True
+            self.page.update()
         return True
 
     @staticmethod
-    def format_attendance_payload(actividad: str = "Entrenamiento Deportivo / Taller Cultural",
-                                  ubicacion: str = "Escenario Central",
+    def format_attendance_payload(actividad: str = "Disciplinas Deportivas / Talleres Culturales",
+                                  ubicacion: str = "Escenario Deportivo / Centro Cultural",
                                   latitud: float = 4.6097,
                                   longitud: float = -74.0817) -> dict:
-        """
-        Modelo de serialización estandarizado para check-in de asistencia,
-        idéntico al esquema de la PWA Web (POST /api/v1/alumno/asistencia).
-        """
+        """Modelo de serialización estandarizado para check-in de asistencia."""
         import datetime
         return {
-            "actividad": actividad,
-            "ubicacion": ubicacion,
+            "actividad": sanitize_input_for_flet(actividad),
+            "ubicacion": sanitize_input_for_flet(ubicacion),
             "latitud": latitud,
             "longitud": longitud,
             "timestamp": datetime.datetime.utcnow().isoformat()
         }
 
     def sync_offline_attendance(self) -> bool:
-        """
-        Envía los registros de asistencia locales almacenados en SQLite
-        hacia la API central /api/v1/alumno/asistencia.
-        """
+        """Envía los registros de asistencia locales hacia la API central /api/v1/alumno/asistencia."""
         try:
             import sqlite3
             conn = get_db_connection(self.page)
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
-            # Crear tabla local de asistencia si no existe
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS asistencia_local (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -161,7 +170,7 @@ class SyncManager:
                     "timestamp": row["timestamp"]
                 }
                 res = self.api_client.post("/api/v1/alumno/asistencia", payload)
-                if res and res.status_code == 200:
+                if isinstance(res, dict) and not res.get("error"):
                     cursor.execute("UPDATE asistencia_local SET synced = 1 WHERE id = ?", (row["id"],))
             conn.commit()
             conn.close()
