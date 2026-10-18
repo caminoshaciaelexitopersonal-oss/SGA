@@ -17,10 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             const content = await response.json();
 
-<<<<<<< HEAD
-=======
             renderVideo(content.contact?.video_url);
->>>>>>> f36ba405 (Submit Skills Final)
             renderFeatures(content.features || []);
             renderPartners(content.partners || []);
             renderFaq(content.faq || []);
@@ -85,10 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderFeatures(defaultFeatures);
         renderPlans(defaultPlans);
         renderFaq([]);
-<<<<<<< HEAD
-=======
         renderVideo("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
->>>>>>> f36ba405 (Submit Skills Final)
         renderLaunchOffer("¡Invita a 10 instituciones o empresas y recibe 6 meses de licenciamiento completamente gratis!");
         renderFooter({
             nombre_empresa: "SGA-CD Inc.",
@@ -120,8 +114,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-<<<<<<< HEAD
-=======
     function renderVideo(videoUrl) {
         const container = document.getElementById('video-container');
         if (!container || !videoUrl) return;
@@ -146,7 +138,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
->>>>>>> f36ba405 (Submit Skills Final)
     function renderPartners(partners) {
         const clientsGrid = document.getElementById('clients-grid');
         const testersGrid = document.getElementById('testers-grid');
@@ -691,6 +682,9 @@ document.addEventListener('DOMContentLoaded', () => {
     loadAndRenderContent();
     loadLiveMonitor();
     initializeGPUCarousel();
+    if (window.SGAModernCarousel) {
+        window.SGAModernCarousel.init('modern-carousel-container');
+    }
     initializeAIAgent();
     initializeServiceWorker();
 });
