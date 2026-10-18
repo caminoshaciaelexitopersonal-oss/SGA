@@ -206,7 +206,7 @@ window.SGASEOOptimizer = (function() {
 
     /**
      * Aplica la política de privacidad de indexación basada en la ruta actual o vista.
-     * Rutas privadas (app.html, paneles internos) reciben noindex, nofollow.
+     * Rutas privadas (app.html, paneles internos y paneles de los 12 roles) reciben noindex, nofollow.
      */
     function applyPrivacyRobotsPolicy() {
         let metaRobots = document.querySelector('meta[name="robots"]');
@@ -215,9 +215,19 @@ window.SGASEOOptimizer = (function() {
         }
 
         const path = window.location.pathname.toLowerCase();
-        const isPrivateArea = path.includes('app.html') ||
-                              path.includes('/admin') ||
-                              path.includes('/dashboard');
+        const hash = window.location.hash.toLowerCase();
+        const search = window.location.search.toLowerCase();
+
+        const privateKeywords = [
+            'app.html', '/admin', '/dashboard', 'admin_general', 'admin_empresa',
+            'jefe_area', 'profesional_area', 'tecnico_area', 'coordinador',
+            'profesor', 'alumno', 'padre_acudiente', 'jefe_escenarios',
+            'jefe_almacen', 'almacenista'
+        ];
+
+        const isPrivateArea = privateKeywords.some(kw => path.includes(kw) || hash.includes(kw) || search.includes(kw)) ||
+                              document.getElementById('app-content') !== null ||
+                              document.querySelector('.app-layout') !== null;
 
         if (isPrivateArea) {
             metaRobots.setAttribute('content', 'noindex, nofollow');
