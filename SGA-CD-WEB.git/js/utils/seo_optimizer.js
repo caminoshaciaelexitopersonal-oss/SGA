@@ -204,10 +204,36 @@ window.SGASEOOptimizer = (function() {
         };
     }
 
+    /**
+     * Aplica la política de privacidad de indexación basada en la ruta actual o vista.
+     * Rutas privadas (app.html, paneles internos) reciben noindex, nofollow.
+     */
+    function applyPrivacyRobotsPolicy() {
+        let metaRobots = document.querySelector('meta[name="robots"]');
+        if (!metaRobots) {
+            metaRobots = createMeta('robots', 'name');
+        }
+
+        const path = window.location.pathname.toLowerCase();
+        const isPrivateArea = path.includes('app.html') ||
+                              path.includes('/admin') ||
+                              path.includes('/dashboard') ||
+                              Boolean(localStorage.getItem('sga_token')) ||
+                              Boolean(sessionStorage.getItem('sga_token'));
+
+        if (isPrivateArea) {
+            metaRobots.setAttribute('content', 'noindex, nofollow');
+            console.log('[SEO Optimizer] Límite de Privacidad Aplicado: <meta name="robots" content="noindex, nofollow">');
+        } else {
+            metaRobots.setAttribute('content', 'index, follow');
+        }
+    }
+
     return {
         init: function() {
             injectJSONLD();
             setupTelemetry();
+            applyPrivacyRobotsPolicy();
 
             const params = new URLSearchParams(window.location.search);
             const role = params.get('role') || 'general';
@@ -224,7 +250,8 @@ window.SGASEOOptimizer = (function() {
             }
         },
         updateRoleMetadata: updateRoleMetadata,
-        updateActivityMetadata: updateActivityMetadata
+        updateActivityMetadata: updateActivityMetadata,
+        applyPrivacyRobotsPolicy: applyPrivacyRobotsPolicy
     };
 })();
 

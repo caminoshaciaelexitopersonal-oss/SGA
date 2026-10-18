@@ -88,6 +88,28 @@
         }
 
         /**
+         * Procesa solicitudes de conversión para Entidades Públicas o Privadas (Nacional, Departamental o Municipal)
+         * en segundo plano sin bloquear la interfaz de usuario.
+         * @param {object} entityDetails - Detalles de la entidad solicitante
+         */
+        async processPartnerConversion(entityDetails = {}) {
+            setTimeout(async () => {
+                try {
+                    await this.dispatchPlanWhatsAppAlert('entidades', entityDetails);
+                    await this.captureAndDraftHook({
+                        type: 'instagram',
+                        title: entityDetails.entityName || 'Solicitud Entidad Aliada',
+                        planType: 'Nivel 1 Corporativo Entidades',
+                        targetRegion: entityDetails.entityLevel || 'Nacional / Departamental / Municipal'
+                    });
+                    console.log('[SGAMarketingPublisher] Conversión de aliado procesada exitosamente en segundo plano.');
+                } catch (err) {
+                    console.warn('[SGAMarketingPublisher] Excepción en segundo plano [STD-ERR-SECURITY-BREACH]:', err.message);
+                }
+            }, 0);
+        }
+
+        /**
          * Captura eventos y genera borradores de ganchos para Instagram (Publora) y TikTok
          */
         async captureAndDraftHook(options = {}) {

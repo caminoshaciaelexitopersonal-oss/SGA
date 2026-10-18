@@ -14,6 +14,21 @@ async function renderAdminGeneralDashboardView(token) {
         <p>Bienvenido, Super Administrador. Desde aquí podrá gestionar la configuración global de la plataforma.</p>
         <p>Seleccione una opción del menú para comenzar.</p>
     `;
+
+    if (window.gsap && !window.__sga_gsap_visibility_listener_added) {
+        window.__sga_gsap_visibility_listener_added = true;
+        document.addEventListener('visibilitychange', function() {
+            if (window.gsap) {
+                if (document.hidden) {
+                    gsap.globalTimeline.pause();
+                    console.log('[GSAP Lifecycle Admin General] Animaciones pausadas en segundo plano.');
+                } else {
+                    gsap.globalTimeline.resume();
+                    console.log('[GSAP Lifecycle Admin General] Animaciones reanudadas.');
+                }
+            }
+        });
+    }
 }
 
 /**
