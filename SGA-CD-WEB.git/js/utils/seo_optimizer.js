@@ -1,6 +1,10 @@
 /**
  * SEO & Marketing Engine - SGA-CD Multi-Entity & Role-Segmented Analytics
  * SGA-CD Architecture - Dark Metallic Blue System
+ *
+ * Inyección dinámica de metadatos SEO y JSON-LD estructurados para:
+ * - Entidades B2B vs Profesores/Estudiantes B2C.
+ * - Rutas e interfaces internas de Disciplinas Deportivas y Modalidades Culturales / Talleres.
  */
 window.SGASEOOptimizer = (function() {
     const SCHEMAS = {
@@ -30,7 +34,7 @@ window.SGASEOOptimizer = (function() {
                 {
                     "@type": "Offer",
                     "category": "Disciplinas Deportivas",
-                    "description": "Gestión de torneos, entrenamientos y fichas atléticas de rendimiento."
+                    "description": "Gestión de torneos, entrenamientos y fichas atléticas de rendimiento en Taekwondo, Fútbol, Baloncesto, Natación y más."
                 },
                 {
                     "@type": "Offer",
@@ -56,7 +60,7 @@ window.SGASEOOptimizer = (function() {
         }
     };
 
-    function injectJSONLD() {
+    function injectJSONLD(customSchemas) {
         let scriptTag = document.getElementById('sga-jsonld-schema');
         if (!scriptTag) {
             scriptTag = document.createElement('script');
@@ -64,14 +68,16 @@ window.SGASEOOptimizer = (function() {
             scriptTag.type = 'application/ld+json';
             document.head.appendChild(scriptTag);
         }
-        scriptTag.textContent = JSON.stringify([SCHEMAS.organization, SCHEMAS.governmentService], null, 2);
+
+        const schemasToInject = customSchemas || [SCHEMAS.organization, SCHEMAS.governmentService];
+        scriptTag.textContent = JSON.stringify(schemasToInject, null, 2);
     }
 
     function updateRoleMetadata(role) {
-        const metaTitle = document.querySelector('meta[property="og:title"]');
-        const metaDesc = document.querySelector('meta[property="og:description"]');
-        const metaTwTitle = document.querySelector('meta[name="twitter:title"]');
-        const metaTwDesc = document.querySelector('meta[name="twitter:description"]');
+        const metaTitle = document.querySelector('meta[property="og:title"]') || createMeta('og:title', 'property');
+        const metaDesc = document.querySelector('meta[property="og:description"]') || createMeta('og:description', 'property');
+        const metaTwTitle = document.querySelector('meta[name="twitter:title"]') || createMeta('twitter:title', 'name');
+        const metaTwDesc = document.querySelector('meta[name="twitter:description"]') || createMeta('twitter:description', 'name');
 
         let title = "SGA-CD — Plataforma de Gestión Cultural y Deportiva";
         let desc = "Sistema unificado para el seguimiento de presupuestos institucionales, asistencia y formación en disciplinas deportivas y modalidades culturales.";
@@ -84,15 +90,93 @@ window.SGASEOOptimizer = (function() {
             desc = "Inscripción en línea, control de asistencia offline PWA y seguimiento académico en danza (joropo, salsa, vallenato) e instrumentos.";
         }
 
-        if (metaTitle) metaTitle.setAttribute('content', title);
-        if (metaDesc) metaDesc.setAttribute('content', desc);
-        if (metaTwTitle) metaTwTitle.setAttribute('content', title);
-        if (metaTwDesc) metaTwDesc.setAttribute('content', desc);
+        metaTitle.setAttribute('content', title);
+        metaDesc.setAttribute('content', desc);
+        metaTwTitle.setAttribute('content', title);
+        metaTwDesc.setAttribute('content', desc);
+        document.title = title;
+    }
+
+    /**
+     * Inyección Dinámica de SEO para Páginas/Vistas Internas de Actividades
+     * @param {string} category - 'deportes' o 'cultura'
+     * @param {string} activityName - Nombre de la Disciplina o Taller (ej. Taekwondo, Joropo, Guitarra)
+     */
+    function updateActivityMetadata(category, activityName) {
+        if (!activityName) return;
+
+        const isDeporte = category === 'deportes' || category === 'deporte';
+        const cleanName = activityName.trim();
+
+        let title = "";
+        let desc = "";
+        let activitySchema = {};
+
+        if (isDeporte) {
+            title = `Disciplina Deportiva: ${cleanName} — Formación e Impacto Social SGA-CD`;
+            desc = `Inscripciones abiertas, entrenamiento especializado y ficha técnica atlética en ${cleanName}. Programa oficial avalado para convenios municipales y departamentales.`;
+
+            activitySchema = {
+                "@context": "https://schema.org",
+                "@type": "SportsEvent",
+                "name": `Programa de Formación en Disciplina Deportiva: ${cleanName}`,
+                "description": desc,
+                "organizer": SCHEMAS.organization,
+                "sport": cleanName,
+                "location": {
+                    "@type": "Place",
+                    "name": "Escenario Deportivo Municipal / Departamental SGA-CD",
+                    "address": {
+                        "@type": "PostalAddress",
+                        "addressCountry": "CO"
+                    }
+                }
+            };
+        } else {
+            title = `Taller Cultural / Modalidad: ${cleanName} — Escuela de Formación SGA-CD`;
+            desc = `Aprende y perfecciona ${cleanName} en la Escuela de Formación Cultural SGA-CD. Cupos disponibles para niños, jóvenes y adultos.`;
+
+            activitySchema = {
+                "@context": "https://schema.org",
+                "@type": "Course",
+                "name": `Taller Cultural de ${cleanName}`,
+                "description": desc,
+                "provider": SCHEMAS.organization,
+                "hasCourseInstance": {
+                    "@type": "CourseInstance",
+                    "courseMode": "Blended / Presencial Offline Sync",
+                    "instructor": "Instructor Calificado SGA-CD"
+                }
+            };
+        }
+
+        // Actualizar Meta Tags
+        const metaOgTitle = document.querySelector('meta[property="og:title"]') || createMeta('og:title', 'property');
+        const metaOgDesc = document.querySelector('meta[property="og:description"]') || createMeta('og:description', 'property');
+        const metaTwTitle = document.querySelector('meta[name="twitter:title"]') || createMeta('twitter:title', 'name');
+        const metaTwDesc = document.querySelector('meta[name="twitter:description"]') || createMeta('twitter:description', 'name');
+
+        metaOgTitle.setAttribute('content', title);
+        metaOgDesc.setAttribute('content', desc);
+        metaTwTitle.setAttribute('content', title);
+        metaTwDesc.setAttribute('content', desc);
+        document.title = title;
+
+        // Inyectar esquema estructurado específico de la actividad
+        injectJSONLD([SCHEMAS.organization, SCHEMAS.governmentService, activitySchema]);
+
+        console.log(`[SEO Optimizer] Metadata e Inyección JSON-LD actualizada para [${isDeporte ? 'Deporte' : 'Cultura'}]: ${cleanName}`);
+    }
+
+    function createMeta(attrValue, attrType = 'name') {
+        const meta = document.createElement('meta');
+        meta.setAttribute(attrType, attrValue);
+        document.head.appendChild(meta);
+        return meta;
     }
 
     function setupTelemetry() {
         window.trackConversionEvent = function(eventName, category, metadata = {}) {
-            // Anonymize metadata for ECC-main compliance
             const safeData = {
                 event: String(eventName),
                 category: String(category),
@@ -106,7 +190,7 @@ window.SGASEOOptimizer = (function() {
                 try {
                     navigator.sendBeacon('/api/v1/telemetry/event', payload);
                 } catch (e) {
-                    // Fallback for file:// protocol or blocked beacon
+                    // Fallback
                 }
             } else {
                 fetch('/api/v1/telemetry/event', {
@@ -125,12 +209,22 @@ window.SGASEOOptimizer = (function() {
             injectJSONLD();
             setupTelemetry();
 
-            // Detect segment parameter from URL if present (?role=entidad)
             const params = new URLSearchParams(window.location.search);
             const role = params.get('role') || 'general';
             updateRoleMetadata(role);
+
+            // Detectar si la URL incluye parámetros dinámicos de actividad (?deporte=Taekwondo o ?taller=Joropo)
+            const deporte = params.get('deporte') || params.get('disciplina');
+            const taller = params.get('taller') || params.get('modalidad');
+
+            if (deporte) {
+                updateActivityMetadata('deportes', deporte);
+            } else if (taller) {
+                updateActivityMetadata('cultura', taller);
+            }
         },
-        updateRoleMetadata: updateRoleMetadata
+        updateRoleMetadata: updateRoleMetadata,
+        updateActivityMetadata: updateActivityMetadata
     };
 })();
 
