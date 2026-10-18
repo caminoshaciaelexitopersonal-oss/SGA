@@ -43,31 +43,11 @@ def create_light_theme():
         }
     )
 
+from .theme_mapper import create_dark_metallic_blue_theme
+
 def create_dark_theme():
     """
-    Crea el tema oscuro para la aplicación, basado en las especificaciones del usuario.
+    Crea el tema oscuro Dark Metallic Blue para la aplicación SGA-CD Flet,
+    garantizando alineación cromática del 60-30-10 con la interfaz Web.
     """
-    return ft.Theme(
-        color_scheme=ft.ColorScheme(
-            # Fondo principal: Negro Profundo
-            background=COLOR_NEGRO_PROFUNDO,
-            # Botones primarios (acción principal): Verde-Esmeralda Azulado Brillante
-            primary=COLOR_VERDE_AZULADO_BRILLANTE,
-            # Barra de navegación / headers: Negro con acentos
-            primary_container=COLOR_NEGRO_PROFUNDO,
-            # Botones secundarios / resaltados: Dorado Luminoso
-            secondary=COLOR_DORADO,
-            # Texto principal: Blanco Suave
-            on_background=COLOR_TEXTO_PRINCIPAL_DARK,
-            on_surface=COLOR_TEXTO_PRINCIPAL_DARK,
-            # Color del texto sobre botones primarios
-            on_primary=COLOR_NEGRO_PROFUNDO,
-            # Tarjetas / cajas de contenido: Gris Oscuro
-            surface=COLOR_FONDO_TARJETA_DARK,
-        ),
-        # Colores personalizados para el tema oscuro
-        custom_colors={
-            "secondary_text": COLOR_TEXTO_SECUNDARIO_DARK,
-            "card_border": COLOR_BORDE_TARJETA_DARK
-        }
-    )
+    return create_dark_metallic_blue_theme()

@@ -287,6 +287,195 @@ async function renderMercadoView(token) {
     }
 }
 
+// --- IndexedDB & Offline PWA Attendance Engine ---
+const DB_NAME = 'sga_cd_offline_db';
+const STORE_NAME = 'attendance_records';
+
+function openAttendanceDB() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open(DB_NAME, 1);
+        request.onupgradeneeded = (e) => {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains(STORE_NAME)) {
+                db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
+            }
+        };
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+    });
+}
+
+async function saveAttendanceOffline(record) {
+    try {
+        const db = await openAttendanceDB();
+        const tx = db.transaction(STORE_NAME, 'readwrite');
+        const store = tx.objectStore(STORE_NAME);
+        store.add({ ...record, synced: record.synced ?? false, timestamp: record.timestamp || new Date().toISOString() });
+        return true;
+    } catch (e) {
+        const current = JSON.parse(localStorage.getItem('sga_offline_attendance') || '[]');
+        current.push({ ...record, synced: record.synced ?? false, timestamp: record.timestamp || new Date().toISOString() });
+        localStorage.setItem('sga_offline_attendance', JSON.stringify(current));
+        return true;
+    }
+}
+
+async function getLocalAttendanceRecords() {
+    try {
+        const db = await openAttendanceDB();
+        return new Promise((resolve) => {
+            const tx = db.transaction(STORE_NAME, 'readonly');
+            const store = tx.objectStore(STORE_NAME);
+            const request = store.getAll();
+            request.onsuccess = () => resolve(request.result || []);
+            request.onerror = () => resolve([]);
+        });
+    } catch (e) {
+        return JSON.parse(localStorage.getItem('sga_offline_attendance') || '[]');
+    }
+}
+
+async function syncOfflineAttendance(token) {
+    if (!navigator.onLine) return;
+    const records = await getLocalAttendanceRecords();
+    const unsynced = records.filter(r => !r.synced);
+    if (unsynced.length === 0) return;
+
+    for (const record of unsynced) {
+        try {
+            const res = await fetch(`${config.apiBaseUrl}/api/v1/alumno/asistencia`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(record)
+            });
+            if (res.ok) {
+                record.synced = true;
+            }
+        } catch (e) {
+            console.warn('Sync attempt failed for record:', record);
+        }
+    }
+}
+
+/**
+ * Renderiza la vista de "Asistencia Estudiantil PWA Offline" para el alumno.
+ */
+async function renderMiAsistenciaView(token) {
+    const contentArea = document.getElementById('content-area');
+    contentArea.innerHTML = '<h2><i class="fas fa-check-circle"></i> Check-In de Asistencia</h2><p>Cargando módulo de asistencia...</p>';
+
+    // Trigger background sync if online
+    syncOfflineAttendance(token);
+
+    const localHistory = await getLocalAttendanceRecords();
+    let historyRows = '<tr><td colspan="4">No hay registros de asistencia locales.</td></tr>';
+
+    if (localHistory && localHistory.length > 0) {
+        historyRows = localHistory.map(rec => `
+            <tr>
+                <td>${rec.timestamp ? new Date(rec.timestamp).toLocaleString() : 'Reciente'}</td>
+                <td>${rec.actividad || 'Entrenamiento Deportivo / Taller Cultural'}</td>
+                <td><span class="badge ${rec.synced ? 'points' : ''}">${rec.synced ? 'Sincronizado' : 'Pendiente (Offline)'}</span></td>
+                <td><i class="fas ${rec.synced ? 'fa-cloud-check' : 'fa-wifi-slash'}" style="color:${rec.synced ? 'var(--color-accent-cyan)' : 'var(--color-secondary-gold)'}"></i></td>
+            </tr>
+        `).join('');
+    }
+
+    contentArea.innerHTML = `
+        <div class="view-header">
+            <h2><i class="fas fa-check-circle"></i> Check-In de Asistencia PWA</h2>
+            <span id="connection-status" class="badge ${navigator.onLine ? 'points' : ''}" style="padding:0.5rem 1rem;">
+                <i class="fas ${navigator.onLine ? 'fa-wifi' : 'fa-plane'}"></i> ${navigator.onLine ? 'En Línea' : 'Modo Offline'}
+            </span>
+        </div>
+
+        <div class="card" style="text-align:center; padding:2.5rem; margin-bottom:2rem; background:var(--color-surface-card); border:1px solid var(--color-border-specular);">
+            <h3><i class="fas fa-qrcode"></i> Marcar Asistencia Instantánea</h3>
+            <p>Toca el botón para registrar tu presencia en la sesión de hoy. Operacional con o sin conexión a internet.</p>
+            <button id="btn-checkin-asistencia" class="btn-primary" style="min-height:50px; min-width:200px; font-size:1.1rem; border-radius:12px; margin-top:1rem; cursor:pointer;">
+                <i class="fas fa-fingerprint"></i> Check-In Ahora
+            </button>
+            <div id="checkin-feedback" style="margin-top:1rem; font-weight:bold;"></div>
+        </div>
+
+        <h3><i class="fas fa-history"></i> Historial Reciente de Asistencia</h3>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Fecha / Hora</th>
+                    <th>Actividad</th>
+                    <th>Estado de Red</th>
+                    <th>Icono</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${historyRows}
+            </tbody>
+        </table>
+    `;
+
+    // Event listener for Check-In button
+    const checkinBtn = document.getElementById('btn-checkin-asistencia');
+    const feedback = document.getElementById('checkin-feedback');
+
+    checkinBtn.addEventListener('click', async () => {
+        checkinBtn.disabled = true;
+        checkinBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Registrando...';
+
+        const recordPayload = {
+            actividad: 'Entrenamiento Deportivo / Taller Cultural',
+            ubicacion: 'Escenario Central',
+            latitud: 4.6097,
+            longitud: -74.0817
+        };
+
+        if (navigator.onLine) {
+            try {
+                const res = await fetch(`${config.apiBaseUrl}/api/v1/alumno/asistencia`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(recordPayload)
+                });
+                if (res.ok) {
+                    await saveAttendanceOffline({ ...recordPayload, synced: true });
+                    feedback.style.color = 'var(--color-accent-cyan)';
+                    feedback.innerHTML = '<i class="fas fa-circle-check"></i> ¡Asistencia registrada y sincronizada en el servidor!';
+                } else {
+                    throw new Error('Servidor devolvió error.');
+                }
+            } catch (err) {
+                await saveAttendanceOffline({ ...recordPayload, synced: false });
+                feedback.style.color = 'var(--color-secondary-gold)';
+                feedback.innerHTML = '<i class="fas fa-wifi-slash"></i> Guardado en almacenamiento local (Se sincronizará al reconectar).';
+            }
+        } else {
+            await saveAttendanceOffline({ ...recordPayload, synced: false });
+            feedback.style.color = 'var(--color-secondary-gold)';
+            feedback.innerHTML = '<i class="fas fa-wifi-slash"></i> Guardado en modo offline local. Se sincronizará automáticamente.';
+        }
+
+        setTimeout(() => {
+            renderMiAsistenciaView(token);
+        }, 1500);
+    });
+
+    // Handle online reconnection event listener
+    window.addEventListener('online', () => {
+        const connStatus = document.getElementById('connection-status');
+        if (connStatus) {
+            connStatus.innerHTML = '<i class="fas fa-wifi"></i> En Línea';
+            connStatus.classList.add('points');
+        }
+        syncOfflineAttendance(token);
+    });
+}
+
 // --- Registrar todas las vistas de Alumno en el Router ---
 if (typeof registerView === 'function') {
     registerView('alumno', 'mis-cursos', renderMisCursosView);
@@ -295,6 +484,7 @@ if (typeof registerView === 'function') {
     registerView('alumno', 'mi-progreso', renderMiGamificacionView);
     registerView('alumno', 'misiones', renderAlumnoMisionesView);
     registerView('alumno', 'mercado', renderMercadoView);
+    registerView('alumno', 'mi-asistencia', renderMiAsistenciaView);
 } else {
     console.error("El sistema de registro de vistas no está disponible.");
 }
