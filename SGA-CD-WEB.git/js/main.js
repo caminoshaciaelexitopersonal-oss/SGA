@@ -339,6 +339,31 @@ document.addEventListener('DOMContentLoaded', () => {
             ease: 'power3.out'
         });
 
+        // 3D Parallax Scrolling on Sports Disciplines & Cultural Workshops
+        if (typeof ScrollTrigger !== 'undefined') {
+            gsap.to('#hero-video-container', {
+                scrollTrigger: {
+                    trigger: '#hero',
+                    start: 'top top',
+                    end: 'bottom top',
+                    scrub: true
+                },
+                yPercent: 25,
+                ease: 'none'
+            });
+
+            gsap.to('#monitor-vivo', {
+                scrollTrigger: {
+                    trigger: '#monitor-vivo',
+                    start: 'top bottom',
+                    end: 'bottom top',
+                    scrub: 1
+                },
+                y: -30,
+                ease: 'power1.out'
+            });
+        }
+
         // Animated Statistics Counter with ScrollTrigger
         const statNumbers = document.querySelectorAll('.stat-number');
         statNumbers.forEach(stat => {

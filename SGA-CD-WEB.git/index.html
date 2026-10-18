@@ -43,7 +43,10 @@
     }
     </script>
 
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="shortcut icon" href="favicon.svg">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/vanguard.css">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#070B14">
     <!-- Font Awesome -->
@@ -53,17 +56,22 @@
 
     <div class="site-wrapper">
         <header role="banner">
-            <h1 id="header-title" style="display:inline-flex; align-items:center; gap:0.5rem;">
-                <svg class="ui-icon-svg" viewBox="0 0 24 24" aria-hidden="true" style="stroke:var(--color-accent-cyan); width:28px; height:28px;">
-                    <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
-                    <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
-                    <path d="M4 22h16"></path>
-                    <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path>
-                    <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path>
-                    <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path>
+            <a href="index.html" class="sga-brand-logo" aria-label="SGA-CD Logo Corporativo">
+                <svg viewBox="0 0 64 64" aria-hidden="true">
+                    <circle cx="32" cy="32" r="30" fill="#0D1424" stroke="#38BDF8" stroke-width="2.5" />
+                    <path d="M16 22 L32 12 L48 22 L32 32 Z" fill="url(#sgaGradHeader)" />
+                    <path d="M16 30 L32 40 L48 30" stroke="#38BDF8" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M16 38 L32 48 L48 38" stroke="#38BDF8" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" />
+                    <circle cx="32" cy="22" r="3.5" fill="#FFFFFF" />
+                    <defs>
+                        <linearGradient id="sgaGradHeader" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#38BDF8" />
+                            <stop offset="100%" stop-color="#0284C7" />
+                        </linearGradient>
+                    </defs>
                 </svg>
-                SGA-CD
-            </h1>
+                <span class="sga-brand-title">SGA-CD</span>
+            </a>
             <nav role="navigation" aria-label="Navegación Principal">
                 <a href="#hero" class="nav-icon-link" aria-label="Inicio">
                     <svg class="ui-icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
@@ -281,6 +289,7 @@
     <script src="js/utils/error_handler.js"></script>
     <script src="js/utils/network_interceptor.js"></script>
     <script src="js/utils/seo_optimizer.js"></script>
+    <script src="js/utils/dynamic_island.js"></script>
     <script src="js/utils/marketing_publisher.js"></script>
     <script src="js/components/modern_carousel.js"></script>
     <script src="js/privacy.js"></script>

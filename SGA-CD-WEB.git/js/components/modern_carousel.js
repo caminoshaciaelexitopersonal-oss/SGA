@@ -76,11 +76,11 @@ window.SGAModernCarousel = (function() {
         if (!container) return;
 
         container.innerHTML = `
-            <div class="sga-modern-carousel-wrapper" style="position:relative; width:100%; min-height:460px; background:#070B14; border:1px solid rgba(56,189,248,0.25); border-radius:20px; overflow:hidden; padding:1.5rem; box-sizing:border-box;">
-                <div class="sga-carousel-track" style="position:relative; width:100%; min-height:420px; display:flex; align-items:center;">
+            <div class="sga-modern-carousel-wrapper" style="position:relative; width:100%; min-height:480px; background:#070B14; border:1px solid rgba(56,189,248,0.25); border-radius:20px; overflow:hidden; padding:1.5rem; box-sizing:border-box;">
+                <div class="sga-carousel-track" style="position:relative; width:100%; min-height:440px; display:flex; align-items:center;">
                     ${slidesData.map((slide, index) => `
-                        <div class="sga-carousel-slide ${index === 0 ? 'active' : ''}" data-index="${index}" style="position:absolute; inset:0; opacity:${index === 0 ? 1 : 0}; transform:translate3d(${index === 0 ? '0px' : '100px'}, 0, 0); transition:opacity 0.6s ease, transform 0.6s ease; display:flex; flex-direction:column; justify-content:flex-start; padding:2rem 2rem 2rem 2rem; background:${slide.bgGradient}; border-radius:16px; box-sizing:border-box;">
-                            <span class="slide-tag" style="display:inline-block; align-self:flex-start; background:rgba(56,189,248,0.12); color:#38BDF8; font-size:0.8rem; font-weight:800; padding:0.4rem 1rem; border-radius:20px; border:1px solid rgba(56,189,248,0.3); margin-bottom:1rem; letter-spacing:1px;">
+                        <div class="sga-carousel-slide ${index === 0 ? 'active' : ''}" data-index="${index}" style="position:absolute; inset:0; opacity:${index === 0 ? 1 : 0}; transform:translate3d(${index === 0 ? '0px' : '100px'}, 0, 0); transition:opacity 0.6s ease, transform 0.6s ease; display:flex; flex-direction:column; justify-content:flex-start; padding:2.5rem 2rem 2rem 2rem; background:${slide.bgGradient}; border-radius:16px; box-sizing:border-box;">
+                            <span class="slide-tag" style="display:inline-block; align-self:flex-start; background:rgba(56,189,248,0.12); color:#38BDF8; font-size:0.8rem; font-weight:800; padding:0.4rem 1rem; border-radius:20px; border:1px solid rgba(56,189,248,0.3); margin-bottom:1.2rem; letter-spacing:1px; flex-shrink:0;">
                                 ${slide.tag}
                             </span>
                             <h2 class="slide-floating-title" style="color:#E2E8F0; font-size:clamp(1.5rem, 3vw, 2.5rem); font-weight:800; margin:0 0 1rem 0; line-height:1.2;">

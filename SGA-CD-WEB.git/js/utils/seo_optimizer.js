@@ -217,9 +217,7 @@ window.SGASEOOptimizer = (function() {
         const path = window.location.pathname.toLowerCase();
         const isPrivateArea = path.includes('app.html') ||
                               path.includes('/admin') ||
-                              path.includes('/dashboard') ||
-                              Boolean(localStorage.getItem('sga_token')) ||
-                              Boolean(sessionStorage.getItem('sga_token'));
+                              path.includes('/dashboard');
 
         if (isPrivateArea) {
             metaRobots.setAttribute('content', 'noindex, nofollow');
