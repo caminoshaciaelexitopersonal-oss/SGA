@@ -57,9 +57,96 @@ html, body {
 }
 
 /* WCAG Target Size Constraints */
-button, a.cta-button, a.plan-button, input, select, textarea, .faq-question {
+button, a.cta-button, a.plan-button, input, select, textarea, .faq-question, .ui-icon-btn {
     min-height: 44px;
     min-width: 44px;
+}
+
+/* Vector UI Icons System (60-30-10 Dark Metallic Rule) */
+.ui-icon-svg {
+    width: 22px;
+    height: 22px;
+    stroke: var(--color-text-muted);
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: stroke 0.3s cubic-bezier(0.16, 1, 0.3, 1), fill 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: transform, stroke, fill;
+}
+
+.ui-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    border-radius: 10px;
+    background: rgba(13, 20, 36, 0.6);
+    border: 1px solid var(--color-border-specular);
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.ui-icon-btn:hover,
+.ui-icon-btn:focus-visible,
+.ui-icon-btn.active {
+    background: rgba(56, 189, 248, 0.12);
+    border-color: var(--color-accent-cyan);
+    box-shadow: 0 0 15px rgba(56, 189, 248, 0.25);
+}
+
+.ui-icon-btn:hover .ui-icon-svg,
+.ui-icon-btn:focus-visible .ui-icon-svg,
+.ui-icon-btn.active .ui-icon-svg {
+    stroke: var(--color-accent-cyan);
+    fill: rgba(56, 189, 248, 0.2);
+    transform: scale(1.12);
+}
+
+.nav-icon-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--color-text-muted);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: var(--font-size-small);
+    transition: color 0.3s ease;
+}
+
+.nav-icon-link:hover .ui-icon-svg,
+.nav-icon-link:focus-visible .ui-icon-svg {
+    stroke: var(--color-accent-cyan);
+    fill: rgba(56, 189, 248, 0.2);
+    transform: scale(1.1);
+}
+
+/* Card Utility Action Group */
+.card-actions-group {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    margin-top: 1rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.floating-social-bar {
+    position: fixed;
+    left: 20px;
+    bottom: 25px;
+    z-index: 999;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    background: rgba(13, 20, 36, 0.85);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--color-border-specular);
+    border-radius: 30px;
+    padding: 0.5rem;
+    box-shadow: var(--shadow-desktop-hardware);
 }
 
 /* Accessibility SR Only Utility */

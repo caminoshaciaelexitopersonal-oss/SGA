@@ -527,16 +527,45 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
                 <h3>${cleanTitle}</h3>
                 <p style="font-size:0.9rem; margin-bottom:1rem;">${cleanDetalle}</p>
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:auto; padding-top:0.5rem;">
-                    <a href="https://twitter.com/intent/tweet?text=${socialPayload}" target="_blank" rel="noopener noreferrer" class="social-share-btn" style="font-size:0.8rem; color:var(--color-accent-cyan); text-decoration:none; display:inline-flex; align-items:center; gap:0.35rem;">
-                        <i class="fa-brands fa-x-twitter"></i> Compartir
-                    </a>
-                    <button onclick="window.trackEvent('event_interest_click', { event_id: ${ev.id}, event_title: '${cleanTitle}' })" class="cta-button" style="padding:0.3rem 0.8rem; font-size:0.8rem; min-height:unset;">
-                        Detalles
+
+                <!-- Vector UI Icons Action Group (Bookmark, Ojo/Cupos, Flecha Registro) -->
+                <div class="card-actions-group">
+                    <button class="ui-icon-btn bookmark-btn" aria-label="Guardar / Bookmark actividad" title="Guardar Actividad">
+                        <svg class="ui-icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"></path></svg>
                     </button>
+                    <button class="ui-icon-btn details-btn" aria-label="Ver cupos y detalles de actividad" title="Ver Cupos y Detalles" onclick="window.trackEvent('event_interest_click', { event_id: ${ev.id}, event_title: '${cleanTitle}' })">
+                        <svg class="ui-icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    </button>
+                    <a href="register.html" class="ui-icon-btn register-arrow-btn" aria-label="Inscripción / Registro rápido" title="Registro Rápido" style="margin-left:auto;">
+                        <svg class="ui-icon-svg" viewBox="0 0 24 24" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                    </a>
                 </div>
             `;
             monitorGrid.appendChild(card);
+        });
+
+        // Attach GSAP Timeline 60 FPS transitions for Vector UI Icons
+        document.querySelectorAll('.ui-icon-btn').forEach(btn => {
+            btn.addEventListener('mouseenter', () => {
+                const svg = btn.querySelector('.ui-icon-svg');
+                if (typeof gsap !== 'undefined' && svg) {
+                    gsap.to(svg, { scale: 1.15, stroke: '#38BDF8', duration: 0.2, ease: 'power2.out' });
+                }
+            });
+            btn.addEventListener('mouseleave', () => {
+                const svg = btn.querySelector('.ui-icon-svg');
+                if (typeof gsap !== 'undefined' && svg && !btn.classList.contains('active')) {
+                    gsap.to(svg, { scale: 1.0, stroke: '#94A3B8', duration: 0.2, ease: 'power2.out' });
+                }
+            });
+            btn.addEventListener('click', () => {
+                if (btn.classList.contains('bookmark-btn')) {
+                    btn.classList.toggle('active');
+                    if (btn.classList.contains('active')) {
+                        window.trackEvent('bookmark_activity', { status: 'saved' });
+                    }
+                }
+            });
         });
 
         // GSAP smooth transition for filtered items
