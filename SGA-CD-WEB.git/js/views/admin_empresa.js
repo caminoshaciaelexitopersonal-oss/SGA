@@ -178,10 +178,25 @@ async function renderAdminEmpresaView(token) {
             </div>
         `;
 
-        // Animación GSAP Timeline para barras analíticas Dataviz
+        // Animación GSAP Timeline para barras analíticas Dataviz y mitigación de fuga de memoria en blur
         if (window.gsap) {
-            gsap.from('.chart-bar-fill', { width: '0%', duration: 1.2, stagger: 0.2, ease: 'power3.out' });
-            gsap.from('.bento-kpi-card', { opacity: 0, y: 20, duration: 0.6, stagger: 0.1, ease: 'power2.out' });
+            const chartTween = gsap.from('.chart-bar-fill', { width: '0%', duration: 1.2, stagger: 0.2, ease: 'power3.out' });
+            const bentoTween = gsap.from('.bento-kpi-card', { opacity: 0, y: 20, duration: 0.6, stagger: 0.1, ease: 'power2.out' });
+
+            if (!window.__sga_gsap_visibility_listener_added) {
+                window.__sga_gsap_visibility_listener_added = true;
+                document.addEventListener('visibilitychange', function() {
+                    if (window.gsap) {
+                        if (document.hidden) {
+                            gsap.globalTimeline.pause();
+                            console.log('[GSAP Lifecycle] Animaciones pausadas en segundo plano para prevenir fugas de memoria.');
+                        } else {
+                            gsap.globalTimeline.resume();
+                            console.log('[GSAP Lifecycle] Animaciones reanudadas a 60 FPS.');
+                        }
+                    }
+                });
+            }
         }
     } catch (error) {
         console.warn('Fallback render for admin empresa:', error);

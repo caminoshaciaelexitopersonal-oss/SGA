@@ -17,10 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             const content = await response.json();
 
-<<<<<<< HEAD
-=======
             renderVideo(content.contact?.video_url);
->>>>>>> f36ba405 (Submit Skills Final)
             renderFeatures(content.features || []);
             renderPartners(content.partners || []);
             renderFaq(content.faq || []);
@@ -85,10 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderFeatures(defaultFeatures);
         renderPlans(defaultPlans);
         renderFaq([]);
-<<<<<<< HEAD
-=======
         renderVideo("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
->>>>>>> f36ba405 (Submit Skills Final)
         renderLaunchOffer("¡Invita a 10 instituciones o empresas y recibe 6 meses de licenciamiento completamente gratis!");
         renderFooter({
             nombre_empresa: "SGA-CD Inc.",
@@ -120,8 +114,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-<<<<<<< HEAD
-=======
     function renderVideo(videoUrl) {
         const container = document.getElementById('video-container');
         if (!container || !videoUrl) return;
@@ -146,7 +138,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
->>>>>>> f36ba405 (Submit Skills Final)
     function renderPartners(partners) {
         const clientsGrid = document.getElementById('clients-grid');
         const testersGrid = document.getElementById('testers-grid');
@@ -348,6 +339,31 @@ document.addEventListener('DOMContentLoaded', () => {
             ease: 'power3.out'
         });
 
+        // 3D Parallax Scrolling on Sports Disciplines & Cultural Workshops
+        if (typeof ScrollTrigger !== 'undefined') {
+            gsap.to('#hero-video-container', {
+                scrollTrigger: {
+                    trigger: '#hero',
+                    start: 'top top',
+                    end: 'bottom top',
+                    scrub: true
+                },
+                yPercent: 25,
+                ease: 'none'
+            });
+
+            gsap.to('#monitor-vivo', {
+                scrollTrigger: {
+                    trigger: '#monitor-vivo',
+                    start: 'top bottom',
+                    end: 'bottom top',
+                    scrub: 1
+                },
+                y: -30,
+                ease: 'power1.out'
+            });
+        }
+
         // Animated Statistics Counter with ScrollTrigger
         const statNumbers = document.querySelectorAll('.stat-number');
         statNumbers.forEach(stat => {
@@ -486,14 +502,68 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error('API offline');
             }
         } catch (e) {
-            // Default high-performance fallback feed
+        // Default high-performance fallback feed with 5 photos gallery per activity card
             liveMonitorEvents = [
-                { id: 1, categoria: 'deporte', titulo: 'Disciplina Deportiva: Copa Intercolegial de Taekwondo 2025', detalle: 'Fase eliminatoria regional - 48 atletas acreditados.', estado: 'En Vivo', icono: 'fa-solid fa-trophy' },
-                { id: 2, categoria: 'cultura', titulo: 'Taller Cultural - Instrumentos: Músicas Colombianas (Guitarra/Arpa)', detalle: 'Modalidad de vallenato y música tradicional en auditorio central.', estado: 'Programado', icono: 'fa-solid fa-music' },
-                { id: 3, categoria: 'deporte', titulo: 'Disciplina Deportiva: Torneo de Natación Infantil & Juvenil', detalle: 'Pruebas de 100m libres y relevos mixtos.', estado: 'En Vivo', icono: 'fa-solid fa-person-swimming' },
-                { id: 4, categoria: 'cultura', titulo: 'Taller Cultural: Exposición de Artes Plásticas & Escultura', detalle: 'Muestra estudiantil anual en galería institucional.', estado: 'Inscripciones', icono: 'fa-solid fa-palette' },
-                { id: 5, categoria: 'deporte', titulo: 'Disciplina Deportiva: Liga de Baloncesto Institucional', detalle: 'Jornada 5: Selección A vs. Campus Norte.', estado: 'Programado', icono: 'fa-solid fa-basketball' },
-                { id: 6, categoria: 'cultura', titulo: 'Taller Cultural - Danza: Joropo/Llanera & Salsa', detalle: 'Gala nocturna de clausura académica.', estado: 'Próximo', icono: 'fa-solid fa-masks-theater' }
+            {
+                id: 1,
+                categoria: 'deporte',
+                titulo: 'Disciplina Deportiva: Copa Intercolegial de Taekwondo 2025',
+                detalle: 'Fase eliminatoria regional - 48 atletas acreditados.',
+                estado: 'En Vivo',
+                icono: 'fa-solid fa-trophy',
+                fotos: [
+                    'https://images.unsplash.com/photo-1555597673-b21d5c935865?auto=format&fit=crop&w=600&q=80',
+                    'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=600&q=80',
+                    'https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?auto=format&fit=crop&w=600&q=80',
+                    'https://images.unsplash.com/photo-1517649763962-0c623266ddc0?auto=format&fit=crop&w=600&q=80',
+                    'https://images.unsplash.com/photo-1526676037777-05a232554f77?auto=format&fit=crop&w=600&q=80'
+                ]
+            },
+            {
+                id: 2,
+                categoria: 'cultura',
+                titulo: 'Taller Cultural - Instrumentos: Guitarra & Arpa Llanera',
+                detalle: 'Modalidad de música tradicional y cuerdas en auditorio central.',
+                estado: 'Programado',
+                icono: 'fa-solid fa-music',
+                fotos: [
+                    'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=600&q=80',
+                    'https://images.unsplash.com/photo-1525201548942-d8732f6617a0?auto=format&fit=crop&w=600&q=80',
+                    'https://images.unsplash.com/photo-1510915361894-db8b60106cb1?auto=format&fit=crop&w=600&q=80',
+                    'https://images.unsplash.com/photo-1465847899084-d164df4dedc6?auto=format&fit=crop&w=600&q=80',
+                    'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=600&q=80'
+                ]
+            },
+            {
+                id: 3,
+                categoria: 'deporte',
+                titulo: 'Disciplina Deportiva: Torneo de Natación Infantil & Juvenil',
+                detalle: 'Pruebas de 100m libres y relevos mixtos.',
+                estado: 'En Vivo',
+                icono: 'fa-solid fa-person-swimming',
+                fotos: [
+                    'https://images.unsplash.com/photo-1530549387789-4c1017266635?auto=format&fit=crop&w=600&q=80',
+                    'https://images.unsplash.com/photo-1519315901367-f34ff9154487?auto=format&fit=crop&w=600&q=80',
+                    'https://images.unsplash.com/photo-1560090995-01632a28895b?auto=format&fit=crop&w=600&q=80',
+                    'https://images.unsplash.com/photo-1438029071396-1e831a7fa6d8?auto=format&fit=crop&w=600&q=80',
+                    'https://images.unsplash.com/photo-1519315901367-f34ff9154487?auto=format&fit=crop&w=600&q=80'
+                ]
+            },
+            {
+                id: 4,
+                categoria: 'cultura',
+                titulo: 'Taller Cultural - Danza: Joropo/Llanera, Salsa & Vallenato',
+                detalle: 'Gala folclórica y muestra de ritmos tradicionales.',
+                estado: 'Próximo',
+                icono: 'fa-solid fa-masks-theater',
+                fotos: [
+                    'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&w=600&q=80',
+                    'https://images.unsplash.com/photo-1518834107882-77d19d5c5c62?auto=format&fit=crop&w=600&q=80',
+                    'https://images.unsplash.com/photo-1547153760-18fc86324498?auto=format&fit=crop&w=600&q=80',
+                    'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=600&q=80',
+                    'https://images.unsplash.com/photo-1504609773096-104ff2c73ba4?auto=format&fit=crop&w=600&q=80'
+                ]
+            }
             ];
         }
 
@@ -518,34 +588,94 @@ document.addEventListener('DOMContentLoaded', () => {
 
         filtered.forEach(ev => {
             const card = document.createElement('div');
-            card.className = 'feature-card monitor-card';
+            card.className = 'feature-card monitor-card multi-photo-card';
             card.setAttribute('data-category', ev.categoria);
 
             const cleanTitle = sanitizeHTML(ev.titulo);
             const cleanDetalle = sanitizeHTML(ev.detalle);
             const cleanEstado = sanitizeHTML(ev.estado);
             const cleanIcon = sanitizeHTML(ev.icono || 'fa-solid fa-star');
-            const socialPayload = encodeURIComponent(`¡Orgullo Institucional SGA-CD! Sigue los detalles de: ${ev.titulo} — ${ev.detalle} #SGACD #Deporte #Cultura`);
+            const fotos = (ev.fotos && ev.fotos.length === 5) ? ev.fotos : [
+                'https://images.unsplash.com/photo-1555597673-b21d5c935865?auto=format&fit=crop&w=600&q=80',
+                'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=600&q=80',
+                'https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?auto=format&fit=crop&w=600&q=80',
+                'https://images.unsplash.com/photo-1517649763962-0c623266ddc0?auto=format&fit=crop&w=600&q=80',
+                'https://images.unsplash.com/photo-1526676037777-05a232554f77?auto=format&fit=crop&w=600&q=80'
+            ];
+
+            const galleryImgsHtml = fotos.map((fUrl, imgIdx) => `
+                <img src="${sanitizeHTML(fUrl)}" alt="Foto ${imgIdx + 1} - ${cleanTitle}" class="card-gallery-img" loading="${imgIdx === 0 ? 'eager' : 'lazy'}" width="300" height="180">
+            `).join('');
 
             card.innerHTML = `
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
-                    <i class="${cleanIcon}" style="font-size:1.8rem; margin-bottom:0;"></i>
-                    <span style="font-size:0.75rem; font-weight:700; padding:0.25rem 0.65rem; border-radius:12px; background:rgba(56,189,248,0.15); color:var(--color-accent-cyan); border:1px solid var(--color-border-specular);">
-                        ${cleanEstado}
-                    </span>
+                <!-- Micro-Carrusel Multifoto (5 Fotos GPU Hardware Composited) -->
+                <div class="card-gallery-wrapper" data-card-id="${ev.id}">
+                    <div class="card-gallery-strip" style="transform: translate3d(0%, 0, 0);">
+                        ${galleryImgsHtml}
+                    </div>
+                    <button class="gallery-arrow-btn prev" aria-label="Foto Anterior"><i class="fa-solid fa-chevron-left"></i></button>
+                    <button class="gallery-arrow-btn next" aria-label="Foto Siguiente"><i class="fa-solid fa-chevron-right"></i></button>
+                    <div class="gallery-nav-dots">
+                        <span class="gallery-dot active" data-dot="0"></span>
+                        <span class="gallery-dot" data-dot="1"></span>
+                        <span class="gallery-dot" data-dot="2"></span>
+                        <span class="gallery-dot" data-dot="3"></span>
+                        <span class="gallery-dot" data-dot="4"></span>
+                    </div>
                 </div>
-                <h3>${cleanTitle}</h3>
-                <p style="font-size:0.9rem; margin-bottom:1rem;">${cleanDetalle}</p>
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:auto; padding-top:0.5rem;">
-                    <a href="https://twitter.com/intent/tweet?text=${socialPayload}" target="_blank" rel="noopener noreferrer" class="social-share-btn" style="font-size:0.8rem; color:var(--color-accent-cyan); text-decoration:none; display:inline-flex; align-items:center; gap:0.35rem;">
-                        <i class="fa-brands fa-x-twitter"></i> Compartir
-                    </a>
-                    <button onclick="window.trackEvent('event_interest_click', { event_id: ${ev.id}, event_title: '${cleanTitle}' })" class="cta-button" style="padding:0.3rem 0.8rem; font-size:0.8rem; min-height:unset;">
-                        Detalles
-                    </button>
+
+                <div style="padding: 1.25rem; display:flex; flex-direction:column; flex:1;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+                        <i class="${cleanIcon}" style="font-size:1.5rem; margin-bottom:0; color:#38BDF8;"></i>
+                        <span style="font-size:0.75rem; font-weight:700; padding:0.25rem 0.65rem; border-radius:12px; background:rgba(56,189,248,0.15); color:var(--color-accent-cyan); border:1px solid var(--color-border-specular);">
+                            ${cleanEstado}
+                        </span>
+                    </div>
+                    <h3>${cleanTitle}</h3>
+                    <p style="font-size:0.88rem; margin-bottom:1rem; flex:1; color:#94A3B8;">${cleanDetalle}</p>
+
+                    <!-- Vector UI Icons Action Group -->
+                    <div class="card-actions-group">
+                        <button class="ui-icon-btn bookmark-btn" aria-label="Guardar / Bookmark actividad" title="Guardar Actividad">
+                            <svg class="ui-icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"></path></svg>
+                        </button>
+                        <button class="ui-icon-btn details-btn" aria-label="Ver cupos y detalles de actividad" title="Ver Cupos y Detalles" onclick="window.trackEvent('event_interest_click', { event_id: ${ev.id}, event_title: '${cleanTitle}' })">
+                            <svg class="ui-icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                        </button>
+                        <a href="register.html" class="ui-icon-btn register-arrow-btn" aria-label="Inscripción / Registro rápido" title="Registro Rápido" style="margin-left:auto;">
+                            <svg class="ui-icon-svg" viewBox="0 0 24 24" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                        </a>
+                    </div>
                 </div>
             `;
             monitorGrid.appendChild(card);
+
+            // Bind Micro-Carrusel 5 Photos Event Listeners
+            setupMicroGallery(card);
+        });
+
+        // Attach GSAP Timeline 60 FPS transitions for Vector UI Icons
+        document.querySelectorAll('.ui-icon-btn').forEach(btn => {
+            btn.addEventListener('mouseenter', () => {
+                const svg = btn.querySelector('.ui-icon-svg');
+                if (typeof gsap !== 'undefined' && svg) {
+                    gsap.to(svg, { scale: 1.15, stroke: '#38BDF8', duration: 0.2, ease: 'power2.out' });
+                }
+            });
+            btn.addEventListener('mouseleave', () => {
+                const svg = btn.querySelector('.ui-icon-svg');
+                if (typeof gsap !== 'undefined' && svg && !btn.classList.contains('active')) {
+                    gsap.to(svg, { scale: 1.0, stroke: '#94A3B8', duration: 0.2, ease: 'power2.out' });
+                }
+            });
+            btn.addEventListener('click', () => {
+                if (btn.classList.contains('bookmark-btn')) {
+                    btn.classList.toggle('active');
+                    if (btn.classList.contains('active')) {
+                        window.trackEvent('bookmark_activity', { status: 'saved' });
+                    }
+                }
+            });
         });
 
         // GSAP smooth transition for filtered items
@@ -604,6 +734,134 @@ document.addEventListener('DOMContentLoaded', () => {
             window.trackEvent('cta_click', { button_text: btnText, target_href: e.currentTarget.getAttribute('href') });
         });
     });
+
+    // --- Micro-Gallery 5 Photos Controller ---
+    function setupMicroGallery(cardEl) {
+        const strip = cardEl.querySelector('.card-gallery-strip');
+        const prevBtn = cardEl.querySelector('.gallery-arrow-btn.prev');
+        const nextBtn = cardEl.querySelector('.gallery-arrow-btn.next');
+        const dots = cardEl.querySelectorAll('.gallery-dot');
+
+        if (!strip || !dots.length) return;
+
+        let activeImgIndex = 0;
+
+        function updateGalleryIndex(newIdx) {
+            activeImgIndex = (newIdx + 5) % 5;
+            const offset = activeImgIndex * 20; // 20% per image in 500% strip width
+            strip.style.transform = `translate3d(-${offset}%, 0, 0)`;
+
+            dots.forEach((dot, dIdx) => {
+                if (dIdx === activeImgIndex) {
+                    dot.classList.add('active');
+                } else {
+                    dot.classList.remove('active');
+                }
+            });
+        }
+
+        prevBtn?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            updateGalleryIndex(activeImgIndex - 1);
+        });
+
+        nextBtn?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            updateGalleryIndex(activeImgIndex + 1);
+        });
+
+        dots.forEach((dot, dIdx) => {
+            dot.addEventListener('click', (e) => {
+                e.stopPropagation();
+                updateGalleryIndex(dIdx);
+            });
+        });
+
+        // Touch swipe gesture support for micro-carousel
+        let touchStartX = 0;
+        cardEl.querySelector('.card-gallery-wrapper')?.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+
+        cardEl.querySelector('.card-gallery-wrapper')?.addEventListener('touchend', (e) => {
+            const touchEndX = e.changedTouches[0].screenX;
+            if (touchStartX - touchEndX > 40) {
+                updateGalleryIndex(activeImgIndex + 1);
+            } else if (touchEndX - touchStartX > 40) {
+                updateGalleryIndex(activeImgIndex - 1);
+            }
+        }, { passive: true });
+    }
+
+    // --- Corporate Allies Matrix Generator ---
+    function renderCorporateAllies() {
+        const grid = document.getElementById('corporate-allies-grid');
+        if (!grid) return;
+
+        const allies = [
+            {
+                nombre: "Ecopetrol Energía & Regiones",
+                categoria: "Co-Patrocinador Departamental",
+                icono: "fa-solid fa-bolt-lightning",
+                descripcion: "Financiación de escuelas deportivas y dotación de auditorios culturales en comunidades de influencia."
+            },
+            {
+                nombre: "Bancolombia Social & Cultura",
+                categoria: "Aliado Financiero",
+                icono: "fa-solid fa-building-columns",
+                descripcion: "Plataforma de becas estudiantiles y apoyo a certámenes folclóricos regionales."
+            },
+            {
+                nombre: "Servientrega Logística Nacional",
+                categoria: "Sponsor Deportivo",
+                icono: "fa-solid fa-truck-fast",
+                descripcion: "Suministro y distribución de implementos deportivos para escuelas de formación municipal."
+            },
+            {
+                nombre: "Postobón Talentos Deportivos",
+                categoria: "Patrocinador Oficial",
+                icono: "fa-solid fa-glass-water",
+                descripcion: "Respaldo al rendimiento atlético infantil en torneos intercolegiales de taekwondo y natación."
+            }
+        ];
+
+        grid.innerHTML = allies.map(ally => `
+            <div class="ally-card">
+                <span class="ally-card-badge">${sanitizeHTML(ally.categoria)}</span>
+                <div class="ally-logo-container">
+                    <i class="${sanitizeHTML(ally.icono)}"></i>
+                </div>
+                <h3>${sanitizeHTML(ally.nombre)}</h3>
+                <p>${sanitizeHTML(ally.descripcion)}</p>
+                <div style="display:flex; align-items:center; justify-content:center; gap:0.4rem; color:#38BDF8; font-size:0.8rem; font-weight:700;">
+                    <i class="fa-solid fa-circle-check"></i> Convenio Vigente 2025
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // --- Admin Territorial Asset Submit Handler ---
+    window.handleAdminAssetSubmit = function() {
+        const jurisdiction = document.getElementById('admin-jurisdiction')?.value || 'municipal';
+        const activity = document.getElementById('admin-activity-target')?.value || 'taekwondo';
+        const statusEl = document.getElementById('admin-shield-status');
+
+        if (window.SGASEOOptimizer && window.SGASEOOptimizer.updateActivityMetadata) {
+            const cat = (activity === 'taekwondo') ? 'deportes' : 'cultura';
+            window.SGASEOOptimizer.updateActivityMetadata(cat, activity);
+        }
+
+        if (window.SGADynamicIsland) {
+            window.SGADynamicIsland.showNotification(`Assets de ${activity.toUpperCase()} (${jurisdiction.toUpperCase()}) Sincronizados OK`, 'success');
+        }
+
+        if (statusEl) {
+            statusEl.innerHTML = `<i class="fa-solid fa-check-double" style="color:#38BDF8;"></i> Sincronizado Exitosamente (Nivel ${jurisdiction.toUpperCase()})`;
+            setTimeout(() => {
+                statusEl.innerHTML = `<i class="fa-solid fa-shield-halved"></i> AgentShield ECC Protegido`;
+            }, 3000);
+        }
+    };
 
     // --- 5. GPU-Bound GSAP Carousel Component ---
     function initializeGPUCarousel() {
@@ -690,7 +948,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- App Init ---
     loadAndRenderContent();
     loadLiveMonitor();
+    renderCorporateAllies();
     initializeGPUCarousel();
+    if (window.SGAModernCarousel) {
+        window.SGAModernCarousel.init('modern-carousel-container');
+    }
     initializeAIAgent();
     initializeServiceWorker();
 });
