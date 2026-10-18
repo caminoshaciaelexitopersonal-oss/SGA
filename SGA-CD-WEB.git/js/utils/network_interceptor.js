@@ -11,7 +11,7 @@
         const url = (typeof args[0] === 'string') ? args[0] : (args[0] && args[0].url) || '';
         const options = args[1] || {};
         const isSilent = options.silent === true || (options.headers && (options.headers['X-Silent-Error'] || options.headers['x-silent-error']));
-        const isBackgroundRequest = url.includes('/telemetry') || url.includes('/analytics') || url.includes('/health') || url.includes('/beacon');
+        const isBackgroundRequest = url.includes('/telemetry') || url.includes('/analytics') || url.includes('/health') || url.includes('/beacon') || url.includes('/api/website/content') || url.includes('/api/v1/public/events');
 
         try {
             const response = await originalFetch(...args);
