@@ -56,19 +56,19 @@ async function renderAdminEmpresaView(token) {
                 <div class="bento-kpi-card" style="background:#0D1424; border:1px solid rgba(56,189,248,0.25); border-radius:12px; padding:1.25rem; position:relative; overflow:hidden;">
                     <span style="color:#94A3B8; font-size:0.8rem; font-weight:700;">TOTAL MATRÍCULAS DEPORTES</span>
                     <h3 class="powerbi-counter" style="color:#38BDF8; font-size:2rem; font-weight:800; margin:0.3rem 0;">1,420</h3>
-                    <div style="font-size:0.75rem; color:#10B981;"><i class="fa-solid fa-arrow-trend-up"></i> +14.2% vs mes anterior</div>
+                    <div style="font-size:0.75rem; color:#94A3B8;"><i class="fa-solid fa-arrow-trend-up" style="color:#38BDF8;"></i> +14.2% vs mes anterior</div>
                 </div>
 
                 <div class="bento-kpi-card" style="background:#0D1424; border:1px solid rgba(56,189,248,0.25); border-radius:12px; padding:1.25rem; position:relative; overflow:hidden;">
                     <span style="color:#94A3B8; font-size:0.8rem; font-weight:700;">ASISTENCIA TALLERES CULTURA</span>
                     <h3 class="powerbi-counter" style="color:#38BDF8; font-size:2rem; font-weight:800; margin:0.3rem 0;">94.8%</h3>
-                    <div style="font-size:0.75rem; color:#38BDF8;"><i class="fa-solid fa-circle-check"></i> Sincronizado Offline PWA</div>
+                    <div style="font-size:0.75rem; color:#94A3B8;"><i class="fa-solid fa-circle-check" style="color:#38BDF8;"></i> Sincronizado Offline PWA</div>
                 </div>
 
                 <div class="bento-kpi-card" style="background:#0D1424; border:1px solid rgba(56,189,248,0.25); border-radius:12px; padding:1.25rem; position:relative; overflow:hidden;">
                     <span style="color:#94A3B8; font-size:0.8rem; font-weight:700;">EJECUCIÓN DE CONVENIOS</span>
-                    <h3 class="powerbi-counter" style="color:#F59E0B; font-size:2rem; font-weight:800; margin:0.3rem 0;">$184.5M</h3>
-                    <div style="font-size:0.75rem; color:#F59E0B;"><i class="fa-solid fa-scale-balanced"></i> Auditoría Presupuestal</div>
+                    <h3 class="powerbi-counter" style="color:#38BDF8; font-size:2rem; font-weight:800; margin:0.3rem 0;">$184.5M</h3>
+                    <div style="font-size:0.75rem; color:#94A3B8;"><i class="fa-solid fa-scale-balanced" style="color:#38BDF8;"></i> Auditoría Presupuestal</div>
                 </div>
 
                 <div class="bento-kpi-card" style="background:#0D1424; border:1px solid rgba(56,189,248,0.25); border-radius:12px; padding:1.25rem; position:relative; overflow:hidden;">
@@ -166,7 +166,7 @@ async function renderAdminEmpresaView(token) {
                 </table>
             </div>
 
-            <div class="admin-section" style="background:#0D1424; border:1px solid rgba(56,189,248,0.2); border-radius:14px; padding:1.5rem;">
+            <div class="admin-section" style="background:#0D1424; border:1px solid rgba(56,189,248,0.2); border-radius:14px; padding:1.5rem; margin-bottom:1.5rem;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
                     <h3 style="color:#38BDF8; margin:0;"><i class="fas fa-sitemap"></i> Áreas Institucionales</h3>
                     <button class="btn-primary" style="min-height:44px; padding:0 1.25rem;">Crear Área</button>
@@ -175,6 +175,73 @@ async function renderAdminEmpresaView(token) {
                     <thead><tr><th>ID</th><th>Nombre del Área</th><th>Descripción</th><th>Acciones</th></tr></thead>
                     <tbody>${renderAreaRows(areas)}</tbody>
                 </table>
+            </div>
+
+            <!-- Incrustación Nativa: Gestión de 5 Fotos por Actividad & Matriz de Aliados Corporativos -->
+            <div class="admin-section" style="background:#0D1424; border:1px solid rgba(56,189,248,0.25); border-radius:14px; padding:1.5rem; margin-bottom:1.5rem;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem; flex-wrap:wrap; gap:0.5rem;">
+                    <h3 style="color:#38BDF8; margin:0; font-size:1.3rem; font-weight:700;">
+                        <i class="fas fa-images"></i> Micro-Carruseles de 5 Fotos por Actividad & Matriz de Co-Sponsors
+                    </h3>
+                    <span style="background:#070B14; border:1px solid rgba(56,189,248,0.3); color:#38BDF8; padding:0.4rem 0.8rem; border-radius:16px; font-size:0.75rem; font-weight:700;">
+                        <i class="fa-solid fa-shield-halved"></i> AgentShield ECC Protegido
+                    </span>
+                </div>
+
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:1.25rem; margin-bottom:1.5rem;">
+                    <!-- Micro-Carrusel 1: Disciplinas Deportivas -->
+                    <div class="activity-photo-card" style="background:#070B14; border:1px solid rgba(56,189,248,0.2); border-radius:12px; padding:1rem;">
+                        <h4 style="color:#38BDF8; margin:0 0 0.5rem 0; font-size:1rem;">Disciplinas Deportivas (Taekwondo / Fútbol)</h4>
+                        <p style="color:#94A3B8; font-size:0.8rem; margin-bottom:0.75rem;">5 fotos en formato WebP con aceleración GPU (GSAP translate3d).</p>
+                        <div style="display:flex; gap:0.5rem; overflow-x:auto; padding-bottom:0.5rem;">
+                            <div style="min-width:70px; height:70px; background:#0D1424; border:1px solid rgba(56,189,248,0.3); border-radius:8px; display:flex; align-items:center; justify-content:center; color:#38BDF8; font-size:0.75rem; font-weight:bold;">Foto 1</div>
+                            <div style="min-width:70px; height:70px; background:#0D1424; border:1px solid rgba(56,189,248,0.3); border-radius:8px; display:flex; align-items:center; justify-content:center; color:#38BDF8; font-size:0.75rem; font-weight:bold;">Foto 2</div>
+                            <div style="min-width:70px; height:70px; background:#0D1424; border:1px solid rgba(56,189,248,0.3); border-radius:8px; display:flex; align-items:center; justify-content:center; color:#38BDF8; font-size:0.75rem; font-weight:bold;">Foto 3</div>
+                            <div style="min-width:70px; height:70px; background:#0D1424; border:1px solid rgba(56,189,248,0.3); border-radius:8px; display:flex; align-items:center; justify-content:center; color:#38BDF8; font-size:0.75rem; font-weight:bold;">Foto 4</div>
+                            <div style="min-width:70px; height:70px; background:#0D1424; border:1px solid rgba(56,189,248,0.3); border-radius:8px; display:flex; align-items:center; justify-content:center; color:#38BDF8; font-size:0.75rem; font-weight:bold;">Foto 5</div>
+                        </div>
+                        <button class="btn-primary" style="width:100%; min-height:36px; padding:0.4rem; font-size:0.8rem; margin-top:0.5rem;">Gestionar Galería de 5 Fotos</button>
+                    </div>
+
+                    <!-- Micro-Carrusel 2: Modalidad Danza e Instrumentos -->
+                    <div class="activity-photo-card" style="background:#070B14; border:1px solid rgba(56,189,248,0.2); border-radius:12px; padding:1rem;">
+                        <h4 style="color:#38BDF8; margin:0 0 0.5rem 0; font-size:1rem;">Talleres Culturales (Danza Joropo / Guitarra)</h4>
+                        <p style="color:#94A3B8; font-size:0.8rem; margin-bottom:0.75rem;">Galeria interactiva de 5 imágenes comprimidas WebP.</p>
+                        <div style="display:flex; gap:0.5rem; overflow-x:auto; padding-bottom:0.5rem;">
+                            <div style="min-width:70px; height:70px; background:#0D1424; border:1px solid rgba(56,189,248,0.3); border-radius:8px; display:flex; align-items:center; justify-content:center; color:#38BDF8; font-size:0.75rem; font-weight:bold;">Foto 1</div>
+                            <div style="min-width:70px; height:70px; background:#0D1424; border:1px solid rgba(56,189,248,0.3); border-radius:8px; display:flex; align-items:center; justify-content:center; color:#38BDF8; font-size:0.75rem; font-weight:bold;">Foto 2</div>
+                            <div style="min-width:70px; height:70px; background:#0D1424; border:1px solid rgba(56,189,248,0.3); border-radius:8px; display:flex; align-items:center; justify-content:center; color:#38BDF8; font-size:0.75rem; font-weight:bold;">Foto 3</div>
+                            <div style="min-width:70px; height:70px; background:#0D1424; border:1px solid rgba(56,189,248,0.3); border-radius:8px; display:flex; align-items:center; justify-content:center; color:#38BDF8; font-size:0.75rem; font-weight:bold;">Foto 4</div>
+                            <div style="min-width:70px; height:70px; background:#0D1424; border:1px solid rgba(56,189,248,0.3); border-radius:8px; display:flex; align-items:center; justify-content:center; color:#38BDF8; font-size:0.75rem; font-weight:bold;">Foto 5</div>
+                        </div>
+                        <button class="btn-primary" style="width:100%; min-height:36px; padding:0.4rem; font-size:0.8rem; margin-top:0.5rem;">Gestionar Galería de 5 Fotos</button>
+                    </div>
+                </div>
+
+                <!-- Matriz de Aliados Corporativos y Co-Sponsors -->
+                <div class="allies-grid" style="background:#070B14; border:1px solid rgba(56,189,248,0.2); border-radius:12px; padding:1.25rem;">
+                    <h4 style="color:#38BDF8; margin:0 0 0.75rem 0; font-size:1rem; display:flex; align-items:center; gap:0.5rem;">
+                        <i class="fas fa-handshake"></i> Matriz de Co-Sponsors y Aliados Institucionales
+                    </h4>
+                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:1rem;">
+                        <div style="background:#0D1424; border:1px solid rgba(56,189,248,0.25); border-radius:8px; padding:0.75rem; text-align:center;">
+                            <strong style="color:#38BDF8; font-size:0.85rem;">Gobernación del Meta</strong>
+                            <p style="color:#94A3B8; font-size:0.75rem; margin:0.2rem 0 0 0;">Orden Departamental</p>
+                        </div>
+                        <div style="background:#0D1424; border:1px solid rgba(56,189,248,0.25); border-radius:8px; padding:0.75rem; text-align:center;">
+                            <strong style="color:#38BDF8; font-size:0.85rem;">Alcaldía de Villavicencio</strong>
+                            <p style="color:#94A3B8; font-size:0.75rem; margin:0.2rem 0 0 0;">Orden Municipal</p>
+                        </div>
+                        <div style="background:#0D1424; border:1px solid rgba(56,189,248,0.25); border-radius:8px; padding:0.75rem; text-align:center;">
+                            <strong style="color:#38BDF8; font-size:0.85rem;">Instituto de Deportes</strong>
+                            <p style="color:#94A3B8; font-size:0.75rem; margin:0.2rem 0 0 0;">Público - Descentralizado</p>
+                        </div>
+                        <div style="background:#0D1424; border:1px solid rgba(56,189,248,0.25); border-radius:8px; padding:0.75rem; text-align:center;">
+                            <strong style="color:#38BDF8; font-size:0.85rem;">Fundación Cultura Viva</strong>
+                            <p style="color:#94A3B8; font-size:0.75rem; margin:0.2rem 0 0 0;">Privada B2B</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         `;
 
