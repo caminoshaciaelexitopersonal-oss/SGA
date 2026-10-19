@@ -750,33 +750,83 @@ async function renderMotorPredisMediaView(token) {
                         <i class="fas fa-wand-magic-sparkles"></i> Motor IA de Generación de Videos, Imágenes y Reels (Nivel Predis.ai)
                     </h2>
                     <p style="color:#94A3B8; margin:0.25rem 0 0 0; font-size:0.9rem;">
-                        Crea contenido multimedia completo con IA: Guion, Voz, Música BGM, Subtítulos, Diseños de Marca y Renderizado 4K para Redes Sociales.
+                        Genera contenido multimedia adaptado a dimensiones exactas por red social, automatiza la publicación simultánea y planifica campañas con el Calendario de Envíos.
                     </p>
                 </div>
                 <div>
                     <span style="background:#0D1424; border:1px solid rgba(56,189,248,0.3); color:#38BDF8; padding:0.5rem 1rem; border-radius:20px; font-size:0.8rem; font-weight:700;">
-                        <i class="fas fa-bolt"></i> HyperFrames & Predis AI Engine v2.5
+                        <i class="fas fa-bolt"></i> HyperFrames & Predis AI Engine v2.5 Multi-Dimension
                     </span>
                 </div>
             </div>
 
-            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:1.5rem;">
+            <!-- Matriz de Dimensiones por Red Social -->
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:1rem; margin-bottom:1.5rem;">
+                <div style="background:#0D1424; border:1px solid rgba(56,189,248,0.2); padding:0.8rem; border-radius:10px; display:flex; align-items:center; gap:0.75rem;">
+                    <i class="fab fa-instagram" style="font-size:1.8rem; color:#38BDF8;"></i>
+                    <div>
+                        <div style="font-weight:700; font-size:0.85rem; color:#F8FAFC;">Instagram Reels / Feed</div>
+                        <div style="font-size:0.75rem; color:#94A3B8;">1080x1920 (9:16) / 1080x1080 (1:1)</div>
+                    </div>
+                </div>
+                <div style="background:#0D1424; border:1px solid rgba(56,189,248,0.2); padding:0.8rem; border-radius:10px; display:flex; align-items:center; gap:0.75rem;">
+                    <i class="fab fa-tiktok" style="font-size:1.8rem; color:#38BDF8;"></i>
+                    <div>
+                        <div style="font-weight:700; font-size:0.85rem; color:#F8FAFC;">TikTok Vertical</div>
+                        <div style="font-size:0.75rem; color:#94A3B8;">1080x1920 (9:16 Ultra HD)</div>
+                    </div>
+                </div>
+                <div style="background:#0D1424; border:1px solid rgba(56,189,248,0.2); padding:0.8rem; border-radius:10px; display:flex; align-items:center; gap:0.75rem;">
+                    <i class="fab fa-youtube" style="font-size:1.8rem; color:#38BDF8;"></i>
+                    <div>
+                        <div style="font-weight:700; font-size:0.85rem; color:#F8FAFC;">YouTube Shorts / Video</div>
+                        <div style="font-size:0.75rem; color:#94A3B8;">1080x1920 (9:16) / 1920x1080 (16:9)</div>
+                    </div>
+                </div>
+                <div style="background:#0D1424; border:1px solid rgba(56,189,248,0.2); padding:0.8rem; border-radius:10px; display:flex; align-items:center; gap:0.75rem;">
+                    <i class="fab fa-facebook" style="font-size:1.8rem; color:#38BDF8;"></i>
+                    <div>
+                        <div style="font-weight:700; font-size:0.85rem; color:#F8FAFC;">Facebook Reels & Post</div>
+                        <div style="font-size:0.75rem; color:#94A3B8;">1080x1920 (9:16) / 1080x1350 (4:5)</div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:1.5rem; margin-bottom:1.5rem;">
 
                 <!-- Panel de Parámetros de Generación (Predis AI Studio) -->
                 <div style="background:#0D1424; border:1px solid rgba(56,189,248,0.2); border-radius:14px; padding:1.5rem;">
                     <h3 style="color:#F8FAFC; margin-top:0; font-size:1.2rem; margin-bottom:1.25rem; display:flex; align-items:center; gap:0.5rem;">
-                        <i class="fas fa-sliders-h" style="color:#38BDF8;"></i> Parámetros de Creación Inteligente
+                        <i class="fas fa-sliders-h" style="color:#38BDF8;"></i> Parámetros de Creación Multicanal
                     </h3>
 
                     <div style="display:flex; flex-direction:column; gap:1rem;">
                         <div>
-                            <label style="color:#94A3B8; font-size:0.8rem; font-weight:700;">Formato / Tipo de Contenido</label>
+                            <label style="color:#94A3B8; font-size:0.8rem; font-weight:700;">Formato y Dimensión Target</label>
                             <select id="predis-format-type" style="width:100%; padding:0.65rem; background:#070B14; border:1px solid rgba(56,189,248,0.3); color:#38BDF8; border-radius:8px; font-weight:700; font-size:0.9rem; margin-top:0.3rem;">
-                                <option value="reel_9_16">🎬 Reel / Short Vertical (9:16) — Instagram / TikTok / YouTube Shorts</option>
-                                <option value="post_1_1">🖼️ Post Cuadrado HD (1:1) — Feed Instagram / Facebook</option>
-                                <option value="banner_16_9">📺 Video B2B Horizontal (16:9) — YouTube / Convenios Entidades</option>
-                                <option value="carousel_multi">📚 Carrusel Educativo Multideslizante (5 Slides)</option>
+                                <option value="reel_9_16">🎬 Reel / Short Vertical (1080x1920 - 9:16) — IG / TikTok / Shorts</option>
+                                <option value="post_1_1">🖼️ Post Cuadrado HD (1080x1080 - 1:1) — IG Feed / Facebook</option>
+                                <option value="banner_16_9">📺 Video B2B Horizontal (1920x1080 - 16:9) — YouTube / Convenios</option>
+                                <option value="carousel_multi">📚 Carrusel Educativo (1080x1350 - 4:5 Retrato Multislide)</option>
                             </select>
+                        </div>
+
+                        <div>
+                            <label style="color:#94A3B8; font-size:0.8rem; font-weight:700;">Redes Sociales Destino (Publicación Simultánea Al Tiempo)</label>
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; margin-top:0.3rem; background:#070B14; padding:0.75rem; border-radius:8px; border:1px solid rgba(56,189,248,0.2);">
+                                <label style="color:#F8FAFC; font-size:0.8rem; display:flex; align-items:center; gap:0.4rem; cursor:pointer;">
+                                    <input type="checkbox" class="predis-target-platform" value="instagram" checked style="accent-color:#38BDF8;"> Instagram Reels
+                                </label>
+                                <label style="color:#F8FAFC; font-size:0.8rem; display:flex; align-items:center; gap:0.4rem; cursor:pointer;">
+                                    <input type="checkbox" class="predis-target-platform" value="tiktok" checked style="accent-color:#38BDF8;"> TikTok Video
+                                </label>
+                                <label style="color:#F8FAFC; font-size:0.8rem; display:flex; align-items:center; gap:0.4rem; cursor:pointer;">
+                                    <input type="checkbox" class="predis-target-platform" value="youtube_shorts" checked style="accent-color:#38BDF8;"> YouTube Shorts
+                                </label>
+                                <label style="color:#F8FAFC; font-size:0.8rem; display:flex; align-items:center; gap:0.4rem; cursor:pointer;">
+                                    <input type="checkbox" class="predis-target-platform" value="facebook" checked style="accent-color:#38BDF8;"> Facebook Video
+                                </label>
+                            </div>
                         </div>
 
                         <div>
@@ -793,121 +843,215 @@ async function renderMotorPredisMediaView(token) {
 
                         <div>
                             <label style="color:#94A3B8; font-size:0.8rem; font-weight:700;">Idea del Contenido / Prompt Inicial</label>
-                            <textarea id="predis-prompt-input" style="width:100%; padding:0.65rem; background:#070B14; border:1px solid rgba(56,189,248,0.3); color:#F8FAFC; border-radius:8px; height:80px; font-size:0.85rem; margin-top:0.3rem;" placeholder="Ej. Crea un Reel viral de 15 segundos para motivar a niños a inscribirse en clases de Taekwondo con voz enérgica y música épica.">Promocionar inscripciones abiertas para talleres culturales de Danza Joropo y clases de Taekwondo en SGA-CD con cupos limitados.</textarea>
+                            <textarea id="predis-prompt-input" style="width:100%; padding:0.65rem; background:#070B14; border:1px solid rgba(56,189,248,0.3); color:#F8FAFC; border-radius:8px; height:70px; font-size:0.85rem; margin-top:0.3rem;" placeholder="Ej. Crea un Reel viral de 15 segundos para motivar a niños a inscribirse en clases de Taekwondo con voz enérgica y música épica.">Promocionar inscripciones abiertas para talleres culturales de Danza Joropo y clases de Taekwondo en SGA-CD con cupos limitados.</textarea>
                         </div>
 
                         <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
                             <div>
+                                <label style="color:#94A3B8; font-size:0.8rem; font-weight:700;">Fecha y Hora de Envío Programado</label>
+                                <input type="datetime-local" id="predis-schedule-time" style="width:100%; padding:0.5rem; background:#070B14; border:1px solid rgba(56,189,248,0.3); color:#38BDF8; border-radius:8px; font-size:0.8rem; margin-top:0.2rem;">
+                            </div>
+                            <div>
                                 <label style="color:#94A3B8; font-size:0.8rem; font-weight:700;">Voz de Narración IA</label>
-                                <select id="predis-voice-select" style="width:100%; padding:0.5rem; background:#070B14; border:1px solid rgba(56,189,248,0.3); color:#38BDF8; border-radius:8px; font-size:0.8rem;">
+                                <select id="predis-voice-select" style="width:100%; padding:0.5rem; background:#070B14; border:1px solid rgba(56,189,248,0.3); color:#38BDF8; border-radius:8px; font-size:0.8rem; margin-top:0.2rem;">
                                     <option value="es_latam_male">🎙️ Carlos (Latam Épico)</option>
                                     <option value="es_latam_female">🎙️ Sofia (Latam Dinámica)</option>
                                     <option value="es_co_pro">🎙️ Mateo (Institucional)</option>
                                 </select>
                             </div>
-                            <div>
-                                <label style="color:#94A3B8; font-size:0.8rem; font-weight:700;">Música de Fondo (BGM)</label>
-                                <select id="predis-bgm-select" style="width:100%; padding:0.5rem; background:#070B14; border:1px solid rgba(56,189,248,0.3); color:#38BDF8; border-radius:8px; font-size:0.8rem;">
-                                    <option value="energetic_beats">🎵 Energetic Trap / Cinematic</option>
-                                    <option value="traditional_joropo">🎵 Joropo Folclórico Lleno</option>
-                                    <option value="ambient_corporate">🎵 Cuerdas Corporativas B2B</option>
-                                </select>
-                            </div>
                         </div>
 
-                        <button id="predis-generate-btn" class="btn-primary" style="width:100%; padding:0.8rem; font-size:1rem; font-weight:800; display:flex; justify-content:center; align-items:center; gap:0.5rem; margin-top:0.5rem;">
-                            <i class="fas fa-wand-magic-sparkles"></i> Generar Reel / Video con Predis AI
-                        </button>
+                        <div style="display:flex; gap:0.5rem; margin-top:0.5rem;">
+                            <button id="predis-generate-btn" class="btn-primary" style="flex:1; padding:0.8rem; font-size:0.9rem; font-weight:800; display:flex; justify-content:center; align-items:center; gap:0.5rem;">
+                                <i class="fas fa-paper-plane"></i> Generar y Enviar a Todas al Tiempo
+                            </button>
+                            <button id="predis-schedule-btn" class="btn-secondary" style="flex:1; padding:0.8rem; font-size:0.9rem; font-weight:800; display:flex; justify-content:center; align-items:center; gap:0.5rem;">
+                                <i class="fas fa-calendar-alt"></i> Agendar en Calendario
+                            </button>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Previsualizador Interactivo y Estado de Renderizado -->
+                <!-- Previsualizador Interactivo y Estado de Renderizado Multicanal -->
                 <div style="background:#0D1424; border:1px solid rgba(56,189,248,0.2); border-radius:14px; padding:1.5rem; display:flex; flex-direction:column;">
                     <h3 style="color:#F8FAFC; margin-top:0; font-size:1.2rem; margin-bottom:1rem; display:flex; align-items:center; justify-content:space-between;">
-                        <span><i class="fas fa-desktop" style="color:#38BDF8;"></i> Previsualizador de Medios Generados</span>
-                        <span id="predis-status-badge" style="background:rgba(56,189,248,0.15); color:#38BDF8; font-size:0.75rem; padding:0.25rem 0.6rem; border-radius:10px;">Listo</span>
+                        <span><i class="fas fa-desktop" style="color:#38BDF8;"></i> Previsualizador & Ajuste de Dimensiones</span>
+                        <span id="predis-status-badge" style="background:rgba(56,189,248,0.15); color:#38BDF8; font-size:0.75rem; padding:0.25rem 0.6rem; border-radius:10px;">Dimensión: 1080x1920 (9:16)</span>
                     </h3>
 
                     <!-- Frame Simulado de Celular / Video Reel (9:16 Preview) -->
-                    <div id="predis-preview-box" style="background:#070B14; border:2px dashed rgba(56,189,248,0.3); border-radius:12px; height:340px; display:flex; flex-direction:column; justify-content:center; align-items:center; padding:1rem; text-align:center; position:relative; overflow:hidden;">
+                    <div id="predis-preview-box" style="background:#070B14; border:2px dashed rgba(56,189,248,0.3); border-radius:12px; height:320px; display:flex; flex-direction:column; justify-content:center; align-items:center; padding:1rem; text-align:center; position:relative; overflow:hidden;">
                         <img id="predis-preview-poster" src="https://images.unsplash.com/photo-1555597673-b21d5c935865?w=800" style="width:100%; height:100%; object-fit:cover; position:absolute; top:0; left:0; opacity:0.6;">
 
                         <div style="position:relative; z-index:2; background:rgba(7,11,20,0.85); backdrop-filter:blur(10px); padding:1rem; border-radius:12px; border:1px solid rgba(56,189,248,0.3); max-width:90%;">
                             <h4 id="predis-preview-title" style="color:#38BDF8; margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:800;">¡INSCRIPCIONES ABIERTAS 2025!</h4>
                             <p id="predis-preview-copy" style="color:#F8FAFC; font-size:0.85rem; margin:0 0 0.75rem 0;">Descubre el poder del Taekwondo y la pasión de la Danza Joropo en SGA-CD. ¡Inscríbete hoy mismo con cupos limitados!</p>
-                            <span style="background:#38BDF8; color:#070B14; font-weight:800; padding:0.4rem 0.8rem; border-radius:20px; font-size:0.75rem; display:inline-block;">CTA: ¡Clic para Inscribirte!</span>
+                            <span id="predis-preview-platforms" style="background:#38BDF8; color:#070B14; font-weight:800; padding:0.4rem 0.8rem; border-radius:20px; font-size:0.75rem; display:inline-block;">Destinos: IG, TikTok, YouTube, FB</span>
                         </div>
                     </div>
 
-                    <!-- Botones de Publicación Multicanal -->
-                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin-top:1.25rem;">
-                        <button id="btn-publish-insta-reel" class="btn-primary" style="padding:0.6rem; font-size:0.85rem;">
-                            <i class="fab fa-instagram"></i> Publicar en Reels
-                        </button>
-                        <button id="btn-publish-tiktok-reel" class="btn-secondary" style="padding:0.6rem; font-size:0.85rem;">
-                            <i class="fab fa-tiktok"></i> Publicar en TikTok
+                    <!-- Botón de Publicación Inmediata Simultánea -->
+                    <div style="margin-top:1.25rem;">
+                        <button id="btn-publish-all-now" class="btn-primary" style="width:100%; padding:0.75rem; font-size:0.9rem; font-weight:800;">
+                            <i class="fas fa-rocket"></i> Publicar Simultáneamente en Instagram, TikTok, YouTube Shorts y FB
                         </button>
                     </div>
                 </div>
 
             </div>
+
+            <!-- Calendario de Planificación y Cola de Envíos Programados -->
+            <div style="background:#0D1424; border:1px solid rgba(56,189,248,0.25); border-radius:14px; padding:1.5rem;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:0.5rem;">
+                    <h3 style="color:#38BDF8; margin:0; font-size:1.3rem; font-weight:800; display:flex; align-items:center; gap:0.5rem;">
+                        <i class="fas fa-calendar-days"></i> Calendario de Planificación & Cola de Envíos Automatizados
+                    </h3>
+                    <span style="background:rgba(56,189,248,0.1); color:#38BDF8; padding:0.3rem 0.8rem; border-radius:12px; font-size:0.8rem; font-weight:700;">
+                        Publicación Programada Multi-Red
+                    </span>
+                </div>
+
+                <div style="overflow-x:auto;">
+                    <table style="width:100%; border-collapse:collapse; text-align:left; font-size:0.85rem;">
+                        <thead>
+                            <tr style="border-bottom:1px solid rgba(56,189,248,0.2); color:#38BDF8;">
+                                <th style="padding:0.75rem;">Fecha / Hora Programada</th>
+                                <th style="padding:0.75rem;">Contenido / Campaña</th>
+                                <th style="padding:0.75rem;">Dimensión / Formato</th>
+                                <th style="padding:0.75rem;">Redes Objetivo</th>
+                                <th style="padding:0.75rem;">Estado de Publicación</th>
+                                <th style="padding:0.75rem; text-align:right;">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="predis-calendar-table-body">
+                            <tr style="border-bottom:1px solid rgba(56,189,248,0.1);">
+                                <td style="padding:0.75rem; color:#F8FAFC; font-weight:700;">Hoy — 18:00 hs</td>
+                                <td style="padding:0.75rem; color:#E2E8F0;">Inscripciones Abiertas Taekwondo & Joropo</td>
+                                <td style="padding:0.75rem;"><span style="background:#070B14; color:#38BDF8; padding:0.25rem 0.5rem; border-radius:6px;">1080x1920 (9:16)</span></td>
+                                <td style="padding:0.75rem; color:#94A3B8;"><i class="fab fa-instagram"></i> <i class="fab fa-tiktok"></i> <i class="fab fa-youtube"></i> <i class="fab fa-facebook"></i> Todos</td>
+                                <td style="padding:0.75rem;"><span style="color:#10B981; font-weight:700;"><i class="fas fa-check-circle"></i> Programado Autopost</span></td>
+                                <td style="padding:0.75rem; text-align:right;">
+                                    <button class="btn-secondary" style="padding:0.25rem 0.5rem; font-size:0.75rem;"><i class="fas fa-edit"></i> Reagendar</button>
+                                </td>
+                            </tr>
+                            <tr style="border-bottom:1px solid rgba(56,189,248,0.1);">
+                                <td style="padding:0.75rem; color:#F8FAFC; font-weight:700;">Mañana — 10:00 hs</td>
+                                <td style="padding:0.75rem; color:#E2E8F0;">Convocatoria B2B Alcaldías y Gobernaciones</td>
+                                <td style="padding:0.75rem;"><span style="background:#070B14; color:#38BDF8; padding:0.25rem 0.5rem; border-radius:6px;">1920x1080 (16:9)</span></td>
+                                <td style="padding:0.75rem; color:#94A3B8;"><i class="fab fa-youtube"></i> <i class="fab fa-facebook"></i> YouTube / FB</td>
+                                <td style="padding:0.75rem;"><span style="color:#F59E0B; font-weight:700;"><i class="fas fa-clock"></i> En Cola de Render</span></td>
+                                <td style="padding:0.75rem; text-align:right;">
+                                    <button class="btn-secondary" style="padding:0.25rem 0.5rem; font-size:0.75rem;"><i class="fas fa-edit"></i> Reagendar</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
         </div>
     `;
 
-    // Handler de Generación Estilo Predis.ai
+    // Handlers de Generación, Envío Simultáneo y Agendamiento en Calendario
     const genBtn = document.getElementById('predis-generate-btn');
+    const schedBtn = document.getElementById('predis-schedule-btn');
+    const pubAllBtn = document.getElementById('btn-publish-all-now');
     const badge = document.getElementById('predis-status-badge');
     const titleEl = document.getElementById('predis-preview-title');
     const copyEl = document.getElementById('predis-preview-copy');
     const posterEl = document.getElementById('predis-preview-poster');
+    const platEl = document.getElementById('predis-preview-platforms');
+    const tableBody = document.getElementById('predis-calendar-table-body');
+    const formatSelect = document.getElementById('predis-format-type');
 
-    if (genBtn) {
-        genBtn.addEventListener('click', async () => {
-            genBtn.disabled = true;
-            genBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Generando Guion, Voz y Renderizando Video...`;
-            badge.textContent = 'Procesando IA';
-            badge.style.color = '#F59E0B';
-
-            try {
-                const area = document.getElementById('predis-area-target').value;
-                const prompt = document.getElementById('predis-prompt-input').value;
-                const format = document.getElementById('predis-format-type').value;
-
-                const res = await fetch(`${config.apiBaseUrl}/api/v1/admin_general/crm/generate_predis_media`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify({ area, prompt, format })
-                });
-
-                let data = {};
-                if (res.ok) {
-                    data = await res.json();
-                } else {
-                    data = {
-                        title: '¡DESATATA TU POTENCIAL CON SGA-CD!',
-                        copy: `Aprende ${area.toUpperCase()} con instructores certificados. ¡Inscripciones Abiertas!`,
-                        poster_url: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=800'
-                    };
-                }
-
-                setTimeout(() => {
-                    titleEl.textContent = data.title || '¡INSCRIPCIONES ABIERTAS 2025!';
-                    copyEl.textContent = data.copy || prompt;
-                    if (data.poster_url) posterEl.src = data.poster_url;
-
-                    badge.textContent = 'Renderizado 4K Completado';
-                    badge.style.color = '#38BDF8';
-                    genBtn.disabled = false;
-                    genBtn.innerHTML = `<i class="fas fa-wand-magic-sparkles"></i> Generar Nuevo Video con Predis AI`;
-                }, 1200);
-
-            } catch (err) {
-                console.error("Error en Predis AI Engine:", err);
-                genBtn.disabled = false;
-                genBtn.innerHTML = `<i class="fas fa-wand-magic-sparkles"></i> Generar Reel / Video con Predis AI`;
-            }
+    if (formatSelect) {
+        formatSelect.addEventListener('change', () => {
+            const map = {
+                'reel_9_16': 'Dimensión: 1080x1920 (9:16)',
+                'post_1_1': 'Dimensión: 1080x1080 (1:1)',
+                'banner_16_9': 'Dimensión: 1920x1080 (16:9)',
+                'carousel_multi': 'Dimensión: 1080x1350 (4:5)'
+            };
+            badge.textContent = map[formatSelect.value] || 'Dimensión Personalizada';
         });
     }
+
+    function getSelectedPlatforms() {
+        const checkboxes = document.querySelectorAll('.predis-target-platform:checked');
+        const selected = Array.from(checkboxes).map(cb => cb.value);
+        return selected.length > 0 ? selected : ['instagram', 'tiktok', 'youtube_shorts', 'facebook'];
+    }
+
+    async function processMediaRequest(isScheduled = false) {
+        const area = document.getElementById('predis-area-target').value;
+        const prompt = document.getElementById('predis-prompt-input').value;
+        const format = document.getElementById('predis-format-type').value;
+        const scheduleTime = document.getElementById('predis-schedule-time').value;
+        const platforms = getSelectedPlatforms();
+
+        const btn = isScheduled ? schedBtn : genBtn;
+        btn.disabled = true;
+        btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${isScheduled ? 'Agendando...' : 'Enviando a Todas...'}`;
+
+        try {
+            const res = await fetch(`${config.apiBaseUrl}/api/v1/admin_general/crm/generate_predis_media`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({
+                    area,
+                    prompt,
+                    format,
+                    target_platforms: platforms,
+                    scheduled_time: isScheduled ? scheduleTime : ''
+                })
+            });
+
+            let data = {};
+            if (res.ok) {
+                data = await res.json();
+            } else {
+                data = {
+                    title: `¡INSCRIPCIONES ABIERTAS EN ${area.toUpperCase()}!`,
+                    copy: prompt,
+                    poster_url: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=800',
+                    dimensions: '1080x1920 (9:16)',
+                    target_platforms: platforms,
+                    scheduled_time: isScheduled ? (scheduleTime || 'Mañana 12:00 hs') : 'Inmediato (Simultáneo)'
+                };
+            }
+
+            titleEl.textContent = data.title;
+            copyEl.textContent = data.copy;
+            if (data.poster_url) posterEl.src = data.poster_url;
+            platEl.textContent = `Destinos: ${data.target_platforms.join(', ').toUpperCase()}`;
+
+            if (isScheduled && tableBody) {
+                const newRow = document.createElement('tr');
+                newRow.style.borderBottom = '1px solid rgba(56,189,248,0.1)';
+                newRow.innerHTML = `
+                    <td style="padding:0.75rem; color:#F8FAFC; font-weight:700;">${scheduleTime || 'Programado'}</td>
+                    <td style="padding:0.75rem; color:#E2E8F0;">${data.title}</td>
+                    <td style="padding:0.75rem;"><span style="background:#070B14; color:#38BDF8; padding:0.25rem 0.5rem; border-radius:6px;">${data.dimensions}</span></td>
+                    <td style="padding:0.75rem; color:#94A3B8;">${data.target_platforms.join(', ')}</td>
+                    <td style="padding:0.75rem;"><span style="color:#10B981; font-weight:700;"><i class="fas fa-check-circle"></i> En Cola Agendada</span></td>
+                    <td style="padding:0.75rem; text-align:right;">
+                        <button class="btn-secondary" style="padding:0.25rem 0.5rem; font-size:0.75rem;"><i class="fas fa-edit"></i> Reagendar</button>
+                    </td>
+                `;
+                tableBody.prepend(newRow);
+            }
+
+        } catch (err) {
+            console.error("Error procesando medios Predis:", err);
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = isScheduled ? `<i class="fas fa-calendar-alt"></i> Agendar en Calendario` : `<i class="fas fa-paper-plane"></i> Generar y Enviar a Todas al Tiempo`;
+        }
+    }
+
+    if (genBtn) genBtn.addEventListener('click', () => processMediaRequest(false));
+    if (schedBtn) schedBtn.addEventListener('click', () => processMediaRequest(true));
+    if (pubAllBtn) pubAllBtn.addEventListener('click', () => processMediaRequest(false));
 }
 
 // --- Registrar las vistas de Administrador General en el Router ---

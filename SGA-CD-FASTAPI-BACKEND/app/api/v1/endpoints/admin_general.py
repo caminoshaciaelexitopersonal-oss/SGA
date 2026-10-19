@@ -54,6 +54,9 @@ class PredisMediaRequest(BaseModel):
     area: str
     prompt: str
     format: str
+    target_platforms: list[str] = ["instagram", "tiktok", "youtube_shorts", "facebook"]
+    custom_dimensions: str = "1080x1920 (9:16)"
+    scheduled_time: str = ""
 
 
 class PredisMediaResponse(BaseModel):
@@ -62,6 +65,9 @@ class PredisMediaResponse(BaseModel):
     copy: str
     poster_url: str
     video_path: str
+    dimensions: str
+    target_platforms: list[str]
+    scheduled_time: str
 
 
 @router.get("/settings/api_keys", response_model=ApiSettings)
@@ -250,10 +256,21 @@ def generate_predis_media(
     title = f"¡INSCRIPCIONES ABIERTAS EN {payload.area.replace('_', ' ').upper()} 2025!"
     copy = f"Formación integral de alto impacto en {payload.area.replace('_', ' ')}. Prompt del usuario: '{payload.prompt}'. Cupos limitados en SGA-CD."
 
+    dimensions_map = {
+        "reel_9_16": "1080x1920 (Vertical 9:16 - Reels / TikTok / Shorts)",
+        "post_1_1": "1080x1080 (Cuadrado 1:1 - IG Feed / FB)",
+        "banner_16_9": "1920x1080 (Horizontal 16:9 - YouTube / Web B2B)",
+        "carousel_multi": "1080x1350 (Retrato 4:5 - IG Carousel)"
+    }
+    dimensions = dimensions_map.get(payload.format, payload.custom_dimensions or "1080x1920 (9:16)")
+
     return PredisMediaResponse(
-        status="rendered",
+        status="scheduled" if payload.scheduled_time else "rendered",
         title=title,
         copy=copy,
         poster_url=poster,
-        video_path="dist/assets/video/promo_sga_cd.mp4"
+        video_path="dist/assets/video/promo_sga_cd.mp4",
+        dimensions=dimensions,
+        target_platforms=payload.target_platforms or ["instagram", "tiktok", "youtube_shorts", "facebook"],
+        scheduled_time=payload.scheduled_time or "Inmediato (Automático Simultáneo)"
     )
