@@ -49,6 +49,7 @@ const navLinks = {
             text: 'Configuración y Seguridad',
             icon: 'fa-cog',
             submenu: [
+                { text: 'Proveedores de IA & Ollama', view: 'gestion-api-keys', icon: 'fa-key' },
                 { text: 'Auditoría General', view: 'auditoria', icon: 'fa-history' },
                 { text: 'Asistente de IA', view: 'asistente-ia', icon: 'fa-robot' }
             ]
