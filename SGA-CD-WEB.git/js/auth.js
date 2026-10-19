@@ -79,6 +79,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     const maskedCode = (status === 403 || status === 429) ? 'STD-ERR-SECURITY-BREACH' : 'STD-ERR-SECURITY-LOGIN';
                     triggerLoginShake(loginForm, data.detail || 'Credenciales inválidas o acceso bloqueado temporalmente.', maskedCode);
 
+                    if (window.SGADynamicIsland && (status === 403 || status === 429)) {
+                        window.SGADynamicIsland.notify({
+                            message: `ALERTA DE SEGURIDAD [${maskedCode}]: Acceso restringido o tasa de solicitudes excedida.`,
+                            type: 'breach',
+                            duration: 6000
+                        });
+                    }
+
                     if (submitBtn) {
                         submitBtn.disabled = true;
                         submitBtn.style.background = '#0D1424';

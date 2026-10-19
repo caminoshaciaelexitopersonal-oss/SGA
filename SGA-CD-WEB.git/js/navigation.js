@@ -5,13 +5,13 @@ const navLinks = {
     admin_general: [
         { text: 'Dashboard', view: 'dashboard', icon: 'fa-home' },
         { text: 'Config. WhatsApp', view: 'configuracion-whatsapp', icon: 'fab fa-whatsapp' },
-        { text: 'Gestionar Empresas', icon: 'fa-building' },
-        { text: 'Roles y Permisos', icon: 'fa-shield-alt' },
-        { text: 'Verificar Roles BD', icon: 'fa-database' },
-        { text: 'Auditoría General', icon: 'fa-history' },
-        { text: 'Gestión de Cobros', icon: 'fa-credit-card' },
-        { text: 'Promociones', icon: 'fa-tags' },
-        { text: 'Asistente de IA', icon: 'fa-robot' }
+        { text: 'Gestionar Empresas', view: 'panel-empresa', icon: 'fa-building' },
+        { text: 'Roles y Permisos', view: 'roles-permisos', icon: 'fa-shield-alt' },
+        { text: 'Verificar Roles BD', view: 'verificar-roles', icon: 'fa-database' },
+        { text: 'Auditoría General', view: 'auditoria', icon: 'fa-history' },
+        { text: 'Gestión de Cobros', view: 'suscripcion', icon: 'fa-credit-card' },
+        { text: 'Promociones', view: 'promociones', icon: 'fa-tags' },
+        { text: 'Asistente de IA', view: 'asistente-ia', icon: 'fa-robot' }
     ],
     // Rol 2: Admin de Empresa
     admin_empresa: [
@@ -111,7 +111,7 @@ function renderNavigation(roleName) {
         const viewName = link.view || link.text.toLowerCase().replace(/ /g, '-');
         navHtml += `<a href="#" data-view="${viewName}">
                         <i class="fas ${link.icon}"></i>
-                        <span>${link.text}</span>
+                        <span class="nav-text">${link.text}</span>
                     </a>`;
     });
 

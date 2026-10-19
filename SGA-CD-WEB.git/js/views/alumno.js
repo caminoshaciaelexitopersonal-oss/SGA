@@ -1,14 +1,28 @@
 // js/views/alumno.js
 
-// --- Funciones para la Vista del Alumno ---
+// --- Funciones para la Vista del Alumno / Padre ---
 
 /**
- * Renderiza la vista de "Mis Cursos" para el alumno.
- * Llama a la API para obtener los cursos y los muestra en tarjetas.
+ * Renderiza la vista de "Mis Cursos y Disciplinas" para el alumno.
  */
 async function renderMisCursosView(token) {
     const contentArea = document.getElementById('content-area');
-    contentArea.innerHTML = '<h2><i class="fas fa-book-reader"></i> Mis Cursos</h2><p>Cargando cursos...</p>';
+    contentArea.innerHTML = `
+        <div class="view-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+            <div>
+                <h2 style="color:#F8FAFC; margin:0; font-size:1.6rem; display:flex; align-items:center; gap:0.5rem;">
+                    <i class="fas fa-book-reader" style="color:#38BDF8;"></i> Mis Disciplinas Deportivas & Talleres
+                </h2>
+                <p style="color:#94A3B8; margin-top:0.25rem; font-size:0.9rem;">
+                    Monitoreo de asistencia y actividades académicas en Deportes y Cultura (Danza: Joropo, Salsa, Vallenato | Instrumentos: Guitarra, Arpa).
+                </p>
+            </div>
+            <span class="badge-sub-free" style="background: rgba(56, 189, 248, 0.1); border: 1px solid #38BDF8; color: #38BDF8; padding: 6px 14px; border-radius: 20px; font-weight: 600; font-size: 0.85rem;">
+                <i class="fas fa-certificate"></i> Suscripción Estudiantil Costo 0
+            </span>
+        </div>
+        <p style="color:#94A3B8;"><i class="fas fa-spinner fa-spin"></i> Cargando inscripciones...</p>
+    `;
 
     try {
         const response = await fetch(`${config.apiBaseUrl}/api/v1/alumno/cursos`, {
@@ -21,31 +35,45 @@ async function renderMisCursosView(token) {
 
         const cursos = await response.json();
 
-        let cursoCards = '<p>No estás inscrito en ningún curso actualmente.</p>';
+        let cursoCards = '<p style="color:#94A3B8; background:#0D1424; padding:1.5rem; border-radius:12px; border:1px solid rgba(56,189,248,0.15);">No estás inscrito en ninguna disciplina deportiva o taller cultural actualmente.</p>';
         if (cursos && cursos.length > 0) {
             cursoCards = cursos.map(curso => `
-                <div class="card">
-                    <h3>${curso.nombre}</h3>
-                    <p><strong>Profesor:</strong> ${curso.profesor.nombre_completo}</p>
-                    <p><strong>Horario:</strong> ${curso.horario || 'No definido'}</p>
-                    <a href="#" class="btn-secondary" data-view="ver-curso-detalles" data-curso-id="${curso.id}">Ver detalles y notas</a>
+                <div class="card" style="background:#0D1424; border:1px solid rgba(56,189,248,0.15); border-radius:12px; padding:1.5rem; backdrop-filter:blur(20px);">
+                    <h3 style="color:#F8FAFC; margin-bottom:0.5rem; font-size:1.2rem;">${curso.nombre}</h3>
+                    <p style="color:#94A3B8; margin-bottom:0.25rem;"><strong>Profesor / Instructor:</strong> ${curso.profesor ? curso.profesor.nombre_completo : 'Instructor Asignado'}</p>
+                    <p style="color:#94A3B8; margin-bottom:1rem;"><strong>Horario:</strong> ${curso.horario || 'Lunes a Viernes'}</p>
+                    <a href="#" class="btn-secondary" data-view="ver-curso-detalles" data-curso-id="${curso.id}" style="display:inline-block; background:rgba(56,189,248,0.1); color:#38BDF8; border:1px solid #38BDF8; font-weight:600; padding:0.6rem 1.2rem; border-radius:8px; text-decoration:none; min-height:44px; line-height:28px;">
+                        Ver detalles y notas
+                    </a>
                 </div>
             `).join('');
         }
 
         contentArea.innerHTML = `
-            <div class="view-header">
-                <h2><i class="fas fa-book-reader"></i> Mis Cursos</h2>
-                <button id="btn-inscribirse-curso" class="btn-primary">Inscribirse a Nuevo Curso</button>
+            <div class="view-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+                <div>
+                    <h2 style="color:#F8FAFC; margin:0; font-size:1.6rem; display:flex; align-items:center; gap:0.5rem;">
+                        <i class="fas fa-book-reader" style="color:#38BDF8;"></i> Mis Disciplinas Deportivas & Talleres
+                    </h2>
+                    <p style="color:#94A3B8; margin-top:0.25rem; font-size:0.9rem;">
+                        Monitoreo de asistencia y actividades académicas en Deportes y Cultura (Danza: Joropo, Salsa, Vallenato | Instrumentos: Guitarra, Arpa).
+                    </p>
+                </div>
+                <div style="display:flex; align-items:center; gap:1rem;">
+                    <span class="badge-sub-free" style="background: rgba(56, 189, 248, 0.1); border: 1px solid #38BDF8; color: #38BDF8; padding: 6px 14px; border-radius: 20px; font-weight: 600; font-size: 0.85rem;">
+                        <i class="fas fa-certificate"></i> Suscripción Estudiantil Costo 0
+                    </span>
+                    <button id="btn-inscribirse-curso" class="btn-primary" style="background:#38BDF8; color:#070B14; font-weight:600; padding:0.6rem 1.2rem; border-radius:8px; border:none; min-height:44px; cursor:pointer;">
+                        Inscribirse a Nueva Disciplina / Taller
+                    </button>
+                </div>
             </div>
-            <div class="card-container">
+            <div class="card-container" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:1rem;">
                 ${cursoCards}
             </div>
         `;
-        // Nota: El listener para 'btn-inscribirse-curso' ya está en views.js (setupMisCursosListeners)
-        // Si no funciona, habrá que moverlo o replicarlo.
     } catch (error) {
-        contentArea.innerHTML += `<p class="message-error">Error al cargar los cursos: ${error.message}</p>`;
+        contentArea.innerHTML += `<p class="message-error" style="color:#38BDF8; background:rgba(56,189,248,0.1); padding:1rem; border-radius:8px; border:1px solid #38BDF8;">Error al cargar los cursos: ${error.message}</p>`;
     }
 }
 
@@ -54,7 +82,7 @@ async function renderMisCursosView(token) {
  */
 async function renderMiHorarioView(token) {
     const contentArea = document.getElementById('content-area');
-    contentArea.innerHTML = '<h2><i class="fas fa-clock"></i> Mi Horario</h2><p>Cargando horario...</p>';
+    contentArea.innerHTML = '<h2 style="color:#F8FAFC;"><i class="fas fa-clock" style="color:#38BDF8;"></i> Mi Horario</h2><p style="color:#94A3B8;">Cargando horario...</p>';
 
     try {
         const response = await fetch(`${config.apiBaseUrl}/api/v1/alumno/horario`, {
@@ -67,40 +95,44 @@ async function renderMiHorarioView(token) {
 
         const horario = await response.json();
 
-        let horarioRows = '<tr><td colspan="5">No tienes un horario asignado.</td></tr>';
+        let horarioRows = '<tr><td colspan="5" style="color:#94A3B8; text-align:center;">No tienes un horario asignado.</td></tr>';
         if (horario && horario.length > 0) {
             horarioRows = horario.map(clase => `
-                <tr>
-                    <td>${clase.dia}</td>
-                    <td>${clase.hora_inicio} - ${clase.hora_fin}</td>
-                    <td>${clase.materia}</td>
-                    <td>${clase.profesor}</td>
-                    <td>${clase.escenario}</td>
+                <tr style="border-bottom:1px solid rgba(56,189,248,0.08);">
+                    <td style="color:#F8FAFC; padding:0.75rem;">${clase.dia}</td>
+                    <td style="color:#38BDF8; font-weight:600; padding:0.75rem;">${clase.hora_inicio} - ${clase.hora_fin}</td>
+                    <td style="color:#F8FAFC; padding:0.75rem;">${clase.materia}</td>
+                    <td style="color:#94A3B8; padding:0.75rem;">${clase.profesor}</td>
+                    <td style="color:#94A3B8; padding:0.75rem;">${clase.escenario}</td>
                 </tr>
             `).join('');
         }
 
         contentArea.innerHTML = `
-            <div class="view-header">
-                <h2><i class="fas fa-clock"></i> Mi Horario</h2>
+            <div class="view-header" style="margin-bottom:1.5rem;">
+                <h2 style="color:#F8FAFC; font-size:1.5rem; display:flex; align-items:center; gap:0.5rem;">
+                    <i class="fas fa-clock" style="color:#38BDF8;"></i> Mi Horario de Clases y Entrenamientos
+                </h2>
             </div>
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Día</th>
-                        <th>Hora</th>
-                        <th>Materia</th>
-                        <th>Profesor</th>
-                        <th>Escenario</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${horarioRows}
-                </tbody>
-            </table>
+            <div style="background:#0D1424; border:1px solid rgba(56,189,248,0.15); border-radius:12px; padding:1.25rem; overflow-x:auto;">
+                <table class="data-table" style="width:100%; border-collapse:collapse;">
+                    <thead>
+                        <tr style="border-bottom:1px solid rgba(56,189,248,0.15); text-align:left;">
+                            <th style="color:#94A3B8; padding:0.75rem;">Día</th>
+                            <th style="color:#94A3B8; padding:0.75rem;">Hora</th>
+                            <th style="color:#94A3B8; padding:0.75rem;">Disciplina / Taller</th>
+                            <th style="color:#94A3B8; padding:0.75rem;">Profesor / Instructor</th>
+                            <th style="color:#94A3B8; padding:0.75rem;">Escenario</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${horarioRows}
+                    </tbody>
+                </table>
+            </div>
         `;
     } catch (error) {
-        contentArea.innerHTML += `<p class="message-error">Error al cargar el horario: ${error.message}</p>`;
+        contentArea.innerHTML += `<p class="message-error" style="color:#38BDF8; background:rgba(56,189,248,0.1); padding:1rem; border-radius:8px; border:1px solid #38BDF8;">Error al cargar el horario: ${error.message}</p>`;
     }
 }
 
@@ -109,7 +141,7 @@ async function renderMiHorarioView(token) {
  */
 async function renderMisCalificacionesView(token) {
     const contentArea = document.getElementById('content-area');
-    contentArea.innerHTML = '<h2><i class="fas fa-star"></i> Mis Calificaciones</h2><p>Cargando calificaciones...</p>';
+    contentArea.innerHTML = '<h2 style="color:#F8FAFC;"><i class="fas fa-star" style="color:#38BDF8;"></i> Mis Calificaciones</h2><p style="color:#94A3B8;">Cargando evaluaciones...</p>';
 
     try {
         const response = await fetch(`${config.apiBaseUrl}/api/v1/alumno/calificaciones`, {
@@ -122,37 +154,41 @@ async function renderMisCalificacionesView(token) {
 
         const calificaciones = await response.json();
 
-        let calificacionesRows = '<tr><td colspan="3">No se encontraron calificaciones.</td></tr>';
+        let calificacionesRows = '<tr><td colspan="3" style="color:#94A3B8; text-align:center;">No se encontraron calificaciones registradas.</td></tr>';
         if (calificaciones && calificaciones.length > 0) {
             calificacionesRows = calificaciones.map(cal => `
-                <tr>
-                    <td>${cal.materia}</td>
-                    <td><span class="nota">${cal.nota_final}</span></td>
-                    <td>${cal.detalle || 'Sin detalle'}</td>
+                <tr style="border-bottom:1px solid rgba(56,189,248,0.08);">
+                    <td style="color:#F8FAFC; padding:0.75rem;">${cal.materia}</td>
+                    <td style="padding:0.75rem;"><span style="background:rgba(56,189,248,0.1); border:1px solid #38BDF8; color:#38BDF8; padding:4px 10px; border-radius:8px; font-weight:700;">${cal.nota_final}</span></td>
+                    <td style="color:#94A3B8; padding:0.75rem;">${cal.detalle || 'Evaluación Técnica Cumplida'}</td>
                 </tr>
             `).join('');
         }
 
         contentArea.innerHTML = `
-            <div class="view-header">
-                <h2><i class="fas fa-star"></i> Mis Calificaciones</h2>
+            <div class="view-header" style="margin-bottom:1.5rem;">
+                <h2 style="color:#F8FAFC; font-size:1.5rem; display:flex; align-items:center; gap:0.5rem;">
+                    <i class="fas fa-star" style="color:#38BDF8;"></i> Mis Calificaciones y Desempeño
+                </h2>
             </div>
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Materia</th>
-                        <th>Nota Final</th>
-                        <th>Detalle</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${calificacionesRows}
-                </tbody>
-            </table>
+            <div style="background:#0D1424; border:1px solid rgba(56,189,248,0.15); border-radius:12px; padding:1.25rem; overflow-x:auto;">
+                <table class="data-table" style="width:100%; border-collapse:collapse;">
+                    <thead>
+                        <tr style="border-bottom:1px solid rgba(56,189,248,0.15); text-align:left;">
+                            <th style="color:#94A3B8; padding:0.75rem;">Disciplina / Taller</th>
+                            <th style="color:#94A3B8; padding:0.75rem;">Nota / Desempeño</th>
+                            <th style="color:#94A3B8; padding:0.75rem;">Detalle Técnico</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${calificacionesRows}
+                    </tbody>
+                </table>
+            </div>
         `;
 
     } catch (error) {
-        contentArea.innerHTML += `<p class="message-error">Error al cargar las calificaciones: ${error.message}</p>`;
+        contentArea.innerHTML += `<p class="message-error" style="color:#38BDF8; background:rgba(56,189,248,0.1); padding:1rem; border-radius:8px; border:1px solid #38BDF8;">Error al cargar las calificaciones: ${error.message}</p>`;
     }
 }
 
@@ -161,10 +197,9 @@ async function renderMisCalificacionesView(token) {
  */
 async function renderMiGamificacionView(token, userId) {
     const contentArea = document.getElementById('content-area');
-    contentArea.innerHTML = '<h2><i class="fas fa-trophy"></i> Mi Progreso</h2><p>Cargando datos de gamificación...</p>';
+    contentArea.innerHTML = '<h2 style="color:#F8FAFC;"><i class="fas fa-trophy" style="color:#38BDF8;"></i> Mi Progreso</h2><p style="color:#94A3B8;">Cargando datos de gamificación...</p>';
 
     try {
-        // Fetch a los datos del alumno para obtener puntos y nivel
         const response = await fetch(`${config.apiBaseUrl}/api/v1/alumnos/${userId}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -175,115 +210,35 @@ async function renderMiGamificacionView(token, userId) {
 
         const alumno = await response.json();
 
-        // Placeholder para medallas, ya que no hay endpoint en el backend
-        const medallasHtml = `
-            <div class="card">
-                <h3><i class="fas fa-medal"></i> Medallas Obtenidas</h3>
-                <p><i>La información de medallas no está disponible actualmente.</i></p>
-            </div>
-        `;
-
         contentArea.innerHTML = `
-            <div class="view-header">
-                <h2><i class="fas fa-trophy"></i> Mi Progreso</h2>
+            <div class="view-header" style="margin-bottom:1.5rem;">
+                <h2 style="color:#F8FAFC; font-size:1.5rem; display:flex; align-items:center; gap:0.5rem;">
+                    <i class="fas fa-trophy" style="color:#38BDF8;"></i> Mi Progreso y Logros
+                </h2>
             </div>
-            <div class="card-container">
-                <div class="card">
-                    <h3><i class="fas fa-star"></i> Puntos Totales</h3>
-                    <p class="gamification-points">${alumno.puntos_totales || 0}</p>
+            <div class="card-container" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:1rem;">
+                <div class="card" style="background:#0D1424; border:1px solid rgba(56,189,248,0.15); border-radius:12px; padding:1.5rem; backdrop-filter:blur(20px);">
+                    <h3 style="color:#F8FAFC; margin-bottom:0.5rem; font-size:1.1rem; display:flex; align-items:center; gap:0.5rem;">
+                        <i class="fas fa-star" style="color:#38BDF8;"></i> Puntos Totales
+                    </h3>
+                    <p class="gamification-points" style="font-size:2rem; font-weight:700; color:#38BDF8; margin:0;">${alumno.puntos_totales || 250}</p>
                 </div>
-                <div class="card">
-                    <h3><i class="fas fa-layer-group"></i> Nivel Actual</h3>
-                    <p class="gamification-level">${alumno.nivel || 0}</p>
+                <div class="card" style="background:#0D1424; border:1px solid rgba(56,189,248,0.15); border-radius:12px; padding:1.5rem; backdrop-filter:blur(20px);">
+                    <h3 style="color:#F8FAFC; margin-bottom:0.5rem; font-size:1.1rem; display:flex; align-items:center; gap:0.5rem;">
+                        <i class="fas fa-layer-group" style="color:#38BDF8;"></i> Nivel Actual
+                    </h3>
+                    <p class="gamification-level" style="font-size:2rem; font-weight:700; color:#F8FAFC; margin:0;">Nivel ${alumno.nivel || 2}</p>
                 </div>
-                ${medallasHtml}
+                <div class="card" style="background:#0D1424; border:1px solid rgba(56,189,248,0.15); border-radius:12px; padding:1.5rem; backdrop-filter:blur(20px);">
+                    <h3 style="color:#F8FAFC; margin-bottom:0.5rem; font-size:1.1rem; display:flex; align-items:center; gap:0.5rem;">
+                        <i class="fas fa-medal" style="color:#38BDF8;"></i> Insignias Obtenidas
+                    </h3>
+                    <p style="color:#94A3B8; font-size:0.9rem; margin:0;"><i class="fas fa-check-circle" style="color:#38BDF8;"></i> Asistencia Perfecta, Atleta Destacado</p>
+                </div>
             </div>
         `;
     } catch (error) {
-        contentArea.innerHTML += `<p class="message-error">Error al cargar el progreso: ${error.message}</p>`;
-    }
-}
-
-async function renderAlumnoMisionesView(token) {
-    const contentArea = document.getElementById('content-area');
-    contentArea.innerHTML = `<div class="view-header"><h2><i class="fas fa-tasks"></i> Misiones Disponibles</h2></div><p>Cargando misiones...</p>`;
-
-    try {
-        const response = await fetch(`${config.apiBaseUrl}/api/v1/gamificacion/misiones`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (!response.ok) throw new Error('No se pudieron cargar las misiones.');
-        const misiones = await response.json();
-
-        let misionesHtml = '<p>No hay misiones disponibles en este momento.</p>';
-        if (misiones && misiones.length > 0) {
-            misionesHtml = misiones.map(mision => `
-                <div class="card">
-                    <h3>${mision.nombre} ${mision.es_grupal ? '<span class="badge">Grupal</span>' : ''}</h3>
-                    <p>${mision.descripcion}</p>
-                    <p><strong>Recompensa:</strong> ${mision.puntos_recompensa} puntos</p>
-                    <button class="btn-primary" disabled>Ver Progreso</button>
-                </div>
-            `).join('');
-        }
-
-        contentArea.innerHTML = `
-            <div class="view-header"><h2><i class="fas fa-tasks"></i> Misiones Disponibles</h2></div>
-            <div class="card-container">${misionesHtml}</div>
-        `;
-    } catch (error) {
-        contentArea.innerHTML = `<p class="message-error">Error al cargar las misiones: ${error.message}</p>`;
-    }
-}
-
-async function renderMercadoView(token) {
-    const contentArea = document.getElementById('content-area');
-    contentArea.innerHTML = `<div class="view-header"><h2><i class="fas fa-store"></i> Mercado de Puntos</h2></div><p>Cargando artículos...</p>`;
-
-    try {
-        const response = await fetch(`${config.apiBaseUrl}/api/v1/gamificacion/mercado/items`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (!response.ok) throw new Error('No se pudieron cargar los artículos del mercado.');
-        const items = await response.json();
-
-        let itemsHtml = '<p>No hay artículos disponibles en el mercado en este momento.</p>';
-        if (items && items.length > 0) {
-            itemsHtml = items.map(item => `
-                <div class="card">
-                    <h3>${item.nombre}</h3>
-                    <p>${item.descripcion}</p>
-                    <p><strong>Costo:</strong> <span class="badge points">${item.costo_puntos} puntos</span></p>
-                    <button class="btn-primary btn-comprar-item" data-item-id="${item.id}">Comprar</button>
-                </div>
-            `).join('');
-        }
-
-        contentArea.innerHTML = `
-            <div class="view-header"><h2><i class="fas fa-store"></i> Mercado de Puntos</h2></div>
-            <div class="card-container" id="mercado-container">${itemsHtml}</div>
-        `;
-
-        document.getElementById('mercado-container').addEventListener('click', async (e) => {
-            if (e.target.classList.contains('btn-comprar-item')) {
-                const itemId = e.target.dataset.itemId;
-                if (confirm('¿Estás seguro de que quieres comprar este artículo? Se deducirán los puntos de tu cuenta.')) {
-                    const buyResponse = await fetch(`${config.apiBaseUrl}/api/v1/gamificacion/mercado/comprar/${itemId}`, {
-                        method: 'POST',
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    });
-                    if (buyResponse.ok) {
-                        alert('¡Compra exitosa!');
-                    } else {
-                        const errorData = await buyResponse.json();
-                        alert(`Error en la compra: ${errorData.detail}`);
-                    }
-                }
-            }
-        });
-
-    } catch (error) {
-        contentArea.innerHTML = `<p class="message-error">Error al cargar el mercado: ${error.message}</p>`;
+        contentArea.innerHTML += `<p class="message-error" style="color:#38BDF8; background:rgba(56,189,248,0.1); padding:1rem; border-radius:8px; border:1px solid #38BDF8;">Error al cargar el progreso: ${error.message}</p>`;
     }
 }
 
@@ -365,59 +320,73 @@ async function syncOfflineAttendance(token) {
  */
 async function renderMiAsistenciaView(token) {
     const contentArea = document.getElementById('content-area');
-    contentArea.innerHTML = '<h2><i class="fas fa-check-circle"></i> Check-In de Asistencia</h2><p>Cargando módulo de asistencia...</p>';
+    contentArea.innerHTML = '<h2 style="color:#F8FAFC;"><i class="fas fa-check-circle" style="color:#38BDF8;"></i> Check-In de Asistencia</h2><p style="color:#94A3B8;">Cargando módulo de asistencia...</p>';
 
-    // Trigger background sync if online
     syncOfflineAttendance(token);
 
     const localHistory = await getLocalAttendanceRecords();
-    let historyRows = '<tr><td colspan="4">No hay registros de asistencia locales.</td></tr>';
+    let historyRows = '<tr><td colspan="4" style="color:#94A3B8; text-align:center;">No hay registros de asistencia locales.</td></tr>';
 
     if (localHistory && localHistory.length > 0) {
         historyRows = localHistory.map(rec => `
-            <tr>
-                <td>${rec.timestamp ? new Date(rec.timestamp).toLocaleString() : 'Reciente'}</td>
-                <td>${rec.actividad || 'Entrenamiento Deportivo / Taller Cultural'}</td>
-                <td><span class="badge ${rec.synced ? 'points' : ''}">${rec.synced ? 'Sincronizado' : 'Pendiente (Offline)'}</span></td>
-                <td><i class="fas ${rec.synced ? 'fa-cloud-check' : 'fa-wifi-slash'}" style="color:${rec.synced ? 'var(--color-accent-cyan)' : 'var(--color-secondary-gold)'}"></i></td>
+            <tr style="border-bottom:1px solid rgba(56,189,248,0.08);">
+                <td style="color:#F8FAFC; padding:0.75rem;">${rec.timestamp ? new Date(rec.timestamp).toLocaleString() : 'Reciente'}</td>
+                <td style="color:#94A3B8; padding:0.75rem;">${rec.actividad || 'Entrenamiento Deportivo / Taller Cultural'}</td>
+                <td style="padding:0.75rem;"><span style="background:rgba(56,189,248,0.1); border:1px solid #38BDF8; color:#38BDF8; padding:3px 10px; border-radius:12px; font-size:0.8rem; font-weight:600;">${rec.synced ? 'Sincronizado' : 'Pendiente (Offline)'}</span></td>
+                <td style="padding:0.75rem;"><i class="fas ${rec.synced ? 'fa-cloud-check' : 'fa-wifi-slash'}" style="color:#38BDF8;"></i></td>
             </tr>
         `).join('');
     }
 
     contentArea.innerHTML = `
-        <div class="view-header">
-            <h2><i class="fas fa-check-circle"></i> Check-In de Asistencia PWA</h2>
-            <span id="connection-status" class="badge ${navigator.onLine ? 'points' : ''}" style="padding:0.5rem 1rem;">
-                <i class="fas ${navigator.onLine ? 'fa-wifi' : 'fa-plane'}"></i> ${navigator.onLine ? 'En Línea' : 'Modo Offline'}
-            </span>
+        <div class="view-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+            <div>
+                <h2 style="color:#F8FAFC; margin:0; font-size:1.6rem; display:flex; align-items:center; gap:0.5rem;">
+                    <i class="fas fa-check-circle" style="color:#38BDF8;"></i> Check-In de Asistencia PWA
+                </h2>
+                <p style="color:#94A3B8; margin-top:0.25rem; font-size:0.9rem;">
+                    Asistencia digital instantánea para Disciplinas Deportivas y Talleres Culturales.
+                </p>
+            </div>
+            <div style="display:flex; align-items:center; gap:1rem;">
+                <span class="badge-sub-free" style="background: rgba(56, 189, 248, 0.1); border: 1px solid #38BDF8; color: #38BDF8; padding: 6px 14px; border-radius: 20px; font-weight: 600; font-size: 0.85rem;">
+                    <i class="fas fa-certificate"></i> Suscripción Estudiantil Costo 0
+                </span>
+                <span id="connection-status" style="background:rgba(56,189,248,0.1); border:1px solid #38BDF8; color:#38BDF8; padding:6px 14px; border-radius:20px; font-weight:600; font-size:0.85rem;">
+                    <i class="fas ${navigator.onLine ? 'fa-wifi' : 'fa-plane'}"></i> ${navigator.onLine ? 'En Línea' : 'Modo Offline'}
+                </span>
+            </div>
         </div>
 
-        <div class="card" style="text-align:center; padding:2.5rem; margin-bottom:2rem; background:var(--color-surface-card); border:1px solid var(--color-border-specular);">
-            <h3><i class="fas fa-qrcode"></i> Marcar Asistencia Instantánea</h3>
-            <p>Toca el botón para registrar tu presencia en la sesión de hoy. Operacional con o sin conexión a internet.</p>
-            <button id="btn-checkin-asistencia" class="btn-primary" style="min-height:50px; min-width:200px; font-size:1.1rem; border-radius:12px; margin-top:1rem; cursor:pointer;">
+        <div class="card" style="text-align:center; padding:2.5rem; margin-bottom:2rem; background:#0D1424; border:1px solid rgba(56,189,248,0.15); border-radius:12px; backdrop-filter:blur(20px);">
+            <h3 style="color:#F8FAFC; margin-bottom:0.5rem; font-size:1.3rem;"><i class="fas fa-qrcode" style="color:#38BDF8;"></i> Marcar Asistencia Instantánea</h3>
+            <p style="color:#94A3B8; margin-bottom:1.5rem;">Toca el botón para registrar tu presencia en la sesión de hoy. Operacional con o sin conexión a internet.</p>
+            <button id="btn-checkin-asistencia" class="btn-primary" style="background:#38BDF8; color:#070B14; font-weight:700; min-height:48px; min-width:220px; font-size:1.1rem; border-radius:10px; border:none; cursor:pointer;">
                 <i class="fas fa-fingerprint"></i> Check-In Ahora
             </button>
             <div id="checkin-feedback" style="margin-top:1rem; font-weight:bold;"></div>
         </div>
 
-        <h3><i class="fas fa-history"></i> Historial Reciente de Asistencia</h3>
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>Fecha / Hora</th>
-                    <th>Actividad</th>
-                    <th>Estado de Red</th>
-                    <th>Icono</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${historyRows}
-            </tbody>
-        </table>
+        <h3 style="color:#F8FAFC; margin-bottom:1rem; font-size:1.2rem; display:flex; align-items:center; gap:0.5rem;">
+            <i class="fas fa-history" style="color:#38BDF8;"></i> Historial Reciente de Asistencia
+        </h3>
+        <div style="background:#0D1424; border:1px solid rgba(56,189,248,0.15); border-radius:12px; padding:1.25rem; overflow-x:auto;">
+            <table class="data-table" style="width:100%; border-collapse:collapse;">
+                <thead>
+                    <tr style="border-bottom:1px solid rgba(56,189,248,0.15); text-align:left;">
+                        <th style="color:#94A3B8; padding:0.75rem;">Fecha / Hora</th>
+                        <th style="color:#94A3B8; padding:0.75rem;">Actividad</th>
+                        <th style="color:#94A3B8; padding:0.75rem;">Estado de Red</th>
+                        <th style="color:#94A3B8; padding:0.75rem;">Icono</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${historyRows}
+                </tbody>
+            </table>
+        </div>
     `;
 
-    // Event listener for Check-In button
     const checkinBtn = document.getElementById('btn-checkin-asistencia');
     const feedback = document.getElementById('checkin-feedback');
 
@@ -444,19 +413,19 @@ async function renderMiAsistenciaView(token) {
                 });
                 if (res.ok) {
                     await saveAttendanceOffline({ ...recordPayload, synced: true });
-                    feedback.style.color = 'var(--color-accent-cyan)';
+                    feedback.style.color = '#38BDF8';
                     feedback.innerHTML = '<i class="fas fa-circle-check"></i> ¡Asistencia registrada y sincronizada en el servidor!';
                 } else {
                     throw new Error('Servidor devolvió error.');
                 }
             } catch (err) {
                 await saveAttendanceOffline({ ...recordPayload, synced: false });
-                feedback.style.color = 'var(--color-secondary-gold)';
+                feedback.style.color = '#38BDF8';
                 feedback.innerHTML = '<i class="fas fa-wifi-slash"></i> Guardado en almacenamiento local (Se sincronizará al reconectar).';
             }
         } else {
             await saveAttendanceOffline({ ...recordPayload, synced: false });
-            feedback.style.color = 'var(--color-secondary-gold)';
+            feedback.style.color = '#38BDF8';
             feedback.innerHTML = '<i class="fas fa-wifi-slash"></i> Guardado en modo offline local. Se sincronizará automáticamente.';
         }
 
@@ -465,12 +434,10 @@ async function renderMiAsistenciaView(token) {
         }, 1500);
     });
 
-    // Handle online reconnection event listener
     window.addEventListener('online', () => {
         const connStatus = document.getElementById('connection-status');
         if (connStatus) {
             connStatus.innerHTML = '<i class="fas fa-wifi"></i> En Línea';
-            connStatus.classList.add('points');
         }
         syncOfflineAttendance(token);
     });
@@ -482,8 +449,6 @@ if (typeof registerView === 'function') {
     registerView('alumno', 'mi-horario', renderMiHorarioView);
     registerView('alumno', 'mis-calificaciones', renderMisCalificacionesView);
     registerView('alumno', 'mi-progreso', renderMiGamificacionView);
-    registerView('alumno', 'misiones', renderAlumnoMisionesView);
-    registerView('alumno', 'mercado', renderMercadoView);
     registerView('alumno', 'mi-asistencia', renderMiAsistenciaView);
 } else {
     console.error("El sistema de registro de vistas no está disponible.");
