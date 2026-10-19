@@ -24,6 +24,11 @@ const navLinks = {
             icon: 'fa-bullhorn',
             submenu: [
                 { text: 'CRM & Campañas Social', view: 'dashboard', icon: 'fa-paper-plane' },
+                { isHeader: true, text: '3.1. Motor de envió masivo' },
+                { text: 'Config. Creacion de videos Cloud', view: 'gestion-api-keys', icon: 'fas fa-video' },
+                { text: 'Config. Creacion de imágenes Cloud', view: 'gestion-api-keys', icon: 'fas fa-image' },
+                { text: 'Config. Creacion de Reals Cloud', view: 'gestion-api-keys', icon: 'fas fa-film' },
+                { isHeader: true, text: '3.2. Motor de ADS' },
                 { text: 'Config. WhatsApp Cloud', view: 'configuracion-whatsapp', icon: 'fab fa-whatsapp' },
                 { text: 'Config. iNSTAGRAM Cloud', view: 'gestion-api-keys', icon: 'fab fa-instagram' },
                 { text: 'Config. TIK TOK Cloud', view: 'gestion-api-keys', icon: 'fab fa-tiktok' },
@@ -159,11 +164,17 @@ function renderNavigation(roleName) {
             // Renderizar grupo con submenú
             let subHtml = '';
             link.submenu.forEach(sub => {
-                const subView = sub.view || sub.text.toLowerCase().replace(/ /g, '-');
-                subHtml += `<a href="#" data-view="${subView}" class="nav-subitem" tabindex="0">
-                                <i class="fas ${sub.icon}"></i>
-                                <span class="nav-text">${sub.text}</span>
-                            </a>`;
+                if (sub.isHeader) {
+                    subHtml += `<div class="nav-submenu-header" style="color:#38BDF8; font-size:0.75rem; font-weight:800; text-transform:uppercase; tracking:0.05em; padding:0.6rem 0.85rem 0.2rem 0.85rem; border-top:1px solid rgba(56,189,248,0.1); margin-top:0.3rem;">
+                                    ${sub.text}
+                                </div>`;
+                } else {
+                    const subView = sub.view || sub.text.toLowerCase().replace(/ /g, '-');
+                    subHtml += `<a href="#" data-view="${subView}" class="nav-subitem" tabindex="0">
+                                    <i class="fas ${sub.icon}"></i>
+                                    <span class="nav-text">${sub.text}</span>
+                                </a>`;
+                }
             });
 
             navHtml += `<div class="nav-group">
