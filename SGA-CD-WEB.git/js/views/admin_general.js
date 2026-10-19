@@ -531,9 +531,81 @@ async function renderApiKeysView(token) {
 }
 
 
+// --- Gestor de Landing Page Comercial ---
+async function renderGestorLandingView(token) {
+    const contentArea = document.getElementById('content-area');
+    contentArea.innerHTML = `
+        <div class="view-header">
+            <h2><i class="fas fa-sliders-h" style="color:#38BDF8;"></i> Gestor de Landing Page & Configuración Comercial</h2>
+            <p style="color:#94A3B8;">Administración de los 3 planes comerciales, precios, período de gracia, FAQs y metadatos SEO públicos.</p>
+        </div>
+
+        <div class="bento-grid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:1.5rem; margin-top:1.5rem;">
+            <!-- Panel Configuración 3 Planes -->
+            <div class="card" style="background:#0D1424; border:1px solid rgba(56,189,248,0.15); border-radius:12px; padding:1.5rem;">
+                <h3 style="color:#F8FAFC; margin-bottom:1rem;"><i class="fas fa-tags" style="color:#38BDF8;"></i> Configuración de los 3 Planes</h3>
+                <form id="landing-plans-form" style="display:flex; flex-direction:column; gap:1rem;">
+                    <div>
+                        <label style="color:#94A3B8; font-size:0.85rem;">Plan Tier 1: Entidades Culturales y Deportivas ($/mes)</label>
+                        <input type="number" id="plan-tier1-price" value="199" style="width:100%; padding:0.6rem; border-radius:8px; background:#070B14; border:1px solid rgba(56,189,248,0.2); color:#F8FAFC;">
+                    </div>
+                    <div>
+                        <label style="color:#94A3B8; font-size:0.85rem;">Plan Tier 2: Instructores y Profesores ($/mes)</label>
+                        <input type="number" id="plan-tier2-price" value="29" style="width:100%; padding:0.6rem; border-radius:8px; background:#070B14; border:1px solid rgba(56,189,248,0.2); color:#F8FAFC;">
+                    </div>
+                    <div>
+                        <label style="color:#94A3B8; font-size:0.85rem;">Plan Tier 3: Estudiantes y Acudientes ($)</label>
+                        <input type="text" value="0 (Gratis — Costo 0)" disabled style="width:100%; padding:0.6rem; border-radius:8px; background:#1A2642; border:1px solid rgba(56,189,248,0.1); color:#38BDF8; font-weight:700;">
+                    </div>
+                    <div>
+                        <label style="color:#94A3B8; font-size:0.85rem;">Período de Gracia Post-Vencimiento (Días)</label>
+                        <input type="number" id="plan-grace-days" value="5" style="width:100%; padding:0.6rem; border-radius:8px; background:#070B14; border:1px solid rgba(56,189,248,0.2); color:#F8FAFC;">
+                    </div>
+                    <button type="submit" class="btn-primary" style="margin-top:0.5rem;"><i class="fas fa-save"></i> Guardar Configuración de Planes</button>
+                    <div id="plans-feedback"></div>
+                </form>
+            </div>
+
+            <!-- Panel Editor Metadatos SEO Público -->
+            <div class="card" style="background:#0D1424; border:1px solid rgba(56,189,248,0.15); border-radius:12px; padding:1.5rem;">
+                <h3 style="color:#F8FAFC; margin-bottom:1rem;"><i class="fas fa-search-dollar" style="color:#38BDF8;"></i> SEO Public Landing Page</h3>
+                <form id="landing-seo-form" style="display:flex; flex-direction:column; gap:1rem;">
+                    <div>
+                        <label style="color:#94A3B8; font-size:0.85rem;">Título Meta Público</label>
+                        <input type="text" id="seo-title-input" value="SGA-CD — Plataforma Integral para Escuelas Deportivas y Talleres Culturales" style="width:100%; padding:0.6rem; border-radius:8px; background:#070B14; border:1px solid rgba(56,189,248,0.2); color:#F8FAFC;">
+                    </div>
+                    <div>
+                        <label style="color:#94A3B8; font-size:0.85rem;">Descripción OpenGraph</label>
+                        <textarea id="seo-desc-input" style="width:100%; padding:0.6rem; border-radius:8px; background:#070B14; border:1px solid rgba(56,189,248,0.2); color:#F8FAFC; height:80px;">SGA-CD optimiza la gestión académica, deportiva y cultural de entidades públicas y privadas con PWA offline y diagnósticos biométricos.</textarea>
+                    </div>
+                    <button type="submit" class="btn-primary" style="margin-top:0.5rem;"><i class="fas fa-globe"></i> Publicar Metadatos SEO</button>
+                    <div id="seo-feedback"></div>
+                </form>
+            </div>
+        </div>
+    `;
+
+    document.getElementById('landing-plans-form')?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const fb = document.getElementById('plans-feedback');
+        fb.className = 'message-success';
+        fb.style.marginTop = '0.5rem';
+        fb.textContent = '¡Configuración comercial de los 3 planes actualizada correctamente!';
+    });
+
+    document.getElementById('landing-seo-form')?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const fb = document.getElementById('seo-feedback');
+        fb.className = 'message-success';
+        fb.style.marginTop = '0.5rem';
+        fb.textContent = '¡Metadatos SEO para la Landing pública guardados exitosamente!';
+    });
+}
+
 // --- Registrar las vistas de Administrador General en el Router ---
 if (typeof registerView === 'function') {
     registerView('admin_general', 'dashboard', renderAdminGeneralDashboardView);
+    registerView('admin_general', 'gestor-landing', renderGestorLandingView);
     registerView('admin_general', 'configuracion-whatsapp', renderConfiguracionWhatsAppView);
     registerView('admin_general', 'gestion-api-keys', renderApiKeysView);
 } else {

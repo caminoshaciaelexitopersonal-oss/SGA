@@ -1,17 +1,58 @@
 // --- Definición de la Estructura de Navegación por Rol ---
 
 const navLinks = {
-    // Rol 1: Super Admin
+    // Rol 1: Super Admin (Estructurado con Submenús Jerárquicos)
     admin_general: [
-        { text: 'Dashboard', view: 'dashboard', icon: 'fa-home' },
-        { text: 'Config. WhatsApp', view: 'configuracion-whatsapp', icon: 'fab fa-whatsapp' },
-        { text: 'Gestionar Empresas', view: 'panel-empresa', icon: 'fa-building' },
-        { text: 'Roles y Permisos', view: 'roles-permisos', icon: 'fa-shield-alt' },
-        { text: 'Verificar Roles BD', view: 'verificar-roles', icon: 'fa-database' },
-        { text: 'Auditoría General', view: 'auditoria', icon: 'fa-history' },
-        { text: 'Gestión de Cobros', view: 'suscripcion', icon: 'fa-credit-card' },
-        { text: 'Promociones', view: 'promociones', icon: 'fa-tags' },
-        { text: 'Asistente de IA', view: 'asistente-ia', icon: 'fa-robot' }
+        {
+            text: 'Panel de Control',
+            icon: 'fa-home',
+            submenu: [
+                { text: 'Resumen General', view: 'dashboard', icon: 'fa-chart-pie' },
+                { text: 'Indicadores del Sistema', view: 'dashboard', icon: 'fa-tachometer-alt' }
+            ]
+        },
+        {
+            text: 'Gestión de Landing Page',
+            icon: 'fa-sliders-h',
+            submenu: [
+                { text: 'Editor Comercial & Planes', view: 'gestor-landing', icon: 'fa-edit' },
+                { text: 'Metadatos SEO Públicos', view: 'gestor-landing', icon: 'fa-search-dollar' }
+            ]
+        },
+        {
+            text: 'Marketing y Crecimiento',
+            icon: 'fa-bullhorn',
+            submenu: [
+                { text: 'CRM & Campañas Social', view: 'dashboard', icon: 'fa-paper-plane' },
+                { text: 'Config. WhatsApp Cloud', view: 'configuracion-whatsapp', icon: 'fab fa-whatsapp' },
+                { text: 'Promociones y Ofertas', view: 'promociones', icon: 'fa-tags' }
+            ]
+        },
+        {
+            text: 'Gestión Financiera',
+            icon: 'fa-credit-card',
+            submenu: [
+                { text: 'Cobros y Transacciones', view: 'suscripcion', icon: 'fa-file-invoice-dollar' },
+                { text: 'Suscripciones Activas', view: 'suscripcion', icon: 'fa-users-cog' }
+            ]
+        },
+        {
+            text: 'Usuarios y Permisos',
+            icon: 'fa-user-shield',
+            submenu: [
+                { text: 'Gestionar Empresas', view: 'panel-empresa', icon: 'fa-building' },
+                { text: 'Roles y Permisos', view: 'roles-permisos', icon: 'fa-shield-alt' },
+                { text: 'Verificar Roles BD', view: 'verificar-roles', icon: 'fa-database' }
+            ]
+        },
+        {
+            text: 'Configuración y Seguridad',
+            icon: 'fa-cog',
+            submenu: [
+                { text: 'Auditoría General', view: 'auditoria', icon: 'fa-history' },
+                { text: 'Asistente de IA', view: 'asistente-ia', icon: 'fa-robot' }
+            ]
+        }
     ],
     // Rol 2: Admin de Empresa
     admin_empresa: [
@@ -55,7 +96,8 @@ const navLinks = {
         { text: 'Gestionar Cursos', view: 'gestionar-cursos', icon: 'fa-chalkboard-teacher' },
         { text: 'Gestionar Alumnos', view: 'gestionar-alumnos', icon: 'fa-user-graduate' },
         { text: 'Calificaciones', view: 'calificaciones', icon: 'fa-marker' },
-        { text: 'Gamificación', view: 'gamificacion', icon: 'fa-trophy' }
+        { text: 'Gamificación', view: 'gamificacion', icon: 'fa-trophy' },
+        { text: 'Suscripción y Plan', view: 'suscripcion', icon: 'fa-credit-card' }
     ],
     // Rol 8: Alumno
     alumno: [
@@ -107,13 +149,64 @@ function renderNavigation(roleName) {
 
     let navHtml = '';
     links.forEach(link => {
-        // Usar la propiedad 'view' si existe, si no, generar desde el texto
-        const viewName = link.view || link.text.toLowerCase().replace(/ /g, '-');
-        navHtml += `<a href="#" data-view="${viewName}">
-                        <i class="fas ${link.icon}"></i>
-                        <span class="nav-text">${link.text}</span>
-                    </a>`;
+        if (link.submenu && Array.isArray(link.submenu)) {
+            // Renderizar grupo con submenú
+            let subHtml = '';
+            link.submenu.forEach(sub => {
+                const subView = sub.view || sub.text.toLowerCase().replace(/ /g, '-');
+                subHtml += `<a href="#" data-view="${subView}" class="nav-subitem" tabindex="0">
+                                <i class="fas ${sub.icon}"></i>
+                                <span class="nav-text">${sub.text}</span>
+                            </a>`;
+            });
+
+            navHtml += `<div class="nav-group">
+                            <button class="nav-group-title" aria-expanded="false" tabindex="0">
+                                <span><i class="fas ${link.icon}"></i> <span class="nav-text">${link.text}</span></span>
+                                <i class="fas fa-chevron-down nav-arrow"></i>
+                            </button>
+                            <div class="nav-submenu">
+                                ${subHtml}
+                            </div>
+                        </div>`;
+        } else {
+            // Renderizar enlace plano
+            const viewName = link.view || link.text.toLowerCase().replace(/ /g, '-');
+            navHtml += `<a href="#" data-view="${viewName}" tabindex="0">
+                            <i class="fas ${link.icon}"></i>
+                            <span class="nav-text">${link.text}</span>
+                        </a>`;
+        }
     });
 
     navContainer.innerHTML = navHtml;
+    setupSubmenuInteractions(navContainer);
+}
+
+function setupSubmenuInteractions(navContainer) {
+    // Interacción Click/Touch para desplegar submenús
+    navContainer.querySelectorAll('.nav-group-title').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const group = btn.closest('.nav-group');
+            const isOpen = group.classList.contains('open');
+
+            // Cerrar otros grupos
+            navContainer.querySelectorAll('.nav-group').forEach(g => g.classList.remove('open'));
+            if (!isOpen) {
+                group.classList.add('open');
+                btn.setAttribute('aria-expanded', 'true');
+            } else {
+                btn.setAttribute('aria-expanded', 'false');
+            }
+        });
+
+        // Accesibilidad por Teclado
+        btn.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                btn.click();
+            }
+        });
+    });
 }

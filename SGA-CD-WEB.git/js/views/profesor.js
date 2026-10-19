@@ -109,10 +109,13 @@ function renderCourseRows(courses) {
     `).join('');
 }
 
-// --- Registro de Vistas para el Rol de Profesor / Instructor (GAP-02) ---
+// --- Registro de Vistas para el Rol de Profesor / Instructor (GAP-02 & Suscripción) ---
 if (typeof registerView === 'function') {
     registerView('profesor', 'gestionar-cursos', renderProfesorView);
     registerView('profesor', 'dashboard', renderProfesorView);
+    if (typeof renderSuscripcionView === 'function') {
+        registerView('profesor', 'suscripcion', renderSuscripcionView);
+    }
 }
 
 function setupProfesorViewListeners(token) {
