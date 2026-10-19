@@ -109,6 +109,12 @@ function renderCourseRows(courses) {
     `).join('');
 }
 
+// --- Registro de Vistas para el Rol de Profesor / Instructor (GAP-02) ---
+if (typeof registerView === 'function') {
+    registerView('profesor', 'gestionar-cursos', renderProfesorView);
+    registerView('profesor', 'dashboard', renderProfesorView);
+}
+
 function setupProfesorViewListeners(token) {
     const contentArea = document.getElementById('content-area');
     contentArea.addEventListener('click', async (e) => {
