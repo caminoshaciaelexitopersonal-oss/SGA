@@ -125,7 +125,7 @@
 .sga-brand-title {
     font-size: var(--font-size-h3);
     font-weight: 800;
-    background: linear-gradient(135deg, #FFFFFF 0%, #38BDF8 100%);
+    background: linear-gradient(135deg, #F8FAFC 0%, #38BDF8 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     letter-spacing: -0.02em;

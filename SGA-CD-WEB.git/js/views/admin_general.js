@@ -939,7 +939,7 @@ async function renderMotorPredisMediaView(token) {
                                 <td style="padding:0.75rem; color:#E2E8F0;">Convocatoria B2B Alcaldías y Gobernaciones</td>
                                 <td style="padding:0.75rem;"><span style="background:#070B14; color:#38BDF8; padding:0.25rem 0.5rem; border-radius:6px;">1920x1080 (16:9)</span></td>
                                 <td style="padding:0.75rem; color:#94A3B8;"><i class="fab fa-youtube"></i> <i class="fab fa-facebook"></i> YouTube / FB</td>
-                                <td style="padding:0.75rem;"><span style="color:#F59E0B; font-weight:700;"><i class="fas fa-clock"></i> En Cola de Render</span></td>
+                                <td style="padding:0.75rem;"><span style="color:#38BDF8; font-weight:700;"><i class="fas fa-clock"></i> En Cola de Render</span></td>
                                 <td style="padding:0.75rem; text-align:right;">
                                     <button class="btn-secondary" style="padding:0.25rem 0.5rem; font-size:0.75rem;"><i class="fas fa-edit"></i> Reagendar</button>
                                 </td>
