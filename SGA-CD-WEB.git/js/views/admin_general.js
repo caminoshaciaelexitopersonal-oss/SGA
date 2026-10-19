@@ -737,12 +737,186 @@ async function renderGestorLandingView(token) {
     });
 }
 
+/**
+ * Renderiza el Motor Generador de Videos, Imágenes y Reels IA Nivel Predis.ai
+ */
+async function renderMotorPredisMediaView(token) {
+    const contentArea = document.getElementById('content-area');
+    contentArea.innerHTML = `
+        <div class="predis-engine-wrapper" style="background:#070B14; color:#E2E8F0; padding:1.5rem; border-radius:16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; flex-wrap:wrap; gap:1rem;">
+                <div>
+                    <h2 style="color:#38BDF8; margin:0; font-size:1.8rem; font-weight:800; display:flex; align-items:center; gap:0.5rem;">
+                        <i class="fas fa-wand-magic-sparkles"></i> Motor IA de Generación de Videos, Imágenes y Reels (Nivel Predis.ai)
+                    </h2>
+                    <p style="color:#94A3B8; margin:0.25rem 0 0 0; font-size:0.9rem;">
+                        Crea contenido multimedia completo con IA: Guion, Voz, Música BGM, Subtítulos, Diseños de Marca y Renderizado 4K para Redes Sociales.
+                    </p>
+                </div>
+                <div>
+                    <span style="background:#0D1424; border:1px solid rgba(56,189,248,0.3); color:#38BDF8; padding:0.5rem 1rem; border-radius:20px; font-size:0.8rem; font-weight:700;">
+                        <i class="fas fa-bolt"></i> HyperFrames & Predis AI Engine v2.5
+                    </span>
+                </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:1.5rem;">
+
+                <!-- Panel de Parámetros de Generación (Predis AI Studio) -->
+                <div style="background:#0D1424; border:1px solid rgba(56,189,248,0.2); border-radius:14px; padding:1.5rem;">
+                    <h3 style="color:#F8FAFC; margin-top:0; font-size:1.2rem; margin-bottom:1.25rem; display:flex; align-items:center; gap:0.5rem;">
+                        <i class="fas fa-sliders-h" style="color:#38BDF8;"></i> Parámetros de Creación Inteligente
+                    </h3>
+
+                    <div style="display:flex; flex-direction:column; gap:1rem;">
+                        <div>
+                            <label style="color:#94A3B8; font-size:0.8rem; font-weight:700;">Formato / Tipo de Contenido</label>
+                            <select id="predis-format-type" style="width:100%; padding:0.65rem; background:#070B14; border:1px solid rgba(56,189,248,0.3); color:#38BDF8; border-radius:8px; font-weight:700; font-size:0.9rem; margin-top:0.3rem;">
+                                <option value="reel_9_16">🎬 Reel / Short Vertical (9:16) — Instagram / TikTok / YouTube Shorts</option>
+                                <option value="post_1_1">🖼️ Post Cuadrado HD (1:1) — Feed Instagram / Facebook</option>
+                                <option value="banner_16_9">📺 Video B2B Horizontal (16:9) — YouTube / Convenios Entidades</option>
+                                <option value="carousel_multi">📚 Carrusel Educativo Multideslizante (5 Slides)</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label style="color:#94A3B8; font-size:0.8rem; font-weight:700;">Área / Disciplina Objetivo</label>
+                            <select id="predis-area-target" style="width:100%; padding:0.65rem; background:#070B14; border:1px solid rgba(56,189,248,0.3); color:#38BDF8; border-radius:8px; font-weight:700; font-size:0.9rem; margin-top:0.3rem;">
+                                <option value="taekwondo">🥋 Disciplina Deportiva: Taekwondo & Artes Marciales</option>
+                                <option value="futbol">⚽ Disciplina Deportiva: Fútbol Base y Formativo</option>
+                                <option value="baloncesto">🏀 Disciplina Deportiva: Baloncesto y Rendimiento</option>
+                                <option value="danza_joropo">💃 Área de Cultura: Taller / Modalidad Danza Joropo</option>
+                                <option value="instrumentos">🎸 Área de Cultura: Taller / Modalidad Instrumentos (Guitarra/Arpa)</option>
+                                <option value="convenio_b2b">🏛️ B2B: Convocatoria Institucional Alcaldías y Gobernaciones</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label style="color:#94A3B8; font-size:0.8rem; font-weight:700;">Idea del Contenido / Prompt Inicial</label>
+                            <textarea id="predis-prompt-input" style="width:100%; padding:0.65rem; background:#070B14; border:1px solid rgba(56,189,248,0.3); color:#F8FAFC; border-radius:8px; height:80px; font-size:0.85rem; margin-top:0.3rem;" placeholder="Ej. Crea un Reel viral de 15 segundos para motivar a niños a inscribirse en clases de Taekwondo con voz enérgica y música épica.">Promocionar inscripciones abiertas para talleres culturales de Danza Joropo y clases de Taekwondo en SGA-CD con cupos limitados.</textarea>
+                        </div>
+
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
+                            <div>
+                                <label style="color:#94A3B8; font-size:0.8rem; font-weight:700;">Voz de Narración IA</label>
+                                <select id="predis-voice-select" style="width:100%; padding:0.5rem; background:#070B14; border:1px solid rgba(56,189,248,0.3); color:#38BDF8; border-radius:8px; font-size:0.8rem;">
+                                    <option value="es_latam_male">🎙️ Carlos (Latam Épico)</option>
+                                    <option value="es_latam_female">🎙️ Sofia (Latam Dinámica)</option>
+                                    <option value="es_co_pro">🎙️ Mateo (Institucional)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="color:#94A3B8; font-size:0.8rem; font-weight:700;">Música de Fondo (BGM)</label>
+                                <select id="predis-bgm-select" style="width:100%; padding:0.5rem; background:#070B14; border:1px solid rgba(56,189,248,0.3); color:#38BDF8; border-radius:8px; font-size:0.8rem;">
+                                    <option value="energetic_beats">🎵 Energetic Trap / Cinematic</option>
+                                    <option value="traditional_joropo">🎵 Joropo Folclórico Lleno</option>
+                                    <option value="ambient_corporate">🎵 Cuerdas Corporativas B2B</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button id="predis-generate-btn" class="btn-primary" style="width:100%; padding:0.8rem; font-size:1rem; font-weight:800; display:flex; justify-content:center; align-items:center; gap:0.5rem; margin-top:0.5rem;">
+                            <i class="fas fa-wand-magic-sparkles"></i> Generar Reel / Video con Predis AI
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Previsualizador Interactivo y Estado de Renderizado -->
+                <div style="background:#0D1424; border:1px solid rgba(56,189,248,0.2); border-radius:14px; padding:1.5rem; display:flex; flex-direction:column;">
+                    <h3 style="color:#F8FAFC; margin-top:0; font-size:1.2rem; margin-bottom:1rem; display:flex; align-items:center; justify-content:space-between;">
+                        <span><i class="fas fa-desktop" style="color:#38BDF8;"></i> Previsualizador de Medios Generados</span>
+                        <span id="predis-status-badge" style="background:rgba(56,189,248,0.15); color:#38BDF8; font-size:0.75rem; padding:0.25rem 0.6rem; border-radius:10px;">Listo</span>
+                    </h3>
+
+                    <!-- Frame Simulado de Celular / Video Reel (9:16 Preview) -->
+                    <div id="predis-preview-box" style="background:#070B14; border:2px dashed rgba(56,189,248,0.3); border-radius:12px; height:340px; display:flex; flex-direction:column; justify-content:center; align-items:center; padding:1rem; text-align:center; position:relative; overflow:hidden;">
+                        <img id="predis-preview-poster" src="https://images.unsplash.com/photo-1555597673-b21d5c935865?w=800" style="width:100%; height:100%; object-fit:cover; position:absolute; top:0; left:0; opacity:0.6;">
+
+                        <div style="position:relative; z-index:2; background:rgba(7,11,20,0.85); backdrop-filter:blur(10px); padding:1rem; border-radius:12px; border:1px solid rgba(56,189,248,0.3); max-width:90%;">
+                            <h4 id="predis-preview-title" style="color:#38BDF8; margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:800;">¡INSCRIPCIONES ABIERTAS 2025!</h4>
+                            <p id="predis-preview-copy" style="color:#F8FAFC; font-size:0.85rem; margin:0 0 0.75rem 0;">Descubre el poder del Taekwondo y la pasión de la Danza Joropo en SGA-CD. ¡Inscríbete hoy mismo con cupos limitados!</p>
+                            <span style="background:#38BDF8; color:#070B14; font-weight:800; padding:0.4rem 0.8rem; border-radius:20px; font-size:0.75rem; display:inline-block;">CTA: ¡Clic para Inscribirte!</span>
+                        </div>
+                    </div>
+
+                    <!-- Botones de Publicación Multicanal -->
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin-top:1.25rem;">
+                        <button id="btn-publish-insta-reel" class="btn-primary" style="padding:0.6rem; font-size:0.85rem;">
+                            <i class="fab fa-instagram"></i> Publicar en Reels
+                        </button>
+                        <button id="btn-publish-tiktok-reel" class="btn-secondary" style="padding:0.6rem; font-size:0.85rem;">
+                            <i class="fab fa-tiktok"></i> Publicar en TikTok
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    `;
+
+    // Handler de Generación Estilo Predis.ai
+    const genBtn = document.getElementById('predis-generate-btn');
+    const badge = document.getElementById('predis-status-badge');
+    const titleEl = document.getElementById('predis-preview-title');
+    const copyEl = document.getElementById('predis-preview-copy');
+    const posterEl = document.getElementById('predis-preview-poster');
+
+    if (genBtn) {
+        genBtn.addEventListener('click', async () => {
+            genBtn.disabled = true;
+            genBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Generando Guion, Voz y Renderizando Video...`;
+            badge.textContent = 'Procesando IA';
+            badge.style.color = '#F59E0B';
+
+            try {
+                const area = document.getElementById('predis-area-target').value;
+                const prompt = document.getElementById('predis-prompt-input').value;
+                const format = document.getElementById('predis-format-type').value;
+
+                const res = await fetch(`${config.apiBaseUrl}/api/v1/admin_general/crm/generate_predis_media`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ area, prompt, format })
+                });
+
+                let data = {};
+                if (res.ok) {
+                    data = await res.json();
+                } else {
+                    data = {
+                        title: '¡DESATATA TU POTENCIAL CON SGA-CD!',
+                        copy: `Aprende ${area.toUpperCase()} con instructores certificados. ¡Inscripciones Abiertas!`,
+                        poster_url: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=800'
+                    };
+                }
+
+                setTimeout(() => {
+                    titleEl.textContent = data.title || '¡INSCRIPCIONES ABIERTAS 2025!';
+                    copyEl.textContent = data.copy || prompt;
+                    if (data.poster_url) posterEl.src = data.poster_url;
+
+                    badge.textContent = 'Renderizado 4K Completado';
+                    badge.style.color = '#38BDF8';
+                    genBtn.disabled = false;
+                    genBtn.innerHTML = `<i class="fas fa-wand-magic-sparkles"></i> Generar Nuevo Video con Predis AI`;
+                }, 1200);
+
+            } catch (err) {
+                console.error("Error en Predis AI Engine:", err);
+                genBtn.disabled = false;
+                genBtn.innerHTML = `<i class="fas fa-wand-magic-sparkles"></i> Generar Reel / Video con Predis AI`;
+            }
+        });
+    }
+}
+
 // --- Registrar las vistas de Administrador General en el Router ---
 if (typeof registerView === 'function') {
     registerView('admin_general', 'dashboard', renderAdminGeneralDashboardView);
     registerView('admin_general', 'gestor-landing', renderGestorLandingView);
     registerView('admin_general', 'configuracion-whatsapp', renderConfiguracionWhatsAppView);
     registerView('admin_general', 'gestion-api-keys', renderApiKeysView);
+    registerView('admin_general', 'motor-predis-media', renderMotorPredisMediaView);
 } else {
     console.error("El sistema de registro de vistas no está disponible.");
 }

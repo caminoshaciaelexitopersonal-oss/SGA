@@ -25,9 +25,10 @@ const navLinks = {
             submenu: [
                 { text: 'CRM & Campañas Social', view: 'dashboard', icon: 'fa-paper-plane' },
                 { isHeader: true, text: '3.1. Motor de envió masivo' },
-                { text: 'Config. Creacion de videos Cloud', view: 'gestion-api-keys', icon: 'fas fa-video' },
-                { text: 'Config. Creacion de imágenes Cloud', view: 'gestion-api-keys', icon: 'fas fa-image' },
-                { text: 'Config. Creacion de Reals Cloud', view: 'gestion-api-keys', icon: 'fas fa-film' },
+                { text: 'Generador de Videos IA (Predis)', view: 'motor-predis-media', icon: 'fas fa-magic' },
+                { text: 'Config. Creacion de videos Cloud', view: 'motor-predis-media', icon: 'fas fa-video' },
+                { text: 'Config. Creacion de imágenes Cloud', view: 'motor-predis-media', icon: 'fas fa-image' },
+                { text: 'Config. Creacion de Reals Cloud', view: 'motor-predis-media', icon: 'fas fa-film' },
                 { isHeader: true, text: '3.2. Motor de ADS' },
                 { text: 'Config. WhatsApp Cloud', view: 'configuracion-whatsapp', icon: 'fab fa-whatsapp' },
                 { text: 'Config. iNSTAGRAM Cloud', view: 'gestion-api-keys', icon: 'fab fa-instagram' },
