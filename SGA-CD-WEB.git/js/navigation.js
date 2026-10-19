@@ -25,6 +25,11 @@ const navLinks = {
             submenu: [
                 { text: 'CRM & Campañas Social', view: 'dashboard', icon: 'fa-paper-plane' },
                 { text: 'Config. WhatsApp Cloud', view: 'configuracion-whatsapp', icon: 'fab fa-whatsapp' },
+                { text: 'Config. iNSTAGRAM Cloud', view: 'gestion-api-keys', icon: 'fab fa-instagram' },
+                { text: 'Config. TIK TOK Cloud', view: 'gestion-api-keys', icon: 'fab fa-tiktok' },
+                { text: 'Config. Gmail Cloud', view: 'gestion-api-keys', icon: 'fas fa-envelope' },
+                { text: 'Config. X Cloud', view: 'gestion-api-keys', icon: 'fab fa-x-twitter' },
+                { text: 'Config. Youtobe Cloud', view: 'gestion-api-keys', icon: 'fab fa-youtube' },
                 { text: 'Promociones y Ofertas', view: 'promociones', icon: 'fa-tags' }
             ]
         },
