@@ -89,6 +89,12 @@ function renderStaffRows(staff) {
     `).join('');
 }
 
+// --- Registro de Vistas para el Rol de Jefe de Área (GAP-01) ---
+if (typeof registerView === 'function') {
+    registerView('jefe_area', 'panel-area', renderJefeAreaView);
+    registerView('jefe_area', 'dashboard', renderJefeAreaView);
+}
+
 function renderEventRows(events) {
     if (!events || events.length === 0) {
         return '<tr><td colspan="5">No se encontraron eventos en tu área.</td></tr>';

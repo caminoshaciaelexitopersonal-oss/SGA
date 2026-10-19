@@ -1,17 +1,70 @@
 // --- Definición de la Estructura de Navegación por Rol ---
 
 const navLinks = {
-    // Rol 1: Super Admin
+    // Rol 1: Super Admin (Estructurado con Submenús Jerárquicos)
     admin_general: [
-        { text: 'Dashboard', view: 'dashboard', icon: 'fa-home' },
-        { text: 'Config. WhatsApp', view: 'configuracion-whatsapp', icon: 'fab fa-whatsapp' },
-        { text: 'Gestionar Empresas', view: 'panel-empresa', icon: 'fa-building' },
-        { text: 'Roles y Permisos', view: 'roles-permisos', icon: 'fa-shield-alt' },
-        { text: 'Verificar Roles BD', view: 'verificar-roles', icon: 'fa-database' },
-        { text: 'Auditoría General', view: 'auditoria', icon: 'fa-history' },
-        { text: 'Gestión de Cobros', view: 'suscripcion', icon: 'fa-credit-card' },
-        { text: 'Promociones', view: 'promociones', icon: 'fa-tags' },
-        { text: 'Asistente de IA', view: 'asistente-ia', icon: 'fa-robot' }
+        {
+            text: 'Panel de Control',
+            icon: 'fa-home',
+            submenu: [
+                { text: 'Resumen General', view: 'dashboard', icon: 'fa-chart-pie' },
+                { text: 'Indicadores del Sistema', view: 'dashboard', icon: 'fa-tachometer-alt' }
+            ]
+        },
+        {
+            text: 'Gestión de Landing Page',
+            icon: 'fa-sliders-h',
+            submenu: [
+                { text: 'Editor Comercial & Planes', view: 'gestor-landing', icon: 'fa-edit' },
+                { text: 'Metadatos SEO Públicos', view: 'gestor-landing', icon: 'fa-search-dollar' }
+            ]
+        },
+        {
+            text: 'Marketing y Crecimiento',
+            icon: 'fa-bullhorn',
+            submenu: [
+                { text: 'CRM & Campañas Social', view: 'dashboard', icon: 'fa-paper-plane' },
+                { isHeader: true, text: '3.1. Motor de envió masivo' },
+                { text: 'Generador de Videos IA (Predis)', view: 'motor-predis-media', icon: 'fas fa-magic' },
+                { text: 'Config. Creacion de videos Cloud', view: 'motor-predis-media', icon: 'fas fa-video' },
+                { text: 'Config. Creacion de imágenes Cloud', view: 'motor-predis-media', icon: 'fas fa-image' },
+                { text: 'Config. Creacion de Reals Cloud', view: 'motor-predis-media', icon: 'fas fa-film' },
+                { isHeader: true, text: '3.2. Motor de ADS' },
+                { text: 'Config. WhatsApp Cloud', view: 'configuracion-whatsapp', icon: 'fab fa-whatsapp' },
+                { text: 'Config. iNSTAGRAM Cloud', view: 'gestion-api-keys', icon: 'fab fa-instagram' },
+                { text: 'Config. TIK TOK Cloud', view: 'gestion-api-keys', icon: 'fab fa-tiktok' },
+                { text: 'Config. Gmail Cloud', view: 'gestion-api-keys', icon: 'fas fa-envelope' },
+                { text: 'Config. X Cloud', view: 'gestion-api-keys', icon: 'fab fa-x-twitter' },
+                { text: 'Config. Youtobe Cloud', view: 'gestion-api-keys', icon: 'fab fa-youtube' },
+                { text: 'Promociones y Ofertas', view: 'promociones', icon: 'fa-tags' }
+            ]
+        },
+        {
+            text: 'Gestión Financiera',
+            icon: 'fa-credit-card',
+            submenu: [
+                { text: 'Cobros y Transacciones', view: 'suscripcion', icon: 'fa-file-invoice-dollar' },
+                { text: 'Suscripciones Activas', view: 'suscripcion', icon: 'fa-users-cog' }
+            ]
+        },
+        {
+            text: 'Usuarios y Permisos',
+            icon: 'fa-user-shield',
+            submenu: [
+                { text: 'Gestionar Empresas', view: 'panel-empresa', icon: 'fa-building' },
+                { text: 'Roles y Permisos', view: 'roles-permisos', icon: 'fa-shield-alt' },
+                { text: 'Verificar Roles BD', view: 'verificar-roles', icon: 'fa-database' }
+            ]
+        },
+        {
+            text: 'Configuración y Seguridad',
+            icon: 'fa-cog',
+            submenu: [
+                { text: 'Proveedores de IA & Ollama', view: 'gestion-api-keys', icon: 'fa-key' },
+                { text: 'Auditoría General', view: 'auditoria', icon: 'fa-history' },
+                { text: 'Asistente de IA', view: 'asistente-ia', icon: 'fa-robot' }
+            ]
+        }
     ],
     // Rol 2: Admin de Empresa
     admin_empresa: [
@@ -55,7 +108,8 @@ const navLinks = {
         { text: 'Gestionar Cursos', view: 'gestionar-cursos', icon: 'fa-chalkboard-teacher' },
         { text: 'Gestionar Alumnos', view: 'gestionar-alumnos', icon: 'fa-user-graduate' },
         { text: 'Calificaciones', view: 'calificaciones', icon: 'fa-marker' },
-        { text: 'Gamificación', view: 'gamificacion', icon: 'fa-trophy' }
+        { text: 'Gamificación', view: 'gamificacion', icon: 'fa-trophy' },
+        { text: 'Suscripción y Plan', view: 'suscripcion', icon: 'fa-credit-card' }
     ],
     // Rol 8: Alumno
     alumno: [
@@ -107,13 +161,70 @@ function renderNavigation(roleName) {
 
     let navHtml = '';
     links.forEach(link => {
-        // Usar la propiedad 'view' si existe, si no, generar desde el texto
-        const viewName = link.view || link.text.toLowerCase().replace(/ /g, '-');
-        navHtml += `<a href="#" data-view="${viewName}">
-                        <i class="fas ${link.icon}"></i>
-                        <span class="nav-text">${link.text}</span>
-                    </a>`;
+        if (link.submenu && Array.isArray(link.submenu)) {
+            // Renderizar grupo con submenú
+            let subHtml = '';
+            link.submenu.forEach(sub => {
+                if (sub.isHeader) {
+                    subHtml += `<div class="nav-submenu-header" style="color:#38BDF8; font-size:0.75rem; font-weight:800; text-transform:uppercase; tracking:0.05em; padding:0.6rem 0.85rem 0.2rem 0.85rem; border-top:1px solid rgba(56,189,248,0.1); margin-top:0.3rem;">
+                                    ${sub.text}
+                                </div>`;
+                } else {
+                    const subView = sub.view || sub.text.toLowerCase().replace(/ /g, '-');
+                    subHtml += `<a href="#" data-view="${subView}" class="nav-subitem" tabindex="0">
+                                    <i class="fas ${sub.icon}"></i>
+                                    <span class="nav-text">${sub.text}</span>
+                                </a>`;
+                }
+            });
+
+            navHtml += `<div class="nav-group">
+                            <button class="nav-group-title" aria-expanded="false" tabindex="0">
+                                <span><i class="fas ${link.icon}"></i> <span class="nav-text">${link.text}</span></span>
+                                <i class="fas fa-chevron-down nav-arrow"></i>
+                            </button>
+                            <div class="nav-submenu">
+                                ${subHtml}
+                            </div>
+                        </div>`;
+        } else {
+            // Renderizar enlace plano
+            const viewName = link.view || link.text.toLowerCase().replace(/ /g, '-');
+            navHtml += `<a href="#" data-view="${viewName}" tabindex="0">
+                            <i class="fas ${link.icon}"></i>
+                            <span class="nav-text">${link.text}</span>
+                        </a>`;
+        }
     });
 
     navContainer.innerHTML = navHtml;
+    setupSubmenuInteractions(navContainer);
+}
+
+function setupSubmenuInteractions(navContainer) {
+    // Interacción Click/Touch para desplegar submenús
+    navContainer.querySelectorAll('.nav-group-title').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const group = btn.closest('.nav-group');
+            const isOpen = group.classList.contains('open');
+
+            // Cerrar otros grupos
+            navContainer.querySelectorAll('.nav-group').forEach(g => g.classList.remove('open'));
+            if (!isOpen) {
+                group.classList.add('open');
+                btn.setAttribute('aria-expanded', 'true');
+            } else {
+                btn.setAttribute('aria-expanded', 'false');
+            }
+        });
+
+        // Accesibilidad por Teclado
+        btn.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                btn.click();
+            }
+        });
+    });
 }

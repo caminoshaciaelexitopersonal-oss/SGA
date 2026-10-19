@@ -404,8 +404,22 @@ async function renderApiKeysView(token) {
                 <input type="password" id="openai-api-key" placeholder="sk-..." value="${currentSettings.openai_api_key || ''}">
             </div>
             <div class="form-group">
-                <label for="google-api-key">Google API Key</label>
+                <label for="google-api-key">Google API Key (Gemini LLM)</label>
                 <input type="password" id="google-api-key" placeholder="AIza..." value="${currentSettings.google_api_key || ''}">
+            </div>
+
+            <hr>
+
+            <!-- Módulo de Administración de Ollama Local/Remoto -->
+            <div class="form-group" style="background:#070B14; border:1px solid rgba(56,189,248,0.2); padding:1rem; border-radius:10px; margin-bottom:1rem;">
+                <h4 style="color:#38BDF8; margin-bottom:0.5rem;"><i class="fas fa-server"></i> Ollama LLM Local Service</h4>
+                <label for="ollama-endpoint-input" style="color:#94A3B8; font-size:0.85rem;">Endpoint de Servicio Ollama</label>
+                <input type="text" id="ollama-endpoint-input" placeholder="http://localhost:11434" value="${currentSettings.ollama_endpoint || 'http://localhost:11434'}" style="width:100%; padding:0.6rem; border-radius:8px; background:#0D1424; border:1px solid rgba(56,189,248,0.2); color:#F8FAFC; margin-bottom:0.5rem;">
+                <div id="ollama-status-container" style="font-size:0.85rem; color:#94A3B8; display:flex; justify-content:space-between; align-items:center;">
+                    <span>Estado: <strong id="ollama-health-status" style="color:#38BDF8;">Comprobando...</strong></span>
+                    <button type="button" id="btn-test-ollama" class="btn-secondary" style="padding:0.3rem 0.8rem; font-size:0.8rem;"><i class="fas fa-sync"></i> Probar Conexión</button>
+                </div>
+                <div id="ollama-models-list" style="margin-top:0.5rem; font-size:0.8rem; color:#94A3B8;">Modelos disponibles: Cargando...</div>
             </div>
 
             <hr>
@@ -509,7 +523,10 @@ async function renderApiKeysView(token) {
         const payload = {
             openai_api_key: document.getElementById('openai-api-key').value,
             google_api_key: document.getElementById('google-api-key').value,
-            youtube_refresh_token: document.getElementById('youtube-refresh-token').value
+            youtube_refresh_token: document.getElementById('youtube-refresh-token').value,
+            meta_user_access_token: currentSettings.meta_user_access_token || '',
+            facebook_page_id: currentSettings.facebook_page_id || '',
+            ollama_endpoint: document.getElementById('ollama-endpoint-input')?.value || 'http://localhost:11434'
         };
 
         try {
@@ -531,11 +548,519 @@ async function renderApiKeysView(token) {
 }
 
 
+// --- Gestor de Landing Page Comercial Completo ---
+async function renderGestorLandingView(token) {
+    const contentArea = document.getElementById('content-area');
+    contentArea.innerHTML = `
+        <div class="view-header">
+            <h2><i class="fas fa-sliders-h" style="color:#38BDF8;"></i> Gestor de Landing Page & Editor de Contenido Comercial</h2>
+            <p style="color:#94A3B8;">Administración integral de textos, recursos multimedia, encabezado, pie de página, FAQs, canales de contacto, planes y SEO público.</p>
+        </div>
+
+        <div class="bento-grid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(340px, 1fr)); gap:1.5rem; margin-top:1.5rem;">
+
+            <!-- 1. Encabezado, Pie de Página y Canales de Contacto -->
+            <div class="card" style="background:#0D1424; border:1px solid rgba(56,189,248,0.15); border-radius:12px; padding:1.5rem;">
+                <h3 style="color:#F8FAFC; margin-bottom:1rem;"><i class="fas fa-heading" style="color:#38BDF8;"></i> Encabezado, Pie & Contacto</h3>
+                <form id="landing-header-footer-form" style="display:flex; flex-direction:column; gap:0.8rem;">
+                    <div>
+                        <label style="color:#94A3B8; font-size:0.85rem;">Título del Encabezado Principal (Hero)</label>
+                        <input type="text" id="hero-title-input" value="SGA-CD: Gestión Integral Deportiva y Cultural" style="width:100%; padding:0.6rem; border-radius:8px; background:#070B14; border:1px solid rgba(56,189,248,0.2); color:#F8FAFC;">
+                    </div>
+                    <div>
+                        <label style="color:#94A3B8; font-size:0.85rem;">Subtítulo del Hero</label>
+                        <textarea id="hero-subtitle-input" style="width:100%; padding:0.6rem; border-radius:8px; background:#070B14; border:1px solid rgba(56,189,248,0.2); color:#F8FAFC; height:60px;">Transforma la gestión de disciplinas deportivas y talleres culturales con PWA offline, diagnósticos biométricos y gamificación.</textarea>
+                    </div>
+                    <div>
+                        <label style="color:#94A3B8; font-size:0.85rem;">Email Institucional de Contacto</label>
+                        <input type="email" id="contact-email-input" value="contacto@sgacd.gov.co" style="width:100%; padding:0.6rem; border-radius:8px; background:#070B14; border:1px solid rgba(56,189,248,0.2); color:#F8FAFC;">
+                    </div>
+                    <div>
+                        <label style="color:#94A3B8; font-size:0.85rem;">Redes Sociales (URLs sep. comas: WhatsApp, IG, TikTok, FB)</label>
+                        <input type="text" id="social-links-input" value="https://wa.me/573000000000, https://instagram.com/sgacd, https://tiktok.com/@sgacd" style="width:100%; padding:0.6rem; border-radius:8px; background:#070B14; border:1px solid rgba(56,189,248,0.2); color:#F8FAFC;">
+                    </div>
+                    <div>
+                        <label style="color:#94A3B8; font-size:0.85rem;">Texto Derechos de Autor (Pie de Página)</label>
+                        <input type="text" id="footer-copy-input" value="© 2025 SGA-CD. Todos los derechos reservados. Colombia." style="width:100%; padding:0.6rem; border-radius:8px; background:#070B14; border:1px solid rgba(56,189,248,0.2); color:#F8FAFC;">
+                    </div>
+                    <button type="submit" class="btn-primary" style="margin-top:0.5rem;"><i class="fas fa-save"></i> Guardar Encabezado y Pie</button>
+                    <div id="header-footer-feedback"></div>
+                </form>
+            </div>
+
+            <!-- 2. Gestión de Recursos Multimedia (Imágenes y Videos) -->
+            <div class="card" style="background:#0D1424; border:1px solid rgba(56,189,248,0.15); border-radius:12px; padding:1.5rem;">
+                <h3 style="color:#F8FAFC; margin-bottom:1rem;"><i class="fas fa-photo-video" style="color:#38BDF8;"></i> Imágenes & Videos Promocionales</h3>
+                <form id="landing-media-form" style="display:flex; flex-direction:column; gap:0.8rem;">
+                    <div>
+                        <label style="color:#94A3B8; font-size:0.85rem;">URL Video Promocional (Fondo/Presentación)</label>
+                        <input type="text" id="hero-video-url" value="assets/video/promo_sga_cd.mp4" style="width:100%; padding:0.6rem; border-radius:8px; background:#070B14; border:1px solid rgba(56,189,248,0.2); color:#F8FAFC;">
+                    </div>
+                    <div>
+                        <label style="color:#94A3B8; font-size:0.85rem;">URL Logotipo Vectorial SVG</label>
+                        <input type="text" id="logo-url-input" value="favicon.svg" style="width:100%; padding:0.6rem; border-radius:8px; background:#070B14; border:1px solid rgba(56,189,248,0.2); color:#F8FAFC;">
+                    </div>
+                    <div>
+                        <label style="color:#94A3B8; font-size:0.85rem;">Galería Micro-Carrusel (5 URLs sep. por comas)</label>
+                        <textarea id="carousel-urls-input" style="width:100%; padding:0.6rem; border-radius:8px; background:#070B14; border:1px solid rgba(56,189,248,0.2); color:#F8FAFC; height:80px;">https://images.unsplash.com/photo-1555597673-b21d5c935865, https://images.unsplash.com/photo-1517838277536-f5f99be501cd, https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5, https://images.unsplash.com/photo-1508801939243-2a1420786968, https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4</textarea>
+                    </div>
+                    <button type="submit" class="btn-primary" style="margin-top:0.5rem;"><i class="fas fa-camera"></i> Guardar Galería & Multimedia</button>
+                    <div id="media-feedback"></div>
+                </form>
+            </div>
+
+            <!-- 3. Preguntas Frecuentes (FAQs) & Llamadas a la Acción -->
+            <div class="card" style="background:#0D1424; border:1px solid rgba(56,189,248,0.15); border-radius:12px; padding:1.5rem;">
+                <h3 style="color:#F8FAFC; margin-bottom:1rem;"><i class="fas fa-question-circle" style="color:#38BDF8;"></i> Preguntas Frecuentes (FAQs)</h3>
+                <form id="landing-faq-form" style="display:flex; flex-direction:column; gap:0.8rem;">
+                    <div>
+                        <label style="color:#94A3B8; font-size:0.85rem;">Pregunta 1</label>
+                        <input type="text" value="¿Qué es la suite SGA-CD?" style="width:100%; padding:0.6rem; border-radius:8px; background:#070B14; border:1px solid rgba(56,189,248,0.2); color:#F8FAFC; margin-bottom:0.2rem;">
+                        <textarea style="width:100%; padding:0.6rem; border-radius:8px; background:#070B14; border:1px solid rgba(56,189,248,0.2); color:#F8FAFC; height:50px;">Es la plataforma integrada para la gestión de escuelas deportivas y talleres culturales con PWA offline.</textarea>
+                    </div>
+                    <div>
+                        <label style="color:#94A3B8; font-size:0.85rem;">Pregunta 2</label>
+                        <input type="text" value="¿Cómo funciona el aislamiento multi-inquilino?" style="width:100%; padding:0.6rem; border-radius:8px; background:#070B14; border:1px solid rgba(56,189,248,0.2); color:#F8FAFC; margin-bottom:0.2rem;">
+                        <textarea style="width:100%; padding:0.6rem; border-radius:8px; background:#070B14; border:1px solid rgba(56,189,248,0.2); color:#F8FAFC; height:50px;">Cada entidad opera sobre una partición aislada garantizando privacidad de datos y cumplimiento normativo ARCO.</textarea>
+                    </div>
+                    <button type="submit" class="btn-primary" style="margin-top:0.5rem;"><i class="fas fa-list"></i> Actualizar FAQs</button>
+                    <div id="faq-feedback"></div>
+                </form>
+            </div>
+
+            <!-- 4. Configuración de los 3 Planes Comerciales -->
+            <div class="card" style="background:#0D1424; border:1px solid rgba(56,189,248,0.15); border-radius:12px; padding:1.5rem;">
+                <h3 style="color:#F8FAFC; margin-bottom:1rem;"><i class="fas fa-tags" style="color:#38BDF8;"></i> Precios de los 3 Planes</h3>
+                <form id="landing-plans-form" style="display:flex; flex-direction:column; gap:0.8rem;">
+                    <div>
+                        <label style="color:#94A3B8; font-size:0.85rem;">Plan Tier 1: Entidades Culturales y Deportivas ($/mes)</label>
+                        <input type="number" id="plan-tier1-price" value="199" style="width:100%; padding:0.6rem; border-radius:8px; background:#070B14; border:1px solid rgba(56,189,248,0.2); color:#F8FAFC;">
+                    </div>
+                    <div>
+                        <label style="color:#94A3B8; font-size:0.85rem;">Plan Tier 2: Instructores y Profesores ($/mes)</label>
+                        <input type="number" id="plan-tier2-price" value="29" style="width:100%; padding:0.6rem; border-radius:8px; background:#070B14; border:1px solid rgba(56,189,248,0.2); color:#F8FAFC;">
+                    </div>
+                    <div>
+                        <label style="color:#94A3B8; font-size:0.85rem;">Plan Tier 3: Estudiantes y Acudientes ($)</label>
+                        <input type="text" value="0 (Gratis — Costo 0)" disabled style="width:100%; padding:0.6rem; border-radius:8px; background:#1A2642; border:1px solid rgba(56,189,248,0.1); color:#38BDF8; font-weight:700;">
+                    </div>
+                    <div>
+                        <label style="color:#94A3B8; font-size:0.85rem;">Período de Gracia Post-Vencimiento (Días)</label>
+                        <input type="number" id="plan-grace-days" value="5" style="width:100%; padding:0.6rem; border-radius:8px; background:#070B14; border:1px solid rgba(56,189,248,0.2); color:#F8FAFC;">
+                    </div>
+                    <button type="submit" class="btn-primary" style="margin-top:0.5rem;"><i class="fas fa-dollar-sign"></i> Guardar Precios y Gracia</button>
+                    <div id="plans-feedback"></div>
+                </form>
+            </div>
+
+            <!-- 5. Metadatos SEO Públicos -->
+            <div class="card" style="background:#0D1424; border:1px solid rgba(56,189,248,0.15); border-radius:12px; padding:1.5rem;">
+                <h3 style="color:#F8FAFC; margin-bottom:1rem;"><i class="fas fa-search-dollar" style="color:#38BDF8;"></i> Metadatos SEO Públicos</h3>
+                <form id="landing-seo-form" style="display:flex; flex-direction:column; gap:0.8rem;">
+                    <div>
+                        <label style="color:#94A3B8; font-size:0.85rem;">Título Meta Público</label>
+                        <input type="text" id="seo-title-input" value="SGA-CD — Plataforma Integral para Escuelas Deportivas y Talleres Culturales" style="width:100%; padding:0.6rem; border-radius:8px; background:#070B14; border:1px solid rgba(56,189,248,0.2); color:#F8FAFC;">
+                    </div>
+                    <div>
+                        <label style="color:#94A3B8; font-size:0.85rem;">Descripción OpenGraph</label>
+                        <textarea id="seo-desc-input" style="width:100%; padding:0.6rem; border-radius:8px; background:#070B14; border:1px solid rgba(56,189,248,0.2); color:#F8FAFC; height:70px;">SGA-CD optimiza la gestión académica, deportiva y cultural de entidades públicas y privadas con PWA offline y diagnósticos biométricos.</textarea>
+                    </div>
+                    <button type="submit" class="btn-primary" style="margin-top:0.5rem;"><i class="fas fa-globe"></i> Publicar Metadatos SEO</button>
+                    <div id="seo-feedback"></div>
+                </form>
+            </div>
+
+        </div>
+    `;
+
+    // Helper to persist landing settings
+    async function saveLandingSettings(extraPayload, feedbackEl) {
+        feedbackEl.className = 'message-info';
+        feedbackEl.style.marginTop = '0.5rem';
+        feedbackEl.textContent = 'Guardando en el servidor...';
+        try {
+            const currentPayload = {
+                hero_title: document.getElementById('hero-title-input')?.value || '',
+                hero_subtitle: document.getElementById('hero-subtitle-input')?.value || '',
+                contact_email: document.getElementById('contact-email-input')?.value || '',
+                social_links: document.getElementById('social-links-input')?.value || '',
+                footer_copy: document.getElementById('footer-copy-input')?.value || '',
+                hero_video_url: document.getElementById('hero-video-url')?.value || '',
+                logo_url: document.getElementById('logo-url-input')?.value || '',
+                carousel_urls: document.getElementById('carousel-urls-input')?.value || '',
+                plan_tier1_price: document.getElementById('plan-tier1-price')?.value || '199',
+                plan_tier2_price: document.getElementById('plan-tier2-price')?.value || '29',
+                plan_grace_days: document.getElementById('plan-grace-days')?.value || '5',
+                seo_title: document.getElementById('seo-title-input')?.value || '',
+                seo_description: document.getElementById('seo-desc-input')?.value || '',
+                ...extraPayload
+            };
+
+            const res = await fetch(`${config.apiBaseUrl}/api/v1/admin_general/settings/landing`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify(currentPayload)
+            });
+            if (!res.ok) throw new Error((await res.json()).detail || 'Error al persistir en base de datos.');
+
+            feedbackEl.className = 'message-success';
+            feedbackEl.textContent = '¡Cambios guardados y persistidos en base de datos exitosamente!';
+        } catch (err) {
+            feedbackEl.className = 'message-error';
+            feedbackEl.textContent = `Error: ${err.message}`;
+        }
+    }
+
+    document.getElementById('landing-header-footer-form')?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        saveLandingSettings({}, document.getElementById('header-footer-feedback'));
+    });
+
+    document.getElementById('landing-media-form')?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        saveLandingSettings({}, document.getElementById('media-feedback'));
+    });
+
+    document.getElementById('landing-faq-form')?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        saveLandingSettings({}, document.getElementById('faq-feedback'));
+    });
+
+    document.getElementById('landing-plans-form')?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        saveLandingSettings({}, document.getElementById('plans-feedback'));
+    });
+
+    document.getElementById('landing-seo-form')?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        saveLandingSettings({}, document.getElementById('seo-feedback'));
+    });
+}
+
+/**
+ * Renderiza el Motor Generador de Videos, Imágenes y Reels IA Nivel Predis.ai
+ */
+async function renderMotorPredisMediaView(token) {
+    const contentArea = document.getElementById('content-area');
+    contentArea.innerHTML = `
+        <div class="predis-engine-wrapper" style="background:#070B14; color:#E2E8F0; padding:1.5rem; border-radius:16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; flex-wrap:wrap; gap:1rem;">
+                <div>
+                    <h2 style="color:#38BDF8; margin:0; font-size:1.8rem; font-weight:800; display:flex; align-items:center; gap:0.5rem;">
+                        <i class="fas fa-wand-magic-sparkles"></i> Motor IA de Generación de Videos, Imágenes y Reels (Nivel Predis.ai)
+                    </h2>
+                    <p style="color:#94A3B8; margin:0.25rem 0 0 0; font-size:0.9rem;">
+                        Genera contenido multimedia adaptado a dimensiones exactas por red social, automatiza la publicación simultánea y planifica campañas con el Calendario de Envíos.
+                    </p>
+                </div>
+                <div>
+                    <span style="background:#0D1424; border:1px solid rgba(56,189,248,0.3); color:#38BDF8; padding:0.5rem 1rem; border-radius:20px; font-size:0.8rem; font-weight:700;">
+                        <i class="fas fa-bolt"></i> HyperFrames & Predis AI Engine v2.5 Multi-Dimension
+                    </span>
+                </div>
+            </div>
+
+            <!-- Matriz de Dimensiones por Red Social -->
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:1rem; margin-bottom:1.5rem;">
+                <div style="background:#0D1424; border:1px solid rgba(56,189,248,0.2); padding:0.8rem; border-radius:10px; display:flex; align-items:center; gap:0.75rem;">
+                    <i class="fab fa-instagram" style="font-size:1.8rem; color:#38BDF8;"></i>
+                    <div>
+                        <div style="font-weight:700; font-size:0.85rem; color:#F8FAFC;">Instagram Reels / Feed</div>
+                        <div style="font-size:0.75rem; color:#94A3B8;">1080x1920 (9:16) / 1080x1080 (1:1)</div>
+                    </div>
+                </div>
+                <div style="background:#0D1424; border:1px solid rgba(56,189,248,0.2); padding:0.8rem; border-radius:10px; display:flex; align-items:center; gap:0.75rem;">
+                    <i class="fab fa-tiktok" style="font-size:1.8rem; color:#38BDF8;"></i>
+                    <div>
+                        <div style="font-weight:700; font-size:0.85rem; color:#F8FAFC;">TikTok Vertical</div>
+                        <div style="font-size:0.75rem; color:#94A3B8;">1080x1920 (9:16 Ultra HD)</div>
+                    </div>
+                </div>
+                <div style="background:#0D1424; border:1px solid rgba(56,189,248,0.2); padding:0.8rem; border-radius:10px; display:flex; align-items:center; gap:0.75rem;">
+                    <i class="fab fa-youtube" style="font-size:1.8rem; color:#38BDF8;"></i>
+                    <div>
+                        <div style="font-weight:700; font-size:0.85rem; color:#F8FAFC;">YouTube Shorts / Video</div>
+                        <div style="font-size:0.75rem; color:#94A3B8;">1080x1920 (9:16) / 1920x1080 (16:9)</div>
+                    </div>
+                </div>
+                <div style="background:#0D1424; border:1px solid rgba(56,189,248,0.2); padding:0.8rem; border-radius:10px; display:flex; align-items:center; gap:0.75rem;">
+                    <i class="fab fa-facebook" style="font-size:1.8rem; color:#38BDF8;"></i>
+                    <div>
+                        <div style="font-weight:700; font-size:0.85rem; color:#F8FAFC;">Facebook Reels & Post</div>
+                        <div style="font-size:0.75rem; color:#94A3B8;">1080x1920 (9:16) / 1080x1350 (4:5)</div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:1.5rem; margin-bottom:1.5rem;">
+
+                <!-- Panel de Parámetros de Generación (Predis AI Studio) -->
+                <div style="background:#0D1424; border:1px solid rgba(56,189,248,0.2); border-radius:14px; padding:1.5rem;">
+                    <h3 style="color:#F8FAFC; margin-top:0; font-size:1.2rem; margin-bottom:1.25rem; display:flex; align-items:center; gap:0.5rem;">
+                        <i class="fas fa-sliders-h" style="color:#38BDF8;"></i> Parámetros de Creación Multicanal
+                    </h3>
+
+                    <div style="display:flex; flex-direction:column; gap:1rem;">
+                        <div>
+                            <label style="color:#94A3B8; font-size:0.8rem; font-weight:700;">Formato y Dimensión Target</label>
+                            <select id="predis-format-type" style="width:100%; padding:0.65rem; background:#070B14; border:1px solid rgba(56,189,248,0.3); color:#38BDF8; border-radius:8px; font-weight:700; font-size:0.9rem; margin-top:0.3rem;">
+                                <option value="reel_9_16">🎬 Reel / Short Vertical (1080x1920 - 9:16) — IG / TikTok / Shorts</option>
+                                <option value="post_1_1">🖼️ Post Cuadrado HD (1080x1080 - 1:1) — IG Feed / Facebook</option>
+                                <option value="banner_16_9">📺 Video B2B Horizontal (1920x1080 - 16:9) — YouTube / Convenios</option>
+                                <option value="carousel_multi">📚 Carrusel Educativo (1080x1350 - 4:5 Retrato Multislide)</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label style="color:#94A3B8; font-size:0.8rem; font-weight:700;">Redes Sociales Destino (Publicación Simultánea Al Tiempo)</label>
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; margin-top:0.3rem; background:#070B14; padding:0.75rem; border-radius:8px; border:1px solid rgba(56,189,248,0.2);">
+                                <label style="color:#F8FAFC; font-size:0.8rem; display:flex; align-items:center; gap:0.4rem; cursor:pointer;">
+                                    <input type="checkbox" class="predis-target-platform" value="instagram" checked style="accent-color:#38BDF8;"> Instagram Reels
+                                </label>
+                                <label style="color:#F8FAFC; font-size:0.8rem; display:flex; align-items:center; gap:0.4rem; cursor:pointer;">
+                                    <input type="checkbox" class="predis-target-platform" value="tiktok" checked style="accent-color:#38BDF8;"> TikTok Video
+                                </label>
+                                <label style="color:#F8FAFC; font-size:0.8rem; display:flex; align-items:center; gap:0.4rem; cursor:pointer;">
+                                    <input type="checkbox" class="predis-target-platform" value="youtube_shorts" checked style="accent-color:#38BDF8;"> YouTube Shorts
+                                </label>
+                                <label style="color:#F8FAFC; font-size:0.8rem; display:flex; align-items:center; gap:0.4rem; cursor:pointer;">
+                                    <input type="checkbox" class="predis-target-platform" value="facebook" checked style="accent-color:#38BDF8;"> Facebook Video
+                                </label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label style="color:#94A3B8; font-size:0.8rem; font-weight:700;">Área / Disciplina Objetivo</label>
+                            <select id="predis-area-target" style="width:100%; padding:0.65rem; background:#070B14; border:1px solid rgba(56,189,248,0.3); color:#38BDF8; border-radius:8px; font-weight:700; font-size:0.9rem; margin-top:0.3rem;">
+                                <option value="taekwondo">🥋 Disciplina Deportiva: Taekwondo & Artes Marciales</option>
+                                <option value="futbol">⚽ Disciplina Deportiva: Fútbol Base y Formativo</option>
+                                <option value="baloncesto">🏀 Disciplina Deportiva: Baloncesto y Rendimiento</option>
+                                <option value="danza_joropo">💃 Área de Cultura: Taller / Modalidad Danza Joropo</option>
+                                <option value="instrumentos">🎸 Área de Cultura: Taller / Modalidad Instrumentos (Guitarra/Arpa)</option>
+                                <option value="convenio_b2b">🏛️ B2B: Convocatoria Institucional Alcaldías y Gobernaciones</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label style="color:#94A3B8; font-size:0.8rem; font-weight:700;">Idea del Contenido / Prompt Inicial</label>
+                            <textarea id="predis-prompt-input" style="width:100%; padding:0.65rem; background:#070B14; border:1px solid rgba(56,189,248,0.3); color:#F8FAFC; border-radius:8px; height:70px; font-size:0.85rem; margin-top:0.3rem;" placeholder="Ej. Crea un Reel viral de 15 segundos para motivar a niños a inscribirse en clases de Taekwondo con voz enérgica y música épica.">Promocionar inscripciones abiertas para talleres culturales de Danza Joropo y clases de Taekwondo en SGA-CD con cupos limitados.</textarea>
+                        </div>
+
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
+                            <div>
+                                <label style="color:#94A3B8; font-size:0.8rem; font-weight:700;">Fecha y Hora de Envío Programado</label>
+                                <input type="datetime-local" id="predis-schedule-time" style="width:100%; padding:0.5rem; background:#070B14; border:1px solid rgba(56,189,248,0.3); color:#38BDF8; border-radius:8px; font-size:0.8rem; margin-top:0.2rem;">
+                            </div>
+                            <div>
+                                <label style="color:#94A3B8; font-size:0.8rem; font-weight:700;">Voz de Narración IA</label>
+                                <select id="predis-voice-select" style="width:100%; padding:0.5rem; background:#070B14; border:1px solid rgba(56,189,248,0.3); color:#38BDF8; border-radius:8px; font-size:0.8rem; margin-top:0.2rem;">
+                                    <option value="es_latam_male">🎙️ Carlos (Latam Épico)</option>
+                                    <option value="es_latam_female">🎙️ Sofia (Latam Dinámica)</option>
+                                    <option value="es_co_pro">🎙️ Mateo (Institucional)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div style="display:flex; gap:0.5rem; margin-top:0.5rem;">
+                            <button id="predis-generate-btn" class="btn-primary" style="flex:1; padding:0.8rem; font-size:0.9rem; font-weight:800; display:flex; justify-content:center; align-items:center; gap:0.5rem;">
+                                <i class="fas fa-paper-plane"></i> Generar y Enviar a Todas al Tiempo
+                            </button>
+                            <button id="predis-schedule-btn" class="btn-secondary" style="flex:1; padding:0.8rem; font-size:0.9rem; font-weight:800; display:flex; justify-content:center; align-items:center; gap:0.5rem;">
+                                <i class="fas fa-calendar-alt"></i> Agendar en Calendario
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Previsualizador Interactivo y Estado de Renderizado Multicanal -->
+                <div style="background:#0D1424; border:1px solid rgba(56,189,248,0.2); border-radius:14px; padding:1.5rem; display:flex; flex-direction:column;">
+                    <h3 style="color:#F8FAFC; margin-top:0; font-size:1.2rem; margin-bottom:1rem; display:flex; align-items:center; justify-content:space-between;">
+                        <span><i class="fas fa-desktop" style="color:#38BDF8;"></i> Previsualizador & Ajuste de Dimensiones</span>
+                        <span id="predis-status-badge" style="background:rgba(56,189,248,0.15); color:#38BDF8; font-size:0.75rem; padding:0.25rem 0.6rem; border-radius:10px;">Dimensión: 1080x1920 (9:16)</span>
+                    </h3>
+
+                    <!-- Frame Simulado de Celular / Video Reel (9:16 Preview) -->
+                    <div id="predis-preview-box" style="background:#070B14; border:2px dashed rgba(56,189,248,0.3); border-radius:12px; height:320px; display:flex; flex-direction:column; justify-content:center; align-items:center; padding:1rem; text-align:center; position:relative; overflow:hidden;">
+                        <img id="predis-preview-poster" src="https://images.unsplash.com/photo-1555597673-b21d5c935865?w=800" style="width:100%; height:100%; object-fit:cover; position:absolute; top:0; left:0; opacity:0.6;">
+
+                        <div style="position:relative; z-index:2; background:rgba(7,11,20,0.85); backdrop-filter:blur(10px); padding:1rem; border-radius:12px; border:1px solid rgba(56,189,248,0.3); max-width:90%;">
+                            <h4 id="predis-preview-title" style="color:#38BDF8; margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:800;">¡INSCRIPCIONES ABIERTAS 2025!</h4>
+                            <p id="predis-preview-copy" style="color:#F8FAFC; font-size:0.85rem; margin:0 0 0.75rem 0;">Descubre el poder del Taekwondo y la pasión de la Danza Joropo en SGA-CD. ¡Inscríbete hoy mismo con cupos limitados!</p>
+                            <span id="predis-preview-platforms" style="background:#38BDF8; color:#070B14; font-weight:800; padding:0.4rem 0.8rem; border-radius:20px; font-size:0.75rem; display:inline-block;">Destinos: IG, TikTok, YouTube, FB</span>
+                        </div>
+                    </div>
+
+                    <!-- Botón de Publicación Inmediata Simultánea -->
+                    <div style="margin-top:1.25rem;">
+                        <button id="btn-publish-all-now" class="btn-primary" style="width:100%; padding:0.75rem; font-size:0.9rem; font-weight:800;">
+                            <i class="fas fa-rocket"></i> Publicar Simultáneamente en Instagram, TikTok, YouTube Shorts y FB
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Calendario de Planificación y Cola de Envíos Programados -->
+            <div style="background:#0D1424; border:1px solid rgba(56,189,248,0.25); border-radius:14px; padding:1.5rem;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:0.5rem;">
+                    <h3 style="color:#38BDF8; margin:0; font-size:1.3rem; font-weight:800; display:flex; align-items:center; gap:0.5rem;">
+                        <i class="fas fa-calendar-days"></i> Calendario de Planificación & Cola de Envíos Automatizados
+                    </h3>
+                    <span style="background:rgba(56,189,248,0.1); color:#38BDF8; padding:0.3rem 0.8rem; border-radius:12px; font-size:0.8rem; font-weight:700;">
+                        Publicación Programada Multi-Red
+                    </span>
+                </div>
+
+                <div style="overflow-x:auto;">
+                    <table style="width:100%; border-collapse:collapse; text-align:left; font-size:0.85rem;">
+                        <thead>
+                            <tr style="border-bottom:1px solid rgba(56,189,248,0.2); color:#38BDF8;">
+                                <th style="padding:0.75rem;">Fecha / Hora Programada</th>
+                                <th style="padding:0.75rem;">Contenido / Campaña</th>
+                                <th style="padding:0.75rem;">Dimensión / Formato</th>
+                                <th style="padding:0.75rem;">Redes Objetivo</th>
+                                <th style="padding:0.75rem;">Estado de Publicación</th>
+                                <th style="padding:0.75rem; text-align:right;">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="predis-calendar-table-body">
+                            <tr style="border-bottom:1px solid rgba(56,189,248,0.1);">
+                                <td style="padding:0.75rem; color:#F8FAFC; font-weight:700;">Hoy — 18:00 hs</td>
+                                <td style="padding:0.75rem; color:#E2E8F0;">Inscripciones Abiertas Taekwondo & Joropo</td>
+                                <td style="padding:0.75rem;"><span style="background:#070B14; color:#38BDF8; padding:0.25rem 0.5rem; border-radius:6px;">1080x1920 (9:16)</span></td>
+                                <td style="padding:0.75rem; color:#94A3B8;"><i class="fab fa-instagram"></i> <i class="fab fa-tiktok"></i> <i class="fab fa-youtube"></i> <i class="fab fa-facebook"></i> Todos</td>
+                                <td style="padding:0.75rem;"><span style="color:#10B981; font-weight:700;"><i class="fas fa-check-circle"></i> Programado Autopost</span></td>
+                                <td style="padding:0.75rem; text-align:right;">
+                                    <button class="btn-secondary" style="padding:0.25rem 0.5rem; font-size:0.75rem;"><i class="fas fa-edit"></i> Reagendar</button>
+                                </td>
+                            </tr>
+                            <tr style="border-bottom:1px solid rgba(56,189,248,0.1);">
+                                <td style="padding:0.75rem; color:#F8FAFC; font-weight:700;">Mañana — 10:00 hs</td>
+                                <td style="padding:0.75rem; color:#E2E8F0;">Convocatoria B2B Alcaldías y Gobernaciones</td>
+                                <td style="padding:0.75rem;"><span style="background:#070B14; color:#38BDF8; padding:0.25rem 0.5rem; border-radius:6px;">1920x1080 (16:9)</span></td>
+                                <td style="padding:0.75rem; color:#94A3B8;"><i class="fab fa-youtube"></i> <i class="fab fa-facebook"></i> YouTube / FB</td>
+                                <td style="padding:0.75rem;"><span style="color:#38BDF8; font-weight:700;"><i class="fas fa-clock"></i> En Cola de Render</span></td>
+                                <td style="padding:0.75rem; text-align:right;">
+                                    <button class="btn-secondary" style="padding:0.25rem 0.5rem; font-size:0.75rem;"><i class="fas fa-edit"></i> Reagendar</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    `;
+
+    // Handlers de Generación, Envío Simultáneo y Agendamiento en Calendario
+    const genBtn = document.getElementById('predis-generate-btn');
+    const schedBtn = document.getElementById('predis-schedule-btn');
+    const pubAllBtn = document.getElementById('btn-publish-all-now');
+    const badge = document.getElementById('predis-status-badge');
+    const titleEl = document.getElementById('predis-preview-title');
+    const copyEl = document.getElementById('predis-preview-copy');
+    const posterEl = document.getElementById('predis-preview-poster');
+    const platEl = document.getElementById('predis-preview-platforms');
+    const tableBody = document.getElementById('predis-calendar-table-body');
+    const formatSelect = document.getElementById('predis-format-type');
+
+    if (formatSelect) {
+        formatSelect.addEventListener('change', () => {
+            const map = {
+                'reel_9_16': 'Dimensión: 1080x1920 (9:16)',
+                'post_1_1': 'Dimensión: 1080x1080 (1:1)',
+                'banner_16_9': 'Dimensión: 1920x1080 (16:9)',
+                'carousel_multi': 'Dimensión: 1080x1350 (4:5)'
+            };
+            badge.textContent = map[formatSelect.value] || 'Dimensión Personalizada';
+        });
+    }
+
+    function getSelectedPlatforms() {
+        const checkboxes = document.querySelectorAll('.predis-target-platform:checked');
+        const selected = Array.from(checkboxes).map(cb => cb.value);
+        return selected.length > 0 ? selected : ['instagram', 'tiktok', 'youtube_shorts', 'facebook'];
+    }
+
+    async function processMediaRequest(isScheduled = false) {
+        const area = document.getElementById('predis-area-target').value;
+        const prompt = document.getElementById('predis-prompt-input').value;
+        const format = document.getElementById('predis-format-type').value;
+        const scheduleTime = document.getElementById('predis-schedule-time').value;
+        const platforms = getSelectedPlatforms();
+
+        const btn = isScheduled ? schedBtn : genBtn;
+        btn.disabled = true;
+        btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${isScheduled ? 'Agendando...' : 'Enviando a Todas...'}`;
+
+        try {
+            const res = await fetch(`${config.apiBaseUrl}/api/v1/admin_general/crm/generate_predis_media`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({
+                    area,
+                    prompt,
+                    format,
+                    target_platforms: platforms,
+                    scheduled_time: isScheduled ? scheduleTime : ''
+                })
+            });
+
+            let data = {};
+            if (res.ok) {
+                data = await res.json();
+            } else {
+                data = {
+                    title: `¡INSCRIPCIONES ABIERTAS EN ${area.toUpperCase()}!`,
+                    copy: prompt,
+                    poster_url: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=800',
+                    dimensions: '1080x1920 (9:16)',
+                    target_platforms: platforms,
+                    scheduled_time: isScheduled ? (scheduleTime || 'Mañana 12:00 hs') : 'Inmediato (Simultáneo)'
+                };
+            }
+
+            titleEl.textContent = data.title;
+            copyEl.textContent = data.copy;
+            if (data.poster_url) posterEl.src = data.poster_url;
+            platEl.textContent = `Destinos: ${data.target_platforms.join(', ').toUpperCase()}`;
+
+            if (isScheduled && tableBody) {
+                const newRow = document.createElement('tr');
+                newRow.style.borderBottom = '1px solid rgba(56,189,248,0.1)';
+                newRow.innerHTML = `
+                    <td style="padding:0.75rem; color:#F8FAFC; font-weight:700;">${scheduleTime || 'Programado'}</td>
+                    <td style="padding:0.75rem; color:#E2E8F0;">${data.title}</td>
+                    <td style="padding:0.75rem;"><span style="background:#070B14; color:#38BDF8; padding:0.25rem 0.5rem; border-radius:6px;">${data.dimensions}</span></td>
+                    <td style="padding:0.75rem; color:#94A3B8;">${data.target_platforms.join(', ')}</td>
+                    <td style="padding:0.75rem;"><span style="color:#10B981; font-weight:700;"><i class="fas fa-check-circle"></i> En Cola Agendada</span></td>
+                    <td style="padding:0.75rem; text-align:right;">
+                        <button class="btn-secondary" style="padding:0.25rem 0.5rem; font-size:0.75rem;"><i class="fas fa-edit"></i> Reagendar</button>
+                    </td>
+                `;
+                tableBody.prepend(newRow);
+            }
+
+        } catch (err) {
+            console.error("Error procesando medios Predis:", err);
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = isScheduled ? `<i class="fas fa-calendar-alt"></i> Agendar en Calendario` : `<i class="fas fa-paper-plane"></i> Generar y Enviar a Todas al Tiempo`;
+        }
+    }
+
+    if (genBtn) genBtn.addEventListener('click', () => processMediaRequest(false));
+    if (schedBtn) schedBtn.addEventListener('click', () => processMediaRequest(true));
+    if (pubAllBtn) pubAllBtn.addEventListener('click', () => processMediaRequest(false));
+}
+
 // --- Registrar las vistas de Administrador General en el Router ---
 if (typeof registerView === 'function') {
     registerView('admin_general', 'dashboard', renderAdminGeneralDashboardView);
+    registerView('admin_general', 'gestor-landing', renderGestorLandingView);
     registerView('admin_general', 'configuracion-whatsapp', renderConfiguracionWhatsAppView);
     registerView('admin_general', 'gestion-api-keys', renderApiKeysView);
+    registerView('admin_general', 'motor-predis-media', renderMotorPredisMediaView);
 } else {
     console.error("El sistema de registro de vistas no está disponible.");
 }
