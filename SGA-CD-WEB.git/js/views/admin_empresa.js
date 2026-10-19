@@ -78,56 +78,75 @@ async function renderAdminEmpresaView(token) {
                 </div>
             </div>
 
-            <!-- Bento Analytics Bars & Distribution Chart Simulation -->
+            <!-- Bento Analytics High-Density Power BI Chart Block -->
             <div style="display:grid; grid-template-columns: 2fr 1fr; gap:1.5rem; margin-bottom:2rem;">
-                <div style="background:#0D1424; border:1px solid rgba(56,189,248,0.2); border-radius:14px; padding:1.5rem;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-                        <h4 style="margin:0; color:#38BDF8; font-size:1.1rem; font-weight:700;">
-                            Rendimiento en Disciplinas Deportivas vs Talleres Culturales
-                        </h4>
-                        <span style="font-size:0.75rem; color:#94A3B8;">Gráfica Analítica Dataviz</span>
+                <div style="background:#0D1424; border:1px solid rgba(56,189,248,0.25); border-radius:14px; padding:1.5rem; box-shadow:0 8px 32px rgba(0,0,0,0.3);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem;">
+                        <div>
+                            <h4 style="margin:0; color:#38BDF8; font-size:1.1rem; font-weight:700;">
+                                <i class="fas fa-chart-line" style="margin-right:0.5rem;"></i> Rendimiento en Disciplinas Deportivas vs Talleres Culturales
+                            </h4>
+                            <span style="font-size:0.75rem; color:#94A3B8;">Telemetría y Dataviz de Participación en Tiempo Real</span>
+                        </div>
+                        <span style="background:rgba(56,189,248,0.1); border:1px solid rgba(56,189,248,0.3); color:#38BDF8; padding:0.25rem 0.75rem; border-radius:12px; font-size:0.75rem; font-weight:600;">
+                            Power BI Engine 60 FPS
+                        </span>
                     </div>
 
-                    <!-- Simulated High-Density Power BI Bar Chart -->
-                    <div class="powerbi-chart-container" style="display:flex; flex-direction:column; gap:1rem; margin-top:1rem;">
+                    <!-- Enhanced High-Density Bar Chart Dataviz -->
+                    <div class="powerbi-chart-container" style="display:flex; flex-direction:column; gap:1.25rem; margin-top:1rem;">
                         <div>
-                            <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:0.3rem;">
-                                <span>Taekwondo / Fútbol / Baloncesto (Deportes)</span>
-                                <span style="color:#38BDF8; font-weight:bold;">88% Promedio</span>
+                            <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:0.4rem;">
+                                <span style="color:#E2E8F0; font-weight:600;"><i class="fas fa-running" style="color:#38BDF8; width:20px;"></i> Disciplinas Deportivas (Taekwondo, Fútbol, Baloncesto)</span>
+                                <span style="color:#38BDF8; font-weight:800;">88% Desempeño</span>
                             </div>
-                            <div style="background:rgba(255,255,255,0.05); height:12px; border-radius:6px; overflow:hidden;">
-                                <div class="chart-bar-fill" style="width:88%; height:100%; background:linear-gradient(90deg, #0284C7 0%, #38BDF8 100%);"></div>
+                            <div style="background:#070B14; height:16px; border-radius:8px; overflow:hidden; border:1px solid rgba(56,189,248,0.2); padding:2px;">
+                                <div class="chart-bar-fill" style="width:88%; height:100%; background:linear-gradient(90deg, #0284C7 0%, #38BDF8 100%); border-radius:6px; box-shadow: 0 0 10px rgba(56,189,248,0.5);"></div>
                             </div>
                         </div>
 
                         <div>
-                            <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:0.3rem;">
-                                <span>Danza: Joropo / Salsa / Vallenato (Cultura)</span>
-                                <span style="color:#38BDF8; font-weight:bold;">92% Promedio</span>
+                            <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:0.4rem;">
+                                <span style="color:#E2E8F0; font-weight:600;"><i class="fas fa-music" style="color:#38BDF8; width:20px;"></i> Modalidades Danza (Joropo/Llanera, Salsa, Vallenato)</span>
+                                <span style="color:#38BDF8; font-weight:800;">92% Desempeño</span>
                             </div>
-                            <div style="background:rgba(255,255,255,0.05); height:12px; border-radius:6px; overflow:hidden;">
-                                <div class="chart-bar-fill" style="width:92%; height:100%; background:linear-gradient(90deg, #0284C7 0%, #38BDF8 100%);"></div>
+                            <div style="background:#070B14; height:16px; border-radius:8px; overflow:hidden; border:1px solid rgba(56,189,248,0.2); padding:2px;">
+                                <div class="chart-bar-fill" style="width:92%; height:100%; background:linear-gradient(90deg, #0284C7 0%, #38BDF8 100%); border-radius:6px; box-shadow: 0 0 10px rgba(56,189,248,0.5);"></div>
                             </div>
                         </div>
 
                         <div>
-                            <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:0.3rem;">
-                                <span>Instrumentos: Guitarra / Arpa (Cultura)</span>
-                                <span style="color:#38BDF8; font-weight:bold;">84% Promedio</span>
+                            <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:0.4rem;">
+                                <span style="color:#E2E8F0; font-weight:600;"><i class="fas fa-guitar" style="color:#38BDF8; width:20px;"></i> Instrumentos Culturales (Guitarra, Arpa)</span>
+                                <span style="color:#38BDF8; font-weight:800;">84% Desempeño</span>
                             </div>
-                            <div style="background:rgba(255,255,255,0.05); height:12px; border-radius:6px; overflow:hidden;">
-                                <div class="chart-bar-fill" style="width:84%; height:100%; background:linear-gradient(90deg, #0284C7 0%, #38BDF8 100%);"></div>
+                            <div style="background:#070B14; height:16px; border-radius:8px; overflow:hidden; border:1px solid rgba(56,189,248,0.2); padding:2px;">
+                                <div class="chart-bar-fill" style="width:84%; height:100%; background:linear-gradient(90deg, #0284C7 0%, #38BDF8 100%); border-radius:6px; box-shadow: 0 0 10px rgba(56,189,248,0.5);"></div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div style="background:#0D1424; border:1px solid rgba(56,189,248,0.2); border-radius:14px; padding:1.5rem; display:flex; flex-direction:column; justify-content:center;">
-                    <h4 style="margin:0 0 1rem 0; color:#38BDF8; font-size:1.1rem; font-weight:700;">Distribución de Roles</h4>
-                    <div style="font-size:0.9rem; line-height:1.8; color:#94A3B8;">
-                        <p style="margin:0;"><strong style="color:#E2E8F0;">• Estudiantes & Padres:</strong> 78%</p>
-                        <p style="margin:0;"><strong style="color:#E2E8F0;">• Profesores e Instructores:</strong> 14%</p>
-                        <p style="margin:0;"><strong style="color:#E2E8F0;">• Entidades & Coordinadores:</strong> 8%</p>
+                <!-- Donut/Distribution Breakdown Block -->
+                <div style="background:#0D1424; border:1px solid rgba(56,189,248,0.25); border-radius:14px; padding:1.5rem; display:flex; flex-direction:column; justify-content:space-between; box-shadow:0 8px 32px rgba(0,0,0,0.3);">
+                    <div>
+                        <h4 style="margin:0 0 1rem 0; color:#38BDF8; font-size:1.1rem; font-weight:700;">
+                            <i class="fas fa-chart-pie" style="margin-right:0.5rem;"></i> Distribución de Roles
+                        </h4>
+                        <!-- Donut Visual Representation -->
+                        <div style="display:flex; justify-content:center; align-items:center; margin:1rem 0; position:relative;">
+                            <div style="width:110px; height:110px; border-radius:50%; background:conic-gradient(#38BDF8 0% 78%, #0284C7 78% 92%, #94A3B8 92% 100%); display:flex; align-items:center; justify-content:center; box-shadow:0 0 15px rgba(56,189,248,0.3);">
+                                <div style="width:75px; height:75px; border-radius:50%; background:#0D1424; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                                    <span style="font-size:0.75rem; color:#94A3B8;">TOTAL</span>
+                                    <strong style="font-size:0.95rem; color:#38BDF8;">100%</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="font-size:0.85rem; line-height:1.8; color:#94A3B8; background:#070B14; padding:0.75rem; border-radius:8px; border:1px solid rgba(56,189,248,0.15);">
+                        <p style="margin:0; display:flex; justify-content:space-between;"><span style="color:#E2E8F0;"><i class="fas fa-circle" style="color:#38BDF8; font-size:0.6rem; vertical-align:middle; margin-right:4px;"></i> Estudiantes & Padres:</span> <strong style="color:#38BDF8;">78%</strong></p>
+                        <p style="margin:0; display:flex; justify-content:space-between;"><span style="color:#E2E8F0;"><i class="fas fa-circle" style="color:#0284C7; font-size:0.6rem; vertical-align:middle; margin-right:4px;"></i> Profesores e Instructores:</span> <strong style="color:#38BDF8;">14%</strong></p>
+                        <p style="margin:0; display:flex; justify-content:space-between;"><span style="color:#E2E8F0;"><i class="fas fa-circle" style="color:#94A3B8; font-size:0.6rem; vertical-align:middle; margin-right:4px;"></i> Entidades & Coordinadores:</span> <strong style="color:#38BDF8;">8%</strong></p>
                     </div>
                 </div>
             </div>
