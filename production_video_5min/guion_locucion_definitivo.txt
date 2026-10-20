@@ -1,0 +1,28 @@
+=== GUION DEFINITIVO DE LOCUCIÓN SGA-CD (5 MINUTOS / 300 SEGUNDOS) ===
+
+ESCENA 1 (00:00 - 00:25 / 25s):
+"Bienvenidos al futuro de la gestión formativa. En un mundo donde el deporte y la cultura transforman vidas, el Sistema Estudiantil, Cultural y Deportivo SGA-CD nace como la infraestructura tecnológica definitiva para conectar instituciones, profesores y comunidades."
+
+ESCENA 2 (00:25 - 00:55 / 30s):
+"SGA-CD es la suite omnicanal integral que simplifica la administración de escuelas deportivas y talleres culturales. Con arquitectura Progressive Web App de sincronización sin conexión y diagnósticos biométricos, garantizamos continuidad operativa sin importar las limitaciones de conectividad en el territorio."
+
+ESCENA 3 (00:55 - 01:35 / 40s):
+"Diseñado para una gobernanza transparente, el sistema soporta doce roles oficiales con aislamiento multi-inquilino estricto. Desde Ministerios, Gobernaciones y Alcaldías hasta instructores y acudientes, SGA-CD asegura el control presupuestal, auditoría criptográfica perimetral y seguridad AgentShield de nivel corporativo."
+
+ESCENA 4 (01:35 - 02:20 / 45s):
+"Para nuestros estudiantes y familias, ofrecemos una Suscripción Estudiantil Costo Cero. La plataforma automatiza la inscripción en línea, emite carnets digitales con código QR, realiza seguimiento de calificaciones y otorga medallería y reconocimientos en un entorno dinámico y motivador."
+
+ESCENA 5 (02:20 - 03:05 / 45s):
+"SGA-CD respeta la identidad y la taxonomía de cada área: en Deportes, gestionamos Disciplinas como Taekwondo, Fútbol y Baloncesto; en Cultura, estructuramos Modalidades y Talleres como Danza Joropo, Salsa e Instrumentos de Cuerda. Todo en expedientes digitales unificados."
+
+ESCENA 6 (03:05 - 03:45 / 40s):
+"Optimizamos la operación en campo. Los jefes de almacén y escenarios administran inventarios, reposición de elementos y reservas de espacios deportivos, mientras los profesores registran asistencia sin conexión a internet mediante la tecnología PWA Sync."
+
+ESCENA 7 (03:45 - 04:20 / 35s):
+"Impulsado por inteligencia artificial, SGA-CD integra el motor de medios Predis.ai para generación de contenido multicanal, telemetría con Ollama local y protección de datos ARCO, asegurando una experiencia digital moderna, rápida y blindada."
+
+ESCENA 8 (04:20 - 04:45 / 25s):
+"Más que software, SGA-CD es una herramienta de equidad social y desarrollo humano. Fomentamos la disciplina, la expresión artística y el talento de miles de jóvenes en toda la nación."
+
+ESCENA 9 (04:45 - 05:00 / 15s):
+"SGA-CD. Tecnología para organizar, conectar y transformar. Únete a la nueva era de la formación cultural y deportiva."
