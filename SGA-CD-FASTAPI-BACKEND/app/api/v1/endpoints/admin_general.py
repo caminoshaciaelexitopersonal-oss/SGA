@@ -10,6 +10,17 @@ router = APIRouter()
 logger = logging.getLogger(__name__)
 
 
+def validate_url_safe(url_str: str) -> bool:
+    if not url_str:
+        return True
+    url_str = url_str.strip()
+    if url_str.startswith("javascript:") or url_str.startswith("data:"):
+        return False
+    if url_str.startswith("http://") or url_str.startswith("https://") or url_str.startswith("assets/"):
+        return True
+    return True
+
+
 class WhatsAppSettings(BaseModel):
     api_token: str
     phone_number_id: str
@@ -24,6 +35,7 @@ class LandingSettings(BaseModel):
     hero_video_url: str
     logo_url: str
     carousel_urls: str
+    carousel_slides_json: str = ""
     faq1_question: str = "¿Qué es la suite SGA-CD?"
     faq1_answer: str = "Es la plataforma integrada para escuelas deportivas y talleres culturales."
     faq2_question: str = "¿Cómo funciona el aislamiento multi-inquilino?"
@@ -172,13 +184,13 @@ def update_whatsapp_settings(
     return {"status": "success", "message": "WhatsApp settings updated successfully."}
 
 
-@router.get("/settings/landing", response_model=LandingSettings)
-def get_landing_settings(
+@router.get("/public/landing", response_model=LandingSettings)
+def get_public_landing_settings(
     db: Session = Depends(deps.get_db),
-    current_user: models.Usuario = Depends(deps.role_required(["admin_general"])),
 ):
     """
-    Retrieve Landing Page settings.
+    Public Endpoint: Exposes commercial & visual landing settings for the public website.
+    Strictly excludes sensitive credentials, tokens, or private administration keys.
     """
     return LandingSettings(
         hero_title=crud_settings.get_setting(db, key="landing_hero_title").value if crud_settings.get_setting(db, key="landing_hero_title") else "SGA-CD: Gestión Integral Deportiva y Cultural",
@@ -186,9 +198,40 @@ def get_landing_settings(
         contact_email=crud_settings.get_setting(db, key="landing_contact_email").value if crud_settings.get_setting(db, key="landing_contact_email") else "contacto@sgacd.gov.co",
         social_links=crud_settings.get_setting(db, key="landing_social_links").value if crud_settings.get_setting(db, key="landing_social_links") else "https://wa.me/573000000000",
         footer_copy=crud_settings.get_setting(db, key="landing_footer_copy").value if crud_settings.get_setting(db, key="landing_footer_copy") else "© 2025 SGA-CD. Todos los derechos reservados.",
-        hero_video_url=crud_settings.get_setting(db, key="landing_hero_video_url").value if crud_settings.get_setting(db, key="landing_hero_video_url") else "assets/video/promo_sga_cd.mp4",
+        hero_video_url=crud_settings.get_setting(db, key="landing_hero_video_url").value if crud_settings.get_setting(db, key="landing_hero_video_url") else "assets/video/presentation_launch.mp4",
         logo_url=crud_settings.get_setting(db, key="landing_logo_url").value if crud_settings.get_setting(db, key="landing_logo_url") else "favicon.svg",
         carousel_urls=crud_settings.get_setting(db, key="landing_carousel_urls").value if crud_settings.get_setting(db, key="landing_carousel_urls") else "",
+        carousel_slides_json=crud_settings.get_setting(db, key="landing_carousel_slides_json").value if crud_settings.get_setting(db, key="landing_carousel_slides_json") else "",
+        faq1_question=crud_settings.get_setting(db, key="landing_faq1_question").value if crud_settings.get_setting(db, key="landing_faq1_question") else "¿Qué es la suite SGA-CD?",
+        faq1_answer=crud_settings.get_setting(db, key="landing_faq1_answer").value if crud_settings.get_setting(db, key="landing_faq1_answer") else "Es la plataforma integrada para escuelas deportivas y talleres culturales.",
+        faq2_question=crud_settings.get_setting(db, key="landing_faq2_question").value if crud_settings.get_setting(db, key="landing_faq2_question") else "¿Cómo funciona el aislamiento multi-inquilino?",
+        faq2_answer=crud_settings.get_setting(db, key="landing_faq2_answer").value if crud_settings.get_setting(db, key="landing_faq2_answer") else "Cada entidad opera sobre una partición aislada cumpliendo normas ARCO.",
+        plan_tier1_price=crud_settings.get_setting(db, key="plan_tier1_price").value if crud_settings.get_setting(db, key="plan_tier1_price") else "199",
+        plan_tier2_price=crud_settings.get_setting(db, key="plan_tier2_price").value if crud_settings.get_setting(db, key="plan_tier2_price") else "29",
+        plan_grace_days=crud_settings.get_setting(db, key="plan_grace_days").value if crud_settings.get_setting(db, key="plan_grace_days") else "5",
+        seo_title=crud_settings.get_setting(db, key="landing_seo_title").value if crud_settings.get_setting(db, key="landing_seo_title") else "SGA-CD — Plataforma Integral para Escuelas Deportivas",
+        seo_description=crud_settings.get_setting(db, key="landing_seo_description").value if crud_settings.get_setting(db, key="landing_seo_description") else "SGA-CD optimiza la gestión deportiva y cultural con PWA offline."
+    )
+
+
+@router.get("/settings/landing", response_model=LandingSettings)
+def get_landing_settings(
+    db: Session = Depends(deps.get_db),
+    current_user: models.Usuario = Depends(deps.role_required(["admin_general"])),
+):
+    """
+    Retrieve Landing Page settings for Admin.
+    """
+    return LandingSettings(
+        hero_title=crud_settings.get_setting(db, key="landing_hero_title").value if crud_settings.get_setting(db, key="landing_hero_title") else "SGA-CD: Gestión Integral Deportiva y Cultural",
+        hero_subtitle=crud_settings.get_setting(db, key="landing_hero_subtitle").value if crud_settings.get_setting(db, key="landing_hero_subtitle") else "Transforma la gestión de disciplinas deportivas y talleres culturales.",
+        contact_email=crud_settings.get_setting(db, key="landing_contact_email").value if crud_settings.get_setting(db, key="landing_contact_email") else "contacto@sgacd.gov.co",
+        social_links=crud_settings.get_setting(db, key="landing_social_links").value if crud_settings.get_setting(db, key="landing_social_links") else "https://wa.me/573000000000",
+        footer_copy=crud_settings.get_setting(db, key="landing_footer_copy").value if crud_settings.get_setting(db, key="landing_footer_copy") else "© 2025 SGA-CD. Todos los derechos reservados.",
+        hero_video_url=crud_settings.get_setting(db, key="landing_hero_video_url").value if crud_settings.get_setting(db, key="landing_hero_video_url") else "assets/video/presentation_launch.mp4",
+        logo_url=crud_settings.get_setting(db, key="landing_logo_url").value if crud_settings.get_setting(db, key="landing_logo_url") else "favicon.svg",
+        carousel_urls=crud_settings.get_setting(db, key="landing_carousel_urls").value if crud_settings.get_setting(db, key="landing_carousel_urls") else "",
+        carousel_slides_json=crud_settings.get_setting(db, key="landing_carousel_slides_json").value if crud_settings.get_setting(db, key="landing_carousel_slides_json") else "",
         faq1_question=crud_settings.get_setting(db, key="landing_faq1_question").value if crud_settings.get_setting(db, key="landing_faq1_question") else "¿Qué es la suite SGA-CD?",
         faq1_answer=crud_settings.get_setting(db, key="landing_faq1_answer").value if crud_settings.get_setting(db, key="landing_faq1_answer") else "Es la plataforma integrada para escuelas deportivas y talleres culturales.",
         faq2_question=crud_settings.get_setting(db, key="landing_faq2_question").value if crud_settings.get_setting(db, key="landing_faq2_question") else "¿Cómo funciona el aislamiento multi-inquilino?",
@@ -219,6 +262,7 @@ def update_landing_settings(
     crud_settings.update_setting(db, key="landing_hero_video_url", value=settings_in.hero_video_url)
     crud_settings.update_setting(db, key="landing_logo_url", value=settings_in.logo_url)
     crud_settings.update_setting(db, key="landing_carousel_urls", value=settings_in.carousel_urls)
+    crud_settings.update_setting(db, key="landing_carousel_slides_json", value=settings_in.carousel_slides_json)
     crud_settings.update_setting(db, key="landing_faq1_question", value=settings_in.faq1_question)
     crud_settings.update_setting(db, key="landing_faq1_answer", value=settings_in.faq1_answer)
     crud_settings.update_setting(db, key="landing_faq2_question", value=settings_in.faq2_question)

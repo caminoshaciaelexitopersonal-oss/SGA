@@ -11,21 +11,50 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 1. Load Dynamic Content from API ---
     async function loadAndRenderContent() {
         try {
-            const response = await fetch(`${config.apiBaseUrl}/api/website/content`);
+            const response = await fetch(`${config.apiBaseUrl}/api/v1/admin_general/public/landing`);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            const content = await response.json();
+            const settings = await response.json();
 
-            renderVideo(content.contact?.video_url);
-            renderFeatures(content.features || []);
-            renderPartners(content.partners || []);
-            renderFaq(content.faq || []);
-            renderPlans(content.plans || []);
-            renderLaunchOffer(content.contact?.launch_offer_text);
-            renderFooter(content.contact || {});
+            // Inject Admin General Dynamic Settings to Landing Page
+            if (settings.hero_title) {
+                const titleEl = document.querySelector('#hero h1');
+                if (titleEl) titleEl.textContent = settings.hero_title;
+            }
+            if (settings.hero_subtitle) {
+                const subEl = document.querySelector('#hero p.lead');
+                if (subEl) subEl.textContent = settings.hero_subtitle;
+            }
+            if (settings.hero_video_url) {
+                const videoSource = document.querySelector('#hero-video-container video source');
+                if (videoSource && settings.hero_video_url) {
+                    videoSource.src = settings.hero_video_url;
+                    const videoEl = document.querySelector('#hero-video-container video');
+                    if (videoEl) videoEl.load();
+                }
+            }
+            if (settings.carousel_slides_json && window.SGAModernCarousel) {
+                try {
+                    const parsedSlides = JSON.parse(settings.carousel_slides_json);
+                    if (Array.isArray(parsedSlides) && parsedSlides.length > 0) {
+                        window.SGAModernCarousel.init('modern-carousel-container', parsedSlides);
+                    }
+                } catch(e) {
+                    console.warn('[Carousel Settings] Error parseando JSON de diapositivas:', e);
+                }
+            } else if (settings.carousel_urls && window.SGAModernCarousel) {
+                const customUrls = settings.carousel_urls.split(',').map(u => u.trim()).filter(u => u.startsWith('http') || u.startsWith('assets/'));
+                if (customUrls.length > 0) {
+                    window.SGAModernCarousel.init('modern-carousel-container', customUrls);
+                }
+            }
+            if (settings.plan_tier1_price) {
+                const p1 = document.querySelector('#plan-tier1-price-display');
+                if (p1) p1.textContent = `$${settings.plan_tier1_price}`;
+            }
 
-            // Initialize GSAP animations after DOM injection
+            renderFallbackContent();
             initializeGSAPAnimations();
 
         } catch (error) {

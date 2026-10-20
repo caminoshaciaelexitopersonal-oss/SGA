@@ -601,8 +601,13 @@ async function renderGestorLandingView(token) {
                         <input type="text" id="logo-url-input" value="favicon.svg" style="width:100%; padding:0.6rem; border-radius:8px; background:#070B14; border:1px solid rgba(56,189,248,0.2); color:#F8FAFC;">
                     </div>
                     <div>
-                        <label style="color:#94A3B8; font-size:0.85rem;">Galería Micro-Carrusel (5 URLs sep. por comas)</label>
-                        <textarea id="carousel-urls-input" style="width:100%; padding:0.6rem; border-radius:8px; background:#070B14; border:1px solid rgba(56,189,248,0.2); color:#F8FAFC; height:80px;">https://images.unsplash.com/photo-1555597673-b21d5c935865, https://images.unsplash.com/photo-1517838277536-f5f99be501cd, https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5, https://images.unsplash.com/photo-1508801939243-2a1420786968, https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4</textarea>
+                        <label style="color:#94A3B8; font-size:0.85rem;">Galería Micro-Carrusel (URLs sep. por comas)</label>
+                        <textarea id="carousel-urls-input" style="width:100%; padding:0.6rem; border-radius:8px; background:#070B14; border:1px solid rgba(56,189,248,0.2); color:#F8FAFC; height:60px;">https://images.unsplash.com/photo-1555597673-b21d5c935865, https://images.unsplash.com/photo-1517838277536-f5f99be501cd, https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5, https://images.unsplash.com/photo-1508801939243-2a1420786968, https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4</textarea>
+                    </div>
+                    <div>
+                        <label style="color:#94A3B8; font-size:0.85rem;">Editor de las 10 Diapositivas del Carrusel (JSON Estructurado)</label>
+                        <textarea id="carousel-slides-json-input" style="width:100%; padding:0.6rem; border-radius:8px; background:#070B14; border:1px solid rgba(56,189,248,0.2); color:#F8FAFC; height:100px; font-family:monospace; font-size:0.8rem;" placeholder='[{"title":"Título 1","subtitle":"Subtítulo 1","tag":"DISCIPLINAS","imageUrl":"https://..."}]'></textarea>
+                        <small style="color:#94A3B8; font-size:0.75rem;">Permite configurar individualmente títulos, descripciones, tags e imágenes para las 10 diapositivas.</small>
                     </div>
                     <button type="submit" class="btn-primary" style="margin-top:0.5rem;"><i class="fas fa-camera"></i> Guardar Galería & Multimedia</button>
                     <div id="media-feedback"></div>
@@ -688,6 +693,7 @@ async function renderGestorLandingView(token) {
                 hero_video_url: document.getElementById('hero-video-url')?.value || '',
                 logo_url: document.getElementById('logo-url-input')?.value || '',
                 carousel_urls: document.getElementById('carousel-urls-input')?.value || '',
+                carousel_slides_json: document.getElementById('carousel-slides-json-input')?.value || '',
                 plan_tier1_price: document.getElementById('plan-tier1-price')?.value || '199',
                 plan_tier2_price: document.getElementById('plan-tier2-price')?.value || '29',
                 plan_grace_days: document.getElementById('plan-grace-days')?.value || '5',
@@ -1054,6 +1060,88 @@ async function renderMotorPredisMediaView(token) {
     if (pubAllBtn) pubAllBtn.addEventListener('click', () => processMediaRequest(false));
 }
 
+/**
+ * Renderiza la vista de Promociones y Ofertas (Módulo de Marketing Comercial)
+ */
+async function renderPromocionesView(token) {
+    const contentArea = document.getElementById('content-area');
+    contentArea.innerHTML = `
+        <div class="view-header" style="background:#070B14; color:#E2E8F0; padding:1.5rem; border-radius:16px;">
+            <h2 style="color:#38BDF8; margin:0; font-size:1.8rem; font-weight:800; display:flex; align-items:center; gap:0.5rem;">
+                <i class="fa-solid fa-tags"></i> Gestión de Promociones, Ofertas & Becas
+            </h2>
+            <p style="color:#94A3B8; margin:0.5rem 0 0 0;">
+                Administración centralizada de códigos de descuento, becas institucionales y campañas promocionales B2B/B2C.
+            </p>
+            <div style="margin-top:1.5rem; background:#0D1424; border:1px solid rgba(56,189,248,0.2); border-radius:12px; padding:1.5rem;">
+                <h3 style="color:#38BDF8; margin-top:0;">Promociones Activas</h3>
+                <p style="color:#94A3B8; font-size:0.9rem;">No hay promociones activas registradas en este momento. Puede configurar campañas desde el Gestor de Landing Page o la Suite CRM.</p>
+            </div>
+        </div>
+    `;
+}
+
+/**
+ * Renderiza la vista de Roles y Permisos (Matriz de Control de Acceso Perimetral)
+ */
+async function renderRolesPermisosView(token) {
+    const contentArea = document.getElementById('content-area');
+    contentArea.innerHTML = `
+        <div class="view-header" style="background:#070B14; color:#E2E8F0; padding:1.5rem; border-radius:16px;">
+            <h2 style="color:#38BDF8; margin:0; font-size:1.8rem; font-weight:800; display:flex; align-items:center; gap:0.5rem;">
+                <i class="fa-solid fa-shield-alt"></i> Matriz de Roles y Permisos Oficiales (12 Roles)
+            </h2>
+            <p style="color:#94A3B8; margin:0.5rem 0 0 0;">
+                Inspección perimetral de jerarquías de acceso y políticas RBAC configuradas en el sistema SGA-CD.
+            </p>
+            <div style="margin-top:1.5rem; background:#0D1424; border:1px solid rgba(56,189,248,0.2); border-radius:12px; padding:1.5rem;">
+                <table style="width:100%; border-collapse:collapse; text-align:left; font-size:0.85rem;">
+                    <thead>
+                        <tr style="border-bottom:1px solid rgba(56,189,248,0.2); color:#38BDF8;">
+                            <th style="padding:0.75rem;">Rol del Sistema</th>
+                            <th style="padding:0.75rem;">Nivel de Dominio</th>
+                            <th style="padding:0.75rem;">Estado de Aislamiento</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="border-bottom:1px solid rgba(56,189,248,0.1);">
+                            <td style="padding:0.75rem; color:#F8FAFC; font-weight:700;">admin_general</td>
+                            <td style="padding:0.75rem; color:#38BDF8;">Super Administrador Global</td>
+                            <td style="padding:0.75rem; color:#10B981;">Activo / Unrestricted</td>
+                        </tr>
+                        <tr style="border-bottom:1px solid rgba(56,189,248,0.1);">
+                            <td style="padding:0.75rem; color:#F8FAFC; font-weight:700;">admin_empresa</td>
+                            <td style="padding:0.75rem; color:#E2E8F0;">Administrador de Entidad Público/Privada</td>
+                            <td style="padding:0.75rem; color:#38BDF8;">Multi-Tenant Ailado</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    `;
+}
+
+/**
+ * Renderiza la vista de Asistente de IA (Agente Inteligente Supervisor)
+ */
+async function renderAsistenteIAView(token) {
+    const contentArea = document.getElementById('content-area');
+    contentArea.innerHTML = `
+        <div class="view-header" style="background:#070B14; color:#E2E8F0; padding:1.5rem; border-radius:16px;">
+            <h2 style="color:#38BDF8; margin:0; font-size:1.8rem; font-weight:800; display:flex; align-items:center; gap:0.5rem;">
+                <i class="fa-solid fa-robot"></i> Asistente de Inteligencia Artificial & Tropa de Agentes
+            </h2>
+            <p style="color:#94A3B8; margin:0.5rem 0 0 0;">
+                Panel de interacción con agentes autónomos para la automatización deportiva y cultural.
+            </p>
+            <div style="margin-top:1.5rem; background:#0D1424; border:1px solid rgba(56,189,248,0.2); border-radius:12px; padding:1.5rem;">
+                <h3 style="color:#38BDF8; margin-top:0;">Agente Supervisor Operativo</h3>
+                <p style="color:#94A3B8; font-size:0.9rem;">El agente autónomo está listo para procesar invocaciones multi-tenant de voz y texto.</p>
+            </div>
+        </div>
+    `;
+}
+
 // --- Registrar las vistas de Administrador General en el Router ---
 if (typeof registerView === 'function') {
     registerView('admin_general', 'dashboard', renderAdminGeneralDashboardView);
@@ -1061,6 +1149,22 @@ if (typeof registerView === 'function') {
     registerView('admin_general', 'configuracion-whatsapp', renderConfiguracionWhatsAppView);
     registerView('admin_general', 'gestion-api-keys', renderApiKeysView);
     registerView('admin_general', 'motor-predis-media', renderMotorPredisMediaView);
+
+    // Vistas compartidas autorizadas registradas explícitamente para admin_general
+    if (typeof renderAdminEmpresaView === 'function') {
+        registerView('admin_general', 'panel-empresa', renderAdminEmpresaView);
+    }
+    if (typeof renderSuscripcionView === 'function') {
+        registerView('admin_general', 'suscripcion', renderSuscripcionView);
+    }
+    if (typeof renderAuditoriaEmpresaView === 'function') {
+        registerView('admin_general', 'auditoria-empresa', renderAuditoriaEmpresaView);
+    }
+
+    // Vistas dedicadas de admin_general
+    registerView('admin_general', 'promociones', renderPromocionesView);
+    registerView('admin_general', 'roles-permisos', renderRolesPermisosView);
+    registerView('admin_general', 'asistente-ia', renderAsistenteIAView);
 } else {
     console.error("El sistema de registro de vistas no está disponible.");
 }
