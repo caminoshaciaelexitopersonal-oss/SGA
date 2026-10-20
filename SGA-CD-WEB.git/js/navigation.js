@@ -53,7 +53,7 @@ const navLinks = {
             submenu: [
                 { text: 'Gestionar Empresas', view: 'panel-empresa', icon: 'fa-building' },
                 { text: 'Roles y Permisos', view: 'roles-permisos', icon: 'fa-shield-alt' },
-                { text: 'Verificar Roles BD', view: 'verificar-roles', icon: 'fa-database' }
+                { text: 'Verificar Roles BD', view: 'verificar-roles-bd', icon: 'fa-database' }
             ]
         },
         {
@@ -61,7 +61,7 @@ const navLinks = {
             icon: 'fa-cog',
             submenu: [
                 { text: 'Proveedores de IA & Ollama', view: 'gestion-api-keys', icon: 'fa-key' },
-                { text: 'Auditoría General', view: 'auditoria', icon: 'fa-history' },
+                { text: 'Auditoría General', view: 'auditoria-empresa', icon: 'fa-history' },
                 { text: 'Asistente de IA', view: 'asistente-ia', icon: 'fa-robot' }
             ]
         }
