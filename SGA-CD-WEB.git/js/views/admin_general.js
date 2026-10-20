@@ -602,7 +602,7 @@ async function renderGestorLandingView(token) {
                     </div>
                     <div>
                         <label style="color:#94A3B8; font-size:0.85rem;">Galería Micro-Carrusel (URLs sep. por comas)</label>
-                        <textarea id="carousel-urls-input" style="width:100%; padding:0.6rem; border-radius:8px; background:#070B14; border:1px solid rgba(56,189,248,0.2); color:#F8FAFC; height:60px;">https://images.unsplash.com/photo-1555597673-b21d5c935865, https://images.unsplash.com/photo-1517838277536-f5f99be501cd, https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5, https://images.unsplash.com/photo-1508801939243-2a1420786968, https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4</textarea>
+                        <textarea id="carousel-urls-input" style="width:100%; padding:0.6rem; border-radius:8px; background:#070B14; border:1px solid rgba(56,189,248,0.2); color:#F8FAFC; height:60px;">https://images.unsplash.com/photo-1555597673-b21d5c935865, https://images.unsplash.com/photo-1517838277536-f5f99be501cd, https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5, https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad, https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4</textarea>
                     </div>
                     <div>
                         <label style="color:#94A3B8; font-size:0.85rem;">Editor de las 10 Diapositivas del Carrusel (JSON Estructurado)</label>
