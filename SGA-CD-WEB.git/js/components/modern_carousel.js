@@ -11,7 +11,7 @@ window.SGAModernCarousel = (function() {
             subtitle: "Disciplinas Deportivas y Modalidades Culturales en un solo ecosistema.",
             tag: "ENTIDADES PÚBLICAS Y PRIVADAS",
             bgGradient: "linear-gradient(135deg, #070B14 0%, #0D1424 100%)",
-            imageUrl: "https://images.unsplash.com/photo-1517649763962-0c623266010b?auto=format&fit=crop&w=1200&q=80"
+            imageUrl: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=80"
         },
         {
             title: "Taekwondo, Fútbol y Baloncesto",
@@ -25,7 +25,7 @@ window.SGAModernCarousel = (function() {
             subtitle: "Preservación del patrimonio cultural con escuelas de formación estructuradas.",
             tag: "MODALIDADES CULTURALES",
             bgGradient: "linear-gradient(135deg, #0D1424 0%, #0F2042 100%)",
-            imageUrl: "https://images.unsplash.com/photo-1508801939243-2a1420786968?auto=format&fit=crop&w=1200&q=80"
+            imageUrl: "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&w=1200&q=80"
         },
         {
             title: "Instrumentos: Guitarra y Arpa",

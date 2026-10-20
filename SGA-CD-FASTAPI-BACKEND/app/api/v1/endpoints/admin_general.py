@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 from sqlalchemy.orm import Session
 from app import models
 from app.api import deps
@@ -45,6 +45,12 @@ class LandingSettings(BaseModel):
     plan_grace_days: str
     seo_title: str
     seo_description: str
+
+    @validator("hero_video_url", "logo_url", pre=True)
+    def validate_urls(cls, v):
+        if v and not validate_url_safe(v):
+            raise ValueError("URL no permitida por políticas de seguridad")
+        return v
 
 
 class ApiSettings(BaseModel):
@@ -228,7 +234,7 @@ def get_landing_settings(
         contact_email=crud_settings.get_setting(db, key="landing_contact_email").value if crud_settings.get_setting(db, key="landing_contact_email") else "contacto@sgacd.gov.co",
         social_links=crud_settings.get_setting(db, key="landing_social_links").value if crud_settings.get_setting(db, key="landing_social_links") else "https://wa.me/573000000000",
         footer_copy=crud_settings.get_setting(db, key="landing_footer_copy").value if crud_settings.get_setting(db, key="landing_footer_copy") else "© 2025 SGA-CD. Todos los derechos reservados.",
-        hero_video_url=crud_settings.get_setting(db, key="landing_hero_video_url").value if crud_settings.get_setting(db, key="landing_hero_video_url") else "assets/video/presentation_launch.mp4",
+        hero_video_url=crud_settings.get_setting(db, key="landing_hero_video_url").value if crud_settings.get_setting(db, key="landing_hero_video_url") else "assets/video/sga_cd_institutional_5min.mp4",
         logo_url=crud_settings.get_setting(db, key="landing_logo_url").value if crud_settings.get_setting(db, key="landing_logo_url") else "favicon.svg",
         carousel_urls=crud_settings.get_setting(db, key="landing_carousel_urls").value if crud_settings.get_setting(db, key="landing_carousel_urls") else "",
         carousel_slides_json=crud_settings.get_setting(db, key="landing_carousel_slides_json").value if crud_settings.get_setting(db, key="landing_carousel_slides_json") else "",
