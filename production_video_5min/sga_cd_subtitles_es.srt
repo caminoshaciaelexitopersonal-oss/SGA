@@ -1,0 +1,35 @@
+1
+00:00:01,000 --> 00:00:24,000
+Bienvenidos al futuro de la gestión formativa. SGA-CD conecta instituciones, profesores y comunidades.
+
+2
+00:00:26,000 --> 00:00:54,000
+SGA-CD es la suite omnicanal integral con PWA Offline Sync y diagnósticos biométricos.
+
+3
+00:00:56,000 --> 00:01:34,000
+Diseñado con 12 roles oficiales, aislamiento multi-tenant y auditoría presupuestal transparente.
+
+4
+00:01:36,000 --> 00:02:18,000
+Suscripción Estudiantil Costo 0: inscripciones en línea, carnet digital QR y medallería.
+
+5
+00:02:21,000 --> 00:03:03,000
+Gestión especializada: Disciplinas Deportivas (Taekwondo, Fútbol) y Modalidades Culturales (Joropo, Arpa).
+
+6
+00:03:06,000 --> 00:03:43,000
+Operaciones en territorio: control de inventarios, reserva de escenarios y toma de asistencia offline.
+
+7
+00:03:46,000 --> 00:04:18,000
+Inteligencia Artificial con Predis.ai, telemetría Ollama y blindaje AgentShield ECC.
+
+8
+00:04:21,000 --> 00:04:44,000
+Herramienta de equidad social y desarrollo humano para jóvenes en todo el país.
+
+9
+00:04:46,000 --> 00:04:59,000
+SGA-CD. Tecnología para organizar, conectar y transformar.

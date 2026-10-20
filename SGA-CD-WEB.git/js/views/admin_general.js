@@ -594,7 +594,7 @@ async function renderGestorLandingView(token) {
                 <form id="landing-media-form" style="display:flex; flex-direction:column; gap:0.8rem;">
                     <div>
                         <label style="color:#94A3B8; font-size:0.85rem;">URL Video Promocional (Fondo/Presentación)</label>
-                        <input type="text" id="hero-video-url" value="assets/video/promo_sga_cd.mp4" style="width:100%; padding:0.6rem; border-radius:8px; background:#070B14; border:1px solid rgba(56,189,248,0.2); color:#F8FAFC;">
+                        <input type="text" id="hero-video-url" value="assets/video/sga_cd_institutional_5min.mp4" style="width:100%; padding:0.6rem; border-radius:8px; background:#070B14; border:1px solid rgba(56,189,248,0.2); color:#F8FAFC;">
                     </div>
                     <div>
                         <label style="color:#94A3B8; font-size:0.85rem;">URL Logotipo Vectorial SVG</label>
