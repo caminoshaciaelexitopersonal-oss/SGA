@@ -339,6 +339,36 @@ class TestVideoDistributionCapabilityProtection(unittest.TestCase):
         self.db_session.commit.assert_not_called()
         self.dist_service.publish_video.assert_not_called()
 
+    def test_12_partial_publication_reconciles_failed_quota(self):
+        """12. Éxito parcial en redes sociales libera sólo la cuota de las plataformas fallidas."""
+        user = DummyEntity(id=12, inquilino_id=120, role_codes=["admin_empresa"], activo=True)
+        tenant = DummyEntity(id=120, nombre_empresa="Full Corp 12", plan="pro_anual", activo=True)
+        sub = DummyEntity(id=12, inquilino_id=120, plan="pro_anual", estado="activa")
+        setup_db_mock(self.db_session, tenant, sub)
+
+        # First platform (youtube) succeeds, second platform (instagram) fails with exception
+        def mock_publish(platform, video_url, title, description):
+            if platform == "youtube":
+                return {"status": "success", "platform": "youtube"}
+            raise Exception("Instagram API token expired")
+
+        self.dist_service.publish_video.side_effect = mock_publish
+
+        req = DistributionRequest(platforms=["youtube", "instagram"], video_url="https://sga-cd.org/v.mp4", title="T", description="D")
+
+        with patch("app.services.plan_capability_service.PlanCapabilityService.release_quota") as mock_release:
+            res = publish_video(request_in=req, db=self.db_session, distribution_service=self.dist_service, current_user=user)
+
+            self.assertEqual(len(res["successes"]), 1)
+            self.assertEqual(len(res["failures"]), 1)
+            # Confirms release_quota called with amount=1 for the single failed platform
+            mock_release.assert_called_once_with(
+                db=self.db_session,
+                inquilino_id=120,
+                capability_name="social_publishing",
+                amount=1
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

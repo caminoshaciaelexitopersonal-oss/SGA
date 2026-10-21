@@ -58,14 +58,17 @@ def publish_video(
         except Exception as e:
             errors.append({"platform": platform, "error": str(e)})
 
-    if not results and errors:
-        # If all platforms failed, release the reserved quota
+    if errors:
+        # Partial or total failure: release quota for failed platforms only
+        num_failed = len(errors)
         PlanCapabilityService.release_quota(
             db=db,
             inquilino_id=current_user.inquilino_id,
             capability_name="social_publishing",
-            amount=num_platforms
+            amount=num_failed
         )
+
+    if not results and errors:
         raise HTTPException(status_code=500, detail={"message": "All publications failed.", "errors": errors})
 
     return {"message": "Distribution process completed.", "successes": results, "failures": errors}

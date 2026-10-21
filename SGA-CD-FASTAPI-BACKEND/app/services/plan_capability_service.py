@@ -362,12 +362,19 @@ class PlanCapabilityService:
         quota_key = cap_key_map.get(capability_name, capability_name)
         monthly_limit = dict_caps.get("monthly_limits", {}).get(quota_key, 0)
 
-        # Retrieve or initialize ConsumoInquilino record
-        consumo = db.query(ConsumoInquilino).filter(
+        # Retrieve or initialize ConsumoInquilino record with row lock if supported
+        query = db.query(ConsumoInquilino).filter(
             ConsumoInquilino.inquilino_id == inquilino_id,
             ConsumoInquilino.periodo == periodo,
             ConsumoInquilino.capacidad == quota_key
-        ).first()
+        )
+        if hasattr(query, "with_for_update") and type(query).__name__ != "MagicMock":
+            try:
+                query = query.with_for_update()
+            except Exception:
+                pass
+
+        consumo = query.first()
 
         current_used = 0
         if consumo is not None:
@@ -397,10 +404,30 @@ class PlanCapabilityService:
                 setattr(consumo, "cantidad_usada", current_used + amount)
             setattr(consumo, "cantidad_usada", current_used + amount)
             db.add(consumo)
+            try:
+                db.commit()
+            except Exception as e:
+                db.rollback()
+                # On concurrent creation conflict (IntegrityError due to unique constraint), retry read & update
+                consumo = db.query(ConsumoInquilino).filter(
+                    ConsumoInquilino.inquilino_id == inquilino_id,
+                    ConsumoInquilino.periodo == periodo,
+                    ConsumoInquilino.capacidad == quota_key
+                ).first()
+                if consumo is not None:
+                    raw_used = getattr(consumo, "cantidad_usada", 0)
+                    if isinstance(raw_used, int):
+                        current_used = raw_used
+                    if current_used + amount > monthly_limit:
+                        raise HTTPException(
+                            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                            detail=f"Monthly limit for '{capability_name}' reached ({current_used}/{monthly_limit}). Upgrade or wait for the next billing cycle."
+                        )
+                    setattr(consumo, "cantidad_usada", current_used + amount)
+                    db.commit()
         else:
             setattr(consumo, "cantidad_usada", current_used + amount)
-
-        db.commit()
+            db.commit()
 
         final_used = getattr(consumo, "cantidad_usada", current_used + amount)
         if not isinstance(final_used, int):

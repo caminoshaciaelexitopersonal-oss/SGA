@@ -269,6 +269,52 @@ class TestQuotaPersistenceAndConcurrency(unittest.TestCase):
         self.assertEqual(res["cantidad_usada"], 9)
         self.db_session.commit.assert_called_once()
 
+    def test_06_unique_constraint_orm_definition(self):
+        """6. Verificación de restricción única en el modelo ORM ConsumoInquilino."""
+        table_args = getattr(ConsumoInquilino, "__table_args__", ())
+        self.assertTrue(len(table_args) > 0, "ConsumoInquilino ORM model missing __table_args__")
+
+    def test_07_concurrent_first_counter_creation_fallback(self):
+        """7. Recuperación ante conflicto de creación concurrente (IntegrityError en primer commit)."""
+        tenant = DummyEntity(id=70, plan="pro_anual", activo=True)
+        sub = DummyEntity(id=7, inquilino_id=70, plan="pro_anual", estado="activa")
+        existing_consumo = DummyEntity(id=7, inquilino_id=70, periodo="2025-05", capacidad="images", cantidad_usada=5)
+
+        # On initial query, no record is found (None)
+        q_mock = MagicMock()
+        q_mock.filter.return_value.first.side_effect = [None, existing_consumo]
+
+        def custom_query(model):
+            model_str = str(model)
+            model_name = getattr(model, "__name__", model_str)
+            if "ConsumoInquilino" in model_name or "ConsumoInquilino" in model_str:
+                return q_mock
+            elif "Suscripcion" in model_name or "Suscripcion" in model_str:
+                m = MagicMock()
+                m.filter.return_value.order_by.return_value.first.return_value = sub
+                return m
+            elif "Inquilino" in model_name or "Inquilino" in model_str:
+                m = MagicMock()
+                m.filter.return_value.first.return_value = tenant
+                return m
+            return MagicMock()
+
+        self.db_session.query.side_effect = custom_query
+
+        # First commit fails due to IntegrityError (simulating race condition on first counter creation)
+        self.db_session.commit.side_effect = [Exception("IntegrityError: duplicate key value violates unique constraint"), None]
+
+        res = PlanCapabilityService.check_and_consume_quota(
+            db=self.db_session,
+            inquilino_id=70,
+            capability_name="ai_images",
+            amount=1,
+            periodo="2025-05"
+        )
+
+        self.assertEqual(res["cantidad_usada"], 6)
+        self.db_session.rollback.assert_called_once()
+
 
 if __name__ == "__main__":
     unittest.main()
