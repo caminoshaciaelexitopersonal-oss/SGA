@@ -17,6 +17,10 @@ class Inquilino(Base):
     openai_api_key = Column(String)
     google_api_key = Column(String)
 
+    # --- Classification B2B (Naturaleza x Ámbito - 12 Combinaciones) ---
+    tipo_organizacion = Column(String, default="entidad_publica") # entidad_publica, entidad_privada, empresa_publica, empresa_privada
+    ambito_organizacional = Column(String, default="municipal")    # nacional, departamental, municipal
+
     # Location columns
     direccion = Column(String)
     municipio = Column(String)

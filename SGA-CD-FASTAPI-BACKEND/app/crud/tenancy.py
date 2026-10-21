@@ -14,7 +14,11 @@ def create_tenant_and_admin(db: Session, *, obj_in: TenantCreate) -> Inquilino:
     # Start a transaction
     with db.begin_nested():
         # 1. Create the Inquilino (Tenant)
-        db_tenant = Inquilino(nombre=obj_in.nombre_empresa)
+        db_tenant = Inquilino(
+            nombre_empresa=obj_in.nombre_empresa,
+            tipo_organizacion=obj_in.tipo_organizacion,
+            ambito_organizacional=obj_in.ambito_organizacional
+        )
         db.add(db_tenant)
         db.flush() # Flush to get the ID for the new tenant
 
