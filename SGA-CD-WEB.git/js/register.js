@@ -63,6 +63,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Collect form data based on the new backend schema
         const tenantData = {
             nombre_empresa: document.getElementById('nombre_empresa').value,
+            tipo_organizacion: document.getElementById('tipo_organizacion')?.value || 'entidad_publica',
+            ambito_organizacional: document.getElementById('ambito_organizacional')?.value || 'municipal',
             admin_nombre_completo: document.getElementById('nombre_admin').value,
             admin_email: document.getElementById('correo_admin').value,
             admin_password: document.getElementById('password_admin').value,

@@ -2,6 +2,8 @@ from pydantic import BaseModel, EmailStr
 
 class TenantCreate(BaseModel):
     nombre_empresa: str
+    tipo_organizacion: str = "entidad_publica"
+    ambito_organizacional: str = "municipal"
     admin_nombre_completo: str
     admin_email: EmailStr
     admin_password: str

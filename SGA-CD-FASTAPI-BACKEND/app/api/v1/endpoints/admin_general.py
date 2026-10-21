@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from app import models
 from app.api import deps
 from app.crud import settings as crud_settings
+from app.services.ai_router import ai_router
 import logging
 
 router = APIRouter()
@@ -303,8 +304,13 @@ def generate_predis_media(
     }
 
     poster = posters.get(payload.area, "https://images.unsplash.com/photo-1555597673-b21d5c935865?w=800")
+
+    # Invocación al AIRouterService para optimizar el copy publicitario
+    prompt_text = f"Genera un título y copy promocional para {payload.area.replace('_', ' ')}. Prompt: {payload.prompt}"
+    router_res = ai_router.generate_text(prompt=prompt_text, task="crm_marketing")
+
     title = f"¡INSCRIPCIONES ABIERTAS EN {payload.area.replace('_', ' ').upper()} 2025!"
-    copy = f"Formación integral de alto impacto en {payload.area.replace('_', ' ')}. Prompt del usuario: '{payload.prompt}'. Cupos limitados en SGA-CD."
+    copy = f"{router_res.get('text', '')} — Formación integral en SGA-CD."
 
     dimensions_map = {
         "reel_9_16": "1080x1920 (Vertical 9:16 - Reels / TikTok / Shorts)",

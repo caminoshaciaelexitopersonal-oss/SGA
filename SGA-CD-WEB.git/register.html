@@ -53,8 +53,28 @@
                         </label>
                     </div>
 
-                    <h3 style="color: var(--color-text-primary);">2. Datos de la Empresa u Organización</h3>
+                    <h3 style="color: var(--color-text-primary);">2. Clasificación B2B & Datos de la Organización</h3>
                     <input type="text" id="nombre_empresa" placeholder="Nombre Oficial de la Empresa u Organización" required>
+
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:0.75rem;">
+                        <div>
+                            <label style="color:#94A3B8; font-size:0.82rem; font-weight:700;">Naturaleza Jurídica</label>
+                            <select id="tipo_organizacion" required style="width:100%; padding:0.65rem; border-radius:8px; background:#070B14; border:1px solid rgba(56,189,248,0.3); color:#F8FAFC; margin-top:0.25rem;">
+                                <option value="entidad_publica" selected>🏛️ Entidad Pública (Gobernación / Alcaldía / Inst.)</option>
+                                <option value="entidad_privada">🏢 Entidad Privada (Fundación / Liga / IES)</option>
+                                <option value="empresa_publica">🏭 Empresa Pública (EICE / Lotería / Consorcio)</option>
+                                <option value="empresa_privada">💼 Empresa Privada (Academia / S.A.S. / Club)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="color:#94A3B8; font-size:0.82rem; font-weight:700;">Ámbito Territorial</label>
+                            <select id="ambito_organizacional" required style="width:100%; padding:0.65rem; border-radius:8px; background:#070B14; border:1px solid rgba(56,189,248,0.3); color:#F8FAFC; margin-top:0.25rem;">
+                                <option value="municipal" selected>📍 Municipal / Local</option>
+                                <option value="departamental">🗺️ Departamental / Regional</option>
+                                <option value="nacional">🇨🇴 Nacional / Cobertura País</option>
+                            </select>
+                        </div>
+                    </div>
 
                     <h3 style="color: var(--color-text-primary); margin-top: 1.5rem;">3. Administrador Principal</h3>
                     <input type="text" id="nombre_admin" placeholder="Nombre Completo del Administrador" required>
