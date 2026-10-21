@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, validator
 from sqlalchemy.orm import Session
 from app import models
 from app.api import deps
 from app.crud import settings as crud_settings
 from app.services.ai_router import ai_router
+from app.services.plan_capability_service import PlanCapabilityService
 import logging
 
 router = APIRouter()
@@ -23,8 +24,9 @@ def validate_url_safe(url_str: str) -> bool:
 
 
 class WhatsAppSettings(BaseModel):
-    api_token: str
     phone_number_id: str
+    access_token: str
+    business_account_id: str
 
 
 class LandingSettings(BaseModel):
@@ -33,40 +35,38 @@ class LandingSettings(BaseModel):
     contact_email: str
     social_links: str
     footer_copy: str
-    hero_video_url: str
-    logo_url: str
-    carousel_urls: str
+    hero_video_url: str = "assets/video/sga_cd_institutional_5min.mp4"
+    logo_url: str = "assets/images/sga_cd_official_logo.svg"
+    carousel_urls: str = ""
     carousel_slides_json: str = ""
-    faq1_question: str = "¿Qué es la suite SGA-CD?"
-    faq1_answer: str = "Es la plataforma integrada para escuelas deportivas y talleres culturales."
-    faq2_question: str = "¿Cómo funciona el aislamiento multi-inquilino?"
-    faq2_answer: str = "Cada entidad opera sobre una partición aislada cumpliendo normas ARCO."
-    plan_tier1_price: str
-    plan_tier2_price: str
-    plan_grace_days: str
-    seo_title: str
-    seo_description: str
+    faq1_question: str = "¿Qué modalidades deportivas y culturales ofrece SGA-CD?"
+    faq1_answer: str = "SGA-CD administra Taekwondo, Fútbol, Baloncesto, Danza Joropo e Instrumentos Tradicionales."
+    faq2_question: str = "¿Cómo se realiza la verificación de usuarios y roles?"
+    faq2_answer: str = "Mediante autenticación JWT, RBAC perimetral e integración con esquemas multi-tenant."
+    plan_tier1_price: str = "$100 USD/mes — Entidades Públicas y Privadas B2B"
+    plan_tier2_price: str = "$20 USD/mes — Instructores y Profesores"
+    plan_grace_days: int = 5
+    seo_title: str = "SGA-CD — Plataforma Integral de Gestión Deportiva y Cultural"
+    seo_description: str = "Sistema de Gestión Académico, Deportivo y Cultural para Entidades Públicas y Privadas."
 
-    @validator("hero_video_url", "logo_url", pre=True)
+    @validator('hero_video_url', 'logo_url', 'carousel_urls', allow_reuse=True)
     def validate_urls(cls, v):
         if v and not validate_url_safe(v):
-            raise ValueError("URL no permitida por políticas de seguridad")
+            raise ValueError(f"URL o ruta no segura: {v}")
         return v
 
 
+class LLMKeysSettings(BaseModel):
+    openai_api_key: str = ""
+    google_api_key: str = ""
+    meta_access_token: str = ""
+
+
 class ApiSettings(BaseModel):
+    llm_preference: str
     openai_api_key: str
     google_api_key: str
-    youtube_refresh_token: str
-    meta_user_access_token: str
-    facebook_page_id: str
-    ollama_endpoint: str = "http://localhost:11434"
-
-
-class OllamaHealthCheck(BaseModel):
-    endpoint: str
-    status: str
-    available_models: list[str]
+    meta_access_token: str
 
 
 class PredisMediaRequest(BaseModel):
@@ -90,83 +90,78 @@ class PredisMediaResponse(BaseModel):
 
 
 @router.get("/settings/api_keys", response_model=ApiSettings)
-def get_api_keys(
+def get_api_settings(
+    *,
     db: Session = Depends(deps.get_db),
     current_user: models.Usuario = Depends(deps.role_required(["admin_general"])),
 ):
     """
-    Retrieve API keys for the Admin General.
+    Get current AI/LLM Provider configuration and preference.
     """
-    openai_key = crud_settings.get_setting(db, key="openai_api_key")
-    google_key = crud_settings.get_setting(db, key="google_api_key")
-    youtube_token = crud_settings.get_setting(db, key="youtube_refresh_token")
-    meta_token = crud_settings.get_setting(db, key="meta_user_access_token")
-    fb_page_id = crud_settings.get_setting(db, key="facebook_page_id")
-
-    ollama_url = crud_settings.get_setting(db, key="ollama_endpoint")
-
+    tenant = current_user.inquilino
     return ApiSettings(
-        openai_api_key=openai_key.value if openai_key else "",
-        google_api_key=google_key.value if google_key else "",
-        youtube_refresh_token=youtube_token.value if youtube_token else "",
-        meta_user_access_token=meta_token.value if meta_token else "",
-        facebook_page_id=fb_page_id.value if fb_page_id else "",
-        ollama_endpoint=ollama_url.value if ollama_url else "http://localhost:11434",
+        llm_preference=tenant.llm_preference if tenant else "local",
+        openai_api_key=tenant.openai_api_key if tenant else "",
+        google_api_key=tenant.google_api_key if tenant else "",
+        meta_access_token=crud_settings.get_setting(db, "meta_page_access_token").value if crud_settings.get_setting(db, "meta_page_access_token") else ""
     )
 
 
-@router.post("/settings/api_keys")
-def update_api_keys(
-    *,
-    db: Session = Depends(deps.get_db),
-    settings_in: ApiSettings,
+@router.get("/settings/ollama/health")
+def check_ollama_health(
     current_user: models.Usuario = Depends(deps.role_required(["admin_general"])),
 ):
     """
-    Update API keys.
+    Check Ollama Local Server health and installed models list.
     """
-    crud_settings.update_setting(db, key="openai_api_key", value=settings_in.openai_api_key)
-    crud_settings.update_setting(db, key="google_api_key", value=settings_in.google_api_key)
-    crud_settings.update_setting(db, key="youtube_refresh_token", value=settings_in.youtube_refresh_token)
-    crud_settings.update_setting(db, key="meta_user_access_token", value=settings_in.meta_user_access_token)
-    crud_settings.update_setting(db, key="facebook_page_id", value=settings_in.facebook_page_id)
-    crud_settings.update_setting(db, key="ollama_endpoint", value=settings_in.ollama_endpoint)
+    return ai_router.check_ollama_health()
+
+
+@router.put("/settings/llm_keys")
+def update_llm_keys(
+    *,
+    db: Session = Depends(deps.get_db),
+    keys_in: LLMKeysSettings,
+    current_user: models.Usuario = Depends(deps.role_required(["admin_general"])),
+):
+    """
+    Update LLM provider keys (OpenAI / Gemini / Meta).
+    """
+    tenant = current_user.inquilino
+    if tenant:
+        if keys_in.openai_api_key:
+            tenant.openai_api_key = keys_in.openai_api_key
+        if keys_in.google_api_key:
+            tenant.google_api_key = keys_in.google_api_key
+        db.commit()
+
+    if keys_in.meta_access_token:
+        crud_settings.update_setting(db, key="meta_page_access_token", value=keys_in.meta_access_token)
 
     return {"status": "success", "message": "API keys updated successfully."}
 
 
-@router.get("/settings/ollama/health", response_model=OllamaHealthCheck)
-def check_ollama_health(
+@router.get("/settings/whatsapp", response_model=WhatsAppSettings)
+def get_whatsapp_settings(
+    *,
     db: Session = Depends(deps.get_db),
     current_user: models.Usuario = Depends(deps.role_required(["admin_general"])),
 ):
     """
-    Check connectivity with the local or remote Ollama instance safely from backend.
+    Get WhatsApp Cloud API configuration settings.
     """
-    import urllib.request
-    import json
+    phone_number_id = crud_settings.get_setting(db, "whatsapp_phone_number_id")
+    access_token = crud_settings.get_setting(db, "whatsapp_access_token")
+    business_account_id = crud_settings.get_setting(db, "whatsapp_business_account_id")
 
-    ollama_setting = crud_settings.get_setting(db, key="ollama_endpoint")
-    endpoint = ollama_setting.value if ollama_setting else "http://localhost:11434"
-
-    try:
-        req = urllib.request.Request(f"{endpoint.rstrip('/')}/api/tags", headers={"User-Agent": "SGA-CD-Admin/1.0"})
-        with urllib.request.urlopen(req, timeout=3) as response:
-            if response.status == 200:
-                data = json.loads(response.read().decode())
-                models_list = [m.get("name") for m in data.get("models", [])]
-                return OllamaHealthCheck(endpoint=endpoint, status="Online / Connected", available_models=models_list)
-    except Exception as e:
-        logger.warning(f"Ollama healthcheck error on {endpoint}: {e}")
-
-    return OllamaHealthCheck(
-        endpoint=endpoint,
-        status="Offline / Unreachable",
-        available_models=["llama3", "mistral", "phi3"]  # Fallback catalog options for configuration
+    return WhatsAppSettings(
+        phone_number_id=phone_number_id.value if phone_number_id else "",
+        access_token=access_token.value if access_token else "",
+        business_account_id=business_account_id.value if business_account_id else ""
     )
 
 
-@router.post("/settings/whatsapp")
+@router.put("/settings/whatsapp", response_model=WhatsAppSettings)
 def update_whatsapp_settings(
     *,
     db: Session = Depends(deps.get_db),
@@ -174,21 +169,63 @@ def update_whatsapp_settings(
     current_user: models.Usuario = Depends(deps.role_required(["admin_general"])),
 ):
     """
-    Endpoint for the Admin General to update WhatsApp settings.
-    These settings are stored in the new 'settings' table.
+    Update WhatsApp Cloud API configuration settings.
     """
-    logger.info(f"Admin General ({current_user.nombre_usuario}) is updating WhatsApp settings.")
+    crud_settings.update_setting(db, key="whatsapp_phone_number_id", value=settings_in.phone_number_id)
+    crud_settings.update_setting(db, key="whatsapp_access_token", value=settings_in.access_token)
+    crud_settings.update_setting(db, key="whatsapp_business_account_id", value=settings_in.business_account_id)
 
-    crud_settings.update_setting(db, key="WHATSAPP_API_TOKEN", value=settings_in.api_token)
-    crud_settings.update_setting(db, key="WHATSAPP_PHONE_NUMBER_ID", value=settings_in.phone_number_id)
+    return settings_in
 
-    # The verify token is often static and defined by the developer,
-    # but we could make it configurable as well if needed.
-    # For now, we assume it's set in the .env file and configured once.
 
-    logger.info("WhatsApp settings updated successfully in the database.")
+@router.get("/settings/landing", response_model=LandingSettings)
+def get_landing_settings(
+    *,
+    db: Session = Depends(deps.get_db),
+    current_user: models.Usuario = Depends(deps.role_required(["admin_general"])),
+):
+    """
+    Get Landing Page configuration settings.
+    """
+    hero_title = crud_settings.get_setting(db, "landing_hero_title")
+    hero_subtitle = crud_settings.get_setting(db, "landing_hero_subtitle")
+    contact_email = crud_settings.get_setting(db, "landing_contact_email")
+    social_links = crud_settings.get_setting(db, "landing_social_links")
+    footer_copy = crud_settings.get_setting(db, "landing_footer_copy")
+    hero_video_url = crud_settings.get_setting(db, "landing_hero_video_url")
+    logo_url = crud_settings.get_setting(db, "landing_logo_url")
+    carousel_urls = crud_settings.get_setting(db, "landing_carousel_urls")
+    carousel_slides_json = crud_settings.get_setting(db, "landing_carousel_slides_json")
+    faq1_question = crud_settings.get_setting(db, "landing_faq1_question")
+    faq1_answer = crud_settings.get_setting(db, "landing_faq1_answer")
+    faq2_question = crud_settings.get_setting(db, "landing_faq2_question")
+    faq2_answer = crud_settings.get_setting(db, "landing_faq2_answer")
+    plan_tier1_price = crud_settings.get_setting(db, "plan_tier1_price")
+    plan_tier2_price = crud_settings.get_setting(db, "plan_tier2_price")
+    plan_grace_days = crud_settings.get_setting(db, "plan_grace_days")
+    seo_title = crud_settings.get_setting(db, "landing_seo_title")
+    seo_description = crud_settings.get_setting(db, "landing_seo_description")
 
-    return {"status": "success", "message": "WhatsApp settings updated successfully."}
+    return LandingSettings(
+        hero_title=hero_title.value if hero_title else "SGA-CD — Sistema de Gestión Académico, Deportivo y Cultural",
+        hero_subtitle=hero_subtitle.value if hero_subtitle else "Plataforma de Vanguardia para Entidades Públicas y Privadas.",
+        contact_email=contact_email.value if contact_email else "contacto@sga-cd.org",
+        social_links=social_links.value if social_links else "https://facebook.com/sga-cd,https://instagram.com/sga-cd",
+        footer_copy=footer_copy.value if footer_copy else "© 2025 SGA-CD. Todos los derechos reservados.",
+        hero_video_url=hero_video_url.value if hero_video_url else "assets/video/sga_cd_institutional_5min.mp4",
+        logo_url=logo_url.value if logo_url else "assets/images/sga_cd_official_logo.svg",
+        carousel_urls=carousel_urls.value if carousel_urls else "",
+        carousel_slides_json=carousel_slides_json.value if carousel_slides_json else "",
+        faq1_question=faq1_question.value if faq1_question else "¿Qué modalidades deportivas y culturales ofrece SGA-CD?",
+        faq1_answer=faq1_answer.value if faq1_answer else "SGA-CD administra Taekwondo, Fútbol, Baloncesto, Danza Joropo e Instrumentos Tradicionales.",
+        faq2_question=faq2_question.value if faq2_question else "¿Cómo se realiza la verificación de usuarios y roles?",
+        faq2_answer=faq2_answer.value if faq2_answer else "Mediante autenticación JWT, RBAC perimetral e integración con esquemas multi-tenant.",
+        plan_tier1_price=plan_tier1_price.value if plan_tier1_price else "$100 USD/mes — Entidades Públicas y Privadas B2B",
+        plan_tier2_price=plan_tier2_price.value if plan_tier2_price else "$20 USD/mes — Instructores y Profesores",
+        plan_grace_days=int(plan_grace_days.value) if plan_grace_days else 5,
+        seo_title=seo_title.value if seo_title else "SGA-CD — Plataforma Integral de Gestión Deportiva y Cultural",
+        seo_description=seo_description.value if seo_description else "Sistema de Gestión Académico, Deportivo y Cultural para Entidades Públicas y Privadas."
+    )
 
 
 @router.get("/public/landing", response_model=LandingSettings)
@@ -196,62 +233,51 @@ def get_public_landing_settings(
     db: Session = Depends(deps.get_db),
 ):
     """
-    Public Endpoint: Exposes commercial & visual landing settings for the public website.
-    Strictly excludes sensitive credentials, tokens, or private administration keys.
+    Public endpoint to fetch commercial Landing Page settings for the public website.
+    Safely exposed without authentication.
     """
+    hero_title = crud_settings.get_setting(db, "landing_hero_title")
+    hero_subtitle = crud_settings.get_setting(db, "landing_hero_subtitle")
+    contact_email = crud_settings.get_setting(db, "landing_contact_email")
+    social_links = crud_settings.get_setting(db, "landing_social_links")
+    footer_copy = crud_settings.get_setting(db, "landing_footer_copy")
+    hero_video_url = crud_settings.get_setting(db, "landing_hero_video_url")
+    logo_url = crud_settings.get_setting(db, "landing_logo_url")
+    carousel_urls = crud_settings.get_setting(db, "landing_carousel_urls")
+    carousel_slides_json = crud_settings.get_setting(db, "landing_carousel_slides_json")
+    faq1_question = crud_settings.get_setting(db, "landing_faq1_question")
+    faq1_answer = crud_settings.get_setting(db, "landing_faq1_answer")
+    faq2_question = crud_settings.get_setting(db, "landing_faq2_question")
+    faq2_answer = crud_settings.get_setting(db, "landing_faq2_answer")
+    plan_tier1_price = crud_settings.get_setting(db, "plan_tier1_price")
+    plan_tier2_price = crud_settings.get_setting(db, "plan_tier2_price")
+    plan_grace_days = crud_settings.get_setting(db, "plan_grace_days")
+    seo_title = crud_settings.get_setting(db, "landing_seo_title")
+    seo_description = crud_settings.get_setting(db, "landing_seo_description")
+
     return LandingSettings(
-        hero_title=crud_settings.get_setting(db, key="landing_hero_title").value if crud_settings.get_setting(db, key="landing_hero_title") else "SGA-CD: Gestión Integral Deportiva y Cultural",
-        hero_subtitle=crud_settings.get_setting(db, key="landing_hero_subtitle").value if crud_settings.get_setting(db, key="landing_hero_subtitle") else "Transforma la gestión de disciplinas deportivas y talleres culturales.",
-        contact_email=crud_settings.get_setting(db, key="landing_contact_email").value if crud_settings.get_setting(db, key="landing_contact_email") else "contacto@sgacd.gov.co",
-        social_links=crud_settings.get_setting(db, key="landing_social_links").value if crud_settings.get_setting(db, key="landing_social_links") else "https://wa.me/573000000000",
-        footer_copy=crud_settings.get_setting(db, key="landing_footer_copy").value if crud_settings.get_setting(db, key="landing_footer_copy") else "© 2025 SGA-CD. Todos los derechos reservados.",
-        hero_video_url=crud_settings.get_setting(db, key="landing_hero_video_url").value if crud_settings.get_setting(db, key="landing_hero_video_url") else "assets/video/sga_cd_institutional_5min.mp4",
-        logo_url=crud_settings.get_setting(db, key="landing_logo_url").value if crud_settings.get_setting(db, key="landing_logo_url") else "favicon.svg",
-        carousel_urls=crud_settings.get_setting(db, key="landing_carousel_urls").value if crud_settings.get_setting(db, key="landing_carousel_urls") else "",
-        carousel_slides_json=crud_settings.get_setting(db, key="landing_carousel_slides_json").value if crud_settings.get_setting(db, key="landing_carousel_slides_json") else "",
-        faq1_question=crud_settings.get_setting(db, key="landing_faq1_question").value if crud_settings.get_setting(db, key="landing_faq1_question") else "¿Qué es la suite SGA-CD?",
-        faq1_answer=crud_settings.get_setting(db, key="landing_faq1_answer").value if crud_settings.get_setting(db, key="landing_faq1_answer") else "Es la plataforma integrada para escuelas deportivas y talleres culturales.",
-        faq2_question=crud_settings.get_setting(db, key="landing_faq2_question").value if crud_settings.get_setting(db, key="landing_faq2_question") else "¿Cómo funciona el aislamiento multi-inquilino?",
-        faq2_answer=crud_settings.get_setting(db, key="landing_faq2_answer").value if crud_settings.get_setting(db, key="landing_faq2_answer") else "Cada entidad opera sobre una partición aislada cumpliendo normas ARCO.",
-        plan_tier1_price=crud_settings.get_setting(db, key="plan_tier1_price").value if crud_settings.get_setting(db, key="plan_tier1_price") else "199",
-        plan_tier2_price=crud_settings.get_setting(db, key="plan_tier2_price").value if crud_settings.get_setting(db, key="plan_tier2_price") else "29",
-        plan_grace_days=crud_settings.get_setting(db, key="plan_grace_days").value if crud_settings.get_setting(db, key="plan_grace_days") else "5",
-        seo_title=crud_settings.get_setting(db, key="landing_seo_title").value if crud_settings.get_setting(db, key="landing_seo_title") else "SGA-CD — Plataforma Integral para Escuelas Deportivas",
-        seo_description=crud_settings.get_setting(db, key="landing_seo_description").value if crud_settings.get_setting(db, key="landing_seo_description") else "SGA-CD optimiza la gestión deportiva y cultural con PWA offline."
+        hero_title=hero_title.value if hero_title else "SGA-CD — Sistema de Gestión Académico, Deportivo y Cultural",
+        hero_subtitle=hero_subtitle.value if hero_subtitle else "Plataforma de Vanguardia para Entidades Públicas y Privadas.",
+        contact_email=contact_email.value if contact_email else "contacto@sga-cd.org",
+        social_links=social_links.value if social_links else "https://facebook.com/sga-cd,https://instagram.com/sga-cd",
+        footer_copy=footer_copy.value if footer_copy else "© 2025 SGA-CD. Todos los derechos reservados.",
+        hero_video_url=hero_video_url.value if hero_video_url else "assets/video/sga_cd_institutional_5min.mp4",
+        logo_url=logo_url.value if logo_url else "assets/images/sga_cd_official_logo.svg",
+        carousel_urls=carousel_urls.value if carousel_urls else "",
+        carousel_slides_json=carousel_slides_json.value if carousel_slides_json else "",
+        faq1_question=faq1_question.value if faq1_question else "¿Qué modalidades deportivas y culturales ofrece SGA-CD?",
+        faq1_answer=faq1_answer.value if faq1_answer else "SGA-CD administra Taekwondo, Fútbol, Baloncesto, Danza Joropo e Instrumentos Tradicionales.",
+        faq2_question=faq2_question.value if faq2_question else "¿Cómo se realiza la verificación de usuarios y roles?",
+        faq2_answer=faq2_answer.value if faq2_answer else "Mediante autenticación JWT, RBAC perimetral e integración con esquemas multi-tenant.",
+        plan_tier1_price=plan_tier1_price.value if plan_tier1_price else "$100 USD/mes — Entidades Públicas y Privadas B2B",
+        plan_tier2_price=plan_tier2_price.value if plan_tier2_price else "$20 USD/mes — Instructores y Profesores",
+        plan_grace_days=int(plan_grace_days.value) if plan_grace_days else 5,
+        seo_title=seo_title.value if seo_title else "SGA-CD — Plataforma Integral de Gestión Deportiva y Cultural",
+        seo_description=seo_description.value if seo_description else "Sistema de Gestión Académico, Deportivo y Cultural para Entidades Públicas y Privadas."
     )
 
 
-@router.get("/settings/landing", response_model=LandingSettings)
-def get_landing_settings(
-    db: Session = Depends(deps.get_db),
-    current_user: models.Usuario = Depends(deps.role_required(["admin_general"])),
-):
-    """
-    Retrieve Landing Page settings for Admin.
-    """
-    return LandingSettings(
-        hero_title=crud_settings.get_setting(db, key="landing_hero_title").value if crud_settings.get_setting(db, key="landing_hero_title") else "SGA-CD: Gestión Integral Deportiva y Cultural",
-        hero_subtitle=crud_settings.get_setting(db, key="landing_hero_subtitle").value if crud_settings.get_setting(db, key="landing_hero_subtitle") else "Transforma la gestión de disciplinas deportivas y talleres culturales.",
-        contact_email=crud_settings.get_setting(db, key="landing_contact_email").value if crud_settings.get_setting(db, key="landing_contact_email") else "contacto@sgacd.gov.co",
-        social_links=crud_settings.get_setting(db, key="landing_social_links").value if crud_settings.get_setting(db, key="landing_social_links") else "https://wa.me/573000000000",
-        footer_copy=crud_settings.get_setting(db, key="landing_footer_copy").value if crud_settings.get_setting(db, key="landing_footer_copy") else "© 2025 SGA-CD. Todos los derechos reservados.",
-        hero_video_url=crud_settings.get_setting(db, key="landing_hero_video_url").value if crud_settings.get_setting(db, key="landing_hero_video_url") else "assets/video/sga_cd_institutional_5min.mp4",
-        logo_url=crud_settings.get_setting(db, key="landing_logo_url").value if crud_settings.get_setting(db, key="landing_logo_url") else "favicon.svg",
-        carousel_urls=crud_settings.get_setting(db, key="landing_carousel_urls").value if crud_settings.get_setting(db, key="landing_carousel_urls") else "",
-        carousel_slides_json=crud_settings.get_setting(db, key="landing_carousel_slides_json").value if crud_settings.get_setting(db, key="landing_carousel_slides_json") else "",
-        faq1_question=crud_settings.get_setting(db, key="landing_faq1_question").value if crud_settings.get_setting(db, key="landing_faq1_question") else "¿Qué es la suite SGA-CD?",
-        faq1_answer=crud_settings.get_setting(db, key="landing_faq1_answer").value if crud_settings.get_setting(db, key="landing_faq1_answer") else "Es la plataforma integrada para escuelas deportivas y talleres culturales.",
-        faq2_question=crud_settings.get_setting(db, key="landing_faq2_question").value if crud_settings.get_setting(db, key="landing_faq2_question") else "¿Cómo funciona el aislamiento multi-inquilino?",
-        faq2_answer=crud_settings.get_setting(db, key="landing_faq2_answer").value if crud_settings.get_setting(db, key="landing_faq2_answer") else "Cada entidad opera sobre una partición aislada cumpliendo normas ARCO.",
-        plan_tier1_price=crud_settings.get_setting(db, key="plan_tier1_price").value if crud_settings.get_setting(db, key="plan_tier1_price") else "199",
-        plan_tier2_price=crud_settings.get_setting(db, key="plan_tier2_price").value if crud_settings.get_setting(db, key="plan_tier2_price") else "29",
-        plan_grace_days=crud_settings.get_setting(db, key="plan_grace_days").value if crud_settings.get_setting(db, key="plan_grace_days") else "5",
-        seo_title=crud_settings.get_setting(db, key="landing_seo_title").value if crud_settings.get_setting(db, key="landing_seo_title") else "SGA-CD — Plataforma Integral para Escuelas Deportivas",
-        seo_description=crud_settings.get_setting(db, key="landing_seo_description").value if crud_settings.get_setting(db, key="landing_seo_description") else "SGA-CD optimiza la gestión deportiva y cultural con PWA offline."
-    )
-
-
-@router.post("/settings/landing")
+@router.put("/settings/landing")
 def update_landing_settings(
     *,
     db: Session = Depends(deps.get_db),
@@ -288,11 +314,43 @@ def generate_predis_media(
     *,
     payload: PredisMediaRequest,
     db: Session = Depends(deps.get_db),
-    current_user: models.Usuario = Depends(deps.role_required(["admin_general"])),
+    current_user: models.Usuario = Depends(deps.get_current_active_user),
 ):
     """
     Generate video/image/reel assets using Predis.ai-level automated script writing and HyperFrames rendering.
+    Enforces role authorization (admin_general or admin_empresa) and dynamic commercial capability protection
+    (ai_images, ai_carousels, ai_reels) based on requested media format before AI invocation.
     """
+    # 1. Enforce Role Authorization
+    deps.role_required(["admin_general", "admin_empresa"])(current_user=current_user)
+
+    # 2. Validate Media Format & Dynamic Commercial Plan Capability Protection
+    format_capability_map = {
+        "reel_9_16": "ai_reels",
+        "post_1_1": "ai_images",
+        "banner_16_9": "ai_images",
+        "carousel_multi": "ai_carousels"
+    }
+
+    if payload.format not in format_capability_map:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Unsupported format '{payload.format}'. Valid formats are: {list(format_capability_map.keys())}"
+        )
+
+    required_cap = format_capability_map[payload.format]
+
+    # Enforce capability gate BEFORE initiating AIRouterService or rendering pipeline
+    deps.require_plan_capability(required_cap)(db=db, current_user=current_user)
+
+    # Reserve monthly quota
+    PlanCapabilityService.check_and_consume_quota(
+        db=db,
+        inquilino_id=current_user.inquilino_id,
+        capability_name=required_cap,
+        amount=1
+    )
+
     logger.info(f"Generating Predis.ai media for area={payload.area}, format={payload.format}")
 
     posters = {
@@ -307,7 +365,11 @@ def generate_predis_media(
 
     # Invocación al AIRouterService para optimizar el copy publicitario
     prompt_text = f"Genera un título y copy promocional para {payload.area.replace('_', ' ')}. Prompt: {payload.prompt}"
-    router_res = ai_router.generate_text(prompt=prompt_text, task="crm_marketing")
+    try:
+        router_res = ai_router.generate_text(prompt=prompt_text, task="crm_marketing")
+    except Exception:
+        PlanCapabilityService.release_quota(db=db, inquilino_id=current_user.inquilino_id, capability_name=required_cap, amount=1)
+        raise
 
     title = f"¡INSCRIPCIONES ABIERTAS EN {payload.area.replace('_', ' ').upper()} 2025!"
     copy = f"{router_res.get('text', '')} — Formación integral en SGA-CD."
