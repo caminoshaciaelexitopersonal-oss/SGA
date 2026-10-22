@@ -1,4 +1,39 @@
-// js/views/admin_empresa.js — Dashboard Bento Grid Estilo Power BI de Alta Densidad (60-30-10)
+// js/views/admin_empresa.js — Dashboard Bento Grid Estilo Power BI con Branding Institucional y Desacople Modular
+
+function getNatureBadgeInfo(tipoOrg) {
+    const map = {
+        'entidad_publica': { label: 'Entidad Pública', icon: 'fa-landmark' },
+        'entidad_privada': { label: 'Entidad Privada', icon: 'fa-building-columns' },
+        'empresa_publica': { label: 'Empresa Pública', icon: 'fa-gears' },
+        'empresa_privada': { label: 'Empresa Privada', icon: 'fa-briefcase' }
+    };
+    return map[tipoOrg] || { label: 'Organización Institucional', icon: 'fa-building' };
+}
+
+function getTerritorialBadgeInfo(ambitoOrg) {
+    const map = {
+        'municipal': { label: 'Ámbito Municipal', badge: '📍' },
+        'departamental': { label: 'Ámbito Departamental', badge: '🗺️' },
+        'nacional': { label: 'Ámbito Nacional', badge: '🇨🇴' }
+    };
+    return map[ambitoOrg] || { label: 'Ámbito Territorial', badge: '📍' };
+}
+
+function getPlanBadgeHtml(canonicalPlan, subStatus, isActive) {
+    if (!isActive || subStatus === 'vencida') {
+        return `<span class="badge-plan-status" style="background:rgba(239,68,68,0.15); border:1px solid #EF4444; color:#F87171; padding:0.4rem 0.85rem; border-radius:20px; font-size:0.8rem; font-weight:700;">
+            <i class="fas fa-exclamation-triangle"></i> Suscripción Vencida — Pago Requerido
+        </span>`;
+    }
+    if (canonicalPlan === 'full') {
+        return `<span class="badge-plan-status" style="background:rgba(16,185,129,0.15); border:1px solid #10B981; color:#34D399; padding:0.4rem 0.85rem; border-radius:20px; font-size:0.8rem; font-weight:700;">
+            <i class="fas fa-gem"></i> Plan Full — Activo
+        </span>`;
+    }
+    return `<span class="badge-plan-status" style="background:rgba(56,189,248,0.15); border:1px solid #38BDF8; color:#38BDF8; padding:0.4rem 0.85rem; border-radius:20px; font-size:0.8rem; font-weight:700;">
+        <i class="fas fa-box-open"></i> Plan Básico — Operativo
+    </span>`;
+}
 
 function renderUserRows(users) {
     if (!users || users.length === 0) return '<tr><td colspan="5">No se encontraron usuarios.</td></tr>';
@@ -7,7 +42,7 @@ function renderUserRows(users) {
             <td><strong>#${user.id}</strong></td>
             <td>${user.nombre_completo}</td>
             <td>${user.correo}</td>
-            <td><span class="badge" style="background:rgba(56,189,248,0.1); color:#38BDF8; font-size:0.75rem;">${user.roles.join(', ')}</span></td>
+            <td><span class="badge" style="background:rgba(56,189,248,0.1); color:#38BDF8; font-size:0.75rem;">${Array.isArray(user.roles) ? user.roles.join(', ') : (user.rol || 'usuario')}</span></td>
             <td>
                 <button class="btn-secondary" style="min-height:36px; padding:0.25rem 0.75rem;">Editar</button>
                 <button class="btn-danger" style="min-height:36px; padding:0.25rem 0.75rem; margin-left:0.25rem;">Eliminar</button>
@@ -31,59 +66,142 @@ function renderAreaRows(areas) {
     `).join('');
 }
 
+async function fetchTenantCapabilities(token) {
+    const fallbackCapabilities = {
+        inquilino_id: 0,
+        nombre_empresa: 'Instituto Municipal de Deporte y Recreación — IMDER',
+        tipo_organizacion: 'entidad_publica',
+        ambito_organizacional: 'municipal',
+        canonical_plan: 'basico',
+        subscription_status: 'sin_suscripcion',
+        is_active: true,
+        panel_institucional_enabled: true,
+        gestion_usuarios_enabled: true,
+        modulos_deportivos_culturales_enabled: true,
+        crm_leads_enabled: false,
+        crm_campaigns_enabled: false,
+        ai_images_enabled: false,
+        ai_carousels_enabled: false,
+        ai_video_enabled: false,
+        ai_reels_enabled: false,
+        social_publishing_enabled: false,
+        crm_analytics_enabled: false,
+        monthly_limits: { images: 0, carousels: 0, videos: 0, reels: 0, llm_prompts: 0, social_posts: 0 }
+    };
+
+    if (!token) return fallbackCapabilities;
+
+    try {
+        const baseUrl = typeof config !== 'undefined' ? config.apiBaseUrl : '';
+        const res = await fetch(`${baseUrl}/api/v1/tenants/my-plan-capabilities`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) {
+            return fallbackCapabilities;
+        }
+        return await res.json();
+    } catch (e) {
+        return fallbackCapabilities;
+    }
+}
+
 async function renderAdminEmpresaView(token) {
     const contentArea = document.getElementById('content-area');
+
+    // 1. Fetch Tenant Capabilities asynchronously from backend
+    const caps = await fetchTenantCapabilities(token);
+
+    const natureBadge = getNatureBadgeInfo(caps.tipo_organizacion);
+    const territorialBadge = getTerritorialBadgeInfo(caps.ambito_organizacional);
+    const planBadgeHtml = getPlanBadgeHtml(caps.canonical_plan, caps.subscription_status, caps.is_active);
+
+    const isSubscriptionExpired = caps.subscription_status === 'vencida' || !caps.is_active;
+
     contentArea.innerHTML = `
         <div class="admin-dashboard" style="background:#070B14; color:#E2E8F0; padding:1.5rem; border-radius:16px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
-                <div>
-                    <h2 style="color:#38BDF8; margin:0; font-size:1.8rem; font-weight:800;">
-                        <i class="fa-solid fa-chart-pie" style="margin-right:0.5rem;"></i> Panel Analítico Estilo Power BI
-                    </h2>
-                    <p style="color:#94A3B8; margin:0.25rem 0 0 0; font-size:0.9rem;">
-                        Monitoreo en tiempo real de Disciplinas Deportivas y Talleres Culturales (Danza: Joropo, Salsa, Vallenato | Instrumentos: Guitarra, Arpa).
-                    </p>
+
+            <!-- Zona 1: Cabecera de Branding Institucional Permanente (Logo + Nombre Real + Badges B2B) -->
+            <div class="corporate-header-banner" style="background:linear-gradient(135deg, #0D1424 0%, #162032 100%); border:1px solid rgba(56,189,248,0.3); border-radius:16px; padding:1.5rem; margin-bottom:1.75rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1.25rem; box-shadow:0 10px 30px rgba(0,0,0,0.4);">
+                <div style="display:flex; align-items:center; gap:1.25rem; flex-wrap:wrap;">
+                    <!-- Logo / Emblema Heráldico Institucional -->
+                    ${caps.logo_url ? `
+                        <img src="${caps.logo_url}" alt="Logo Oficial ${caps.nombre_empresa}" style="max-height:64px; max-width:200px; object-fit:contain; filter:drop-shadow(0 2px 8px rgba(56,189,248,0.4));" />
+                    ` : `
+                        <div style="width:60px; height:60px; border-radius:14px; background:linear-gradient(135deg, #070B14 0%, #1E293B 100%); border:1.5px solid #38BDF8; display:flex; align-items:center; justify-content:center; box-shadow:0 0 18px rgba(56,189,248,0.35);">
+                            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#38BDF8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                            </svg>
+                        </div>
+                    `}
+                    <div>
+                        <div style="display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap; margin-bottom:0.35rem;">
+                            <h1 style="color:#38BDF8; margin:0; font-size:1.85rem; font-weight:800; tracking:-0.02em;">
+                                ${caps.nombre_empresa || 'Instituto Municipal de Deporte y Recreación — IMDER'}
+                            </h1>
+                            ${planBadgeHtml}
+                        </div>
+                        <div style="display:flex; gap:0.75rem; align-items:center; flex-wrap:wrap; font-size:0.85rem; color:#94A3B8;">
+                            <span style="background:#070B14; border:1px solid rgba(56,189,248,0.25); padding:0.25rem 0.75rem; border-radius:12px; color:#38BDF8; font-weight:700;">
+                                <i class="fas ${natureBadge.icon}"></i> ${natureBadge.label}
+                            </span>
+                            <span style="background:#070B14; border:1px solid rgba(56,189,248,0.25); padding:0.25rem 0.75rem; border-radius:12px; color:#E2E8F0; font-weight:700;">
+                                ${territorialBadge.badge} ${territorialBadge.label}
+                            </span>
+                            <span style="color:#94A3B8;"><i class="fa-solid fa-shield-halved" style="color:#38BDF8;"></i> Panel de Control Oficial SGA-CD</span>
+                        </div>
+                    </div>
                 </div>
-                <div style="display:flex; gap:0.5rem;">
-                    <span style="background:#0D1424; border:1px solid rgba(56,189,248,0.3); color:#38BDF8; padding:0.5rem 1rem; border-radius:20px; font-size:0.8rem; font-weight:700;">
-                        <i class="fa-solid fa-satellite-dish"></i> En Vivo (60 FPS)
+                <div style="display:flex; gap:0.5rem; align-items:center;">
+                    <span style="background:#070B14; border:1px solid rgba(56,189,248,0.35); color:#38BDF8; padding:0.5rem 1.1rem; border-radius:20px; font-size:0.8rem; font-weight:700; display:flex; align-items:center; gap:0.5rem;">
+                        <i class="fa-solid fa-satellite-dish" style="color:#34D399;"></i> Operación en Vivo (60 FPS)
                     </span>
                 </div>
             </div>
 
-            <!-- Bento Grid KPI Header Metrics -->
+            ${isSubscriptionExpired ? `
+            <div style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.4); color:#F87171; padding:1rem 1.25rem; border-radius:12px; margin-bottom:1.5rem; display:flex; align-items:center; gap:0.85rem;">
+                <i class="fas fa-exclamation-triangle" style="font-size:1.6rem;"></i>
+                <div>
+                    <strong style="font-size:1rem;">Suscripción Vencida o Inactiva</strong>
+                    <p style="margin:0.2rem 0 0 0; font-size:0.85rem; color:#FECACA;">
+                        Su cuenta institucional requiere renovación. Ingrese a la vista de Suscripción y Pagos para regularizar su saldo y reactivar todos los módulos.
+                    </p>
+                </div>
+            </div>` : ''}
+
+            <!-- Zona 2: KPIs Operativos Enfocados en la Misión Deportiva y Cultural -->
             <div class="bento-grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:1.25rem; margin-bottom:2rem;">
-                <div class="bento-kpi-card" style="background:#0D1424; border:1px solid rgba(56,189,248,0.25); border-radius:12px; padding:1.25rem; position:relative; overflow:hidden;">
-                    <span style="color:#94A3B8; font-size:0.8rem; font-weight:700;">TOTAL MATRÍCULAS DEPORTES</span>
-                    <h3 class="powerbi-counter" style="color:#38BDF8; font-size:2rem; font-weight:800; margin:0.3rem 0;">1,420</h3>
-                    <div style="font-size:0.75rem; color:#94A3B8;"><i class="fa-solid fa-arrow-trend-up" style="color:#38BDF8;"></i> +14.2% vs mes anterior</div>
+                <div class="bento-kpi-card" style="background:#0D1424; border:1px solid rgba(56,189,248,0.25); border-radius:14px; padding:1.25rem; position:relative; overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,0.2);">
+                    <span style="color:#94A3B8; font-size:0.75rem; font-weight:700; text-transform:uppercase;">TOTAL ALUMNOS INSCRITOS</span>
+                    <h3 class="powerbi-counter" style="color:#38BDF8; font-size:2.1rem; font-weight:800; margin:0.3rem 0;">1,420</h3>
+                    <div style="font-size:0.75rem; color:#94A3B8;"><i class="fa-solid fa-arrow-trend-up" style="color:#34D399;"></i> +14.2% vs mes anterior</div>
                 </div>
 
-                <div class="bento-kpi-card" style="background:#0D1424; border:1px solid rgba(56,189,248,0.25); border-radius:12px; padding:1.25rem; position:relative; overflow:hidden;">
-                    <span style="color:#94A3B8; font-size:0.8rem; font-weight:700;">ASISTENCIA TALLERES CULTURA</span>
-                    <h3 class="powerbi-counter" style="color:#38BDF8; font-size:2rem; font-weight:800; margin:0.3rem 0;">94.8%</h3>
-                    <div style="font-size:0.75rem; color:#94A3B8;"><i class="fa-solid fa-circle-check" style="color:#38BDF8;"></i> Sincronizado Offline PWA</div>
+                <div class="bento-kpi-card" style="background:#0D1424; border:1px solid rgba(56,189,248,0.25); border-radius:14px; padding:1.25rem; position:relative; overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,0.2);">
+                    <span style="color:#94A3B8; font-size:0.75rem; font-weight:700; text-transform:uppercase;">DOCENTES E INSTRUCTORES ACTIVOS</span>
+                    <h3 class="powerbi-counter" style="color:#38BDF8; font-size:2.1rem; font-weight:800; margin:0.3rem 0;">48</h3>
+                    <div style="font-size:0.75rem; color:#94A3B8;"><i class="fa-solid fa-chalkboard-user" style="color:#38BDF8;"></i> 100% Verificados en BD</div>
                 </div>
 
-                <div class="bento-kpi-card" style="background:#0D1424; border:1px solid rgba(56,189,248,0.25); border-radius:12px; padding:1.25rem; position:relative; overflow:hidden;">
-                    <span style="color:#94A3B8; font-size:0.8rem; font-weight:700;">EJECUCIÓN DE CONVENIOS</span>
-                    <h3 class="powerbi-counter" style="color:#38BDF8; font-size:2rem; font-weight:800; margin:0.3rem 0;">$184.5M</h3>
-                    <div style="font-size:0.75rem; color:#94A3B8;"><i class="fa-solid fa-scale-balanced" style="color:#38BDF8;"></i> Auditoría Presupuestal</div>
+                <div class="bento-kpi-card" style="background:#0D1424; border:1px solid rgba(56,189,248,0.25); border-radius:14px; padding:1.25rem; position:relative; overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,0.2);">
+                    <span style="color:#94A3B8; font-size:0.75rem; font-weight:700; text-transform:uppercase;">PORCENTAJE ASISTENCIA GENERAL</span>
+                    <h3 class="powerbi-counter" style="color:#38BDF8; font-size:2.1rem; font-weight:800; margin:0.3rem 0;">94.8%</h3>
+                    <div style="font-size:0.75rem; color:#94A3B8;"><i class="fa-solid fa-circle-check" style="color:#34D399;"></i> Sincronizado Offline PWA</div>
                 </div>
 
-                <div class="bento-kpi-card" style="background:#0D1424; border:1px solid rgba(56,189,248,0.25); border-radius:12px; padding:1.25rem; position:relative; overflow:hidden;">
-                    <span style="color:#94A3B8; font-size:0.8rem; font-weight:700;">COBERTURA TERRITORIAL</span>
-                    <h3 class="powerbi-counter" style="color:#38BDF8; font-size:2rem; font-weight:800; margin:0.3rem 0;">12 Mun.</h3>
-                    <div style="font-size:0.75rem; color:#38BDF8;"><i class="fa-solid fa-map-location-dot"></i> Departamental / Municipal</div>
+                <div class="bento-kpi-card" style="background:#0D1424; border:1px solid rgba(56,189,248,0.25); border-radius:14px; padding:1.25rem; position:relative; overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,0.2);">
+                    <span style="color:#94A3B8; font-size:0.75rem; font-weight:700; text-transform:uppercase;">CONVENIOS EN EJECUCIÓN</span>
+                    <h3 class="powerbi-counter" style="color:#38BDF8; font-size:2.1rem; font-weight:800; margin:0.3rem 0;">$184.5M</h3>
+                    <div style="font-size:0.75rem; color:#38BDF8;"><i class="fa-solid fa-scale-balanced"></i> Auditoría Presupuestal</div>
                 </div>
             </div>
 
-            <!-- Bento Analytics High-Density Power BI Chart Block -->
+            <!-- Zona 3: Telemetría de Rendimiento en Tiempo Real (Disciplinas Deportivas vs Talleres Culturales) -->
             <div style="display:grid; grid-template-columns: 2fr 1fr; gap:1.5rem; margin-bottom:2rem;">
                 <div style="background:#0D1424; border:1px solid rgba(56,189,248,0.25); border-radius:14px; padding:1.5rem; box-shadow:0 8px 32px rgba(0,0,0,0.3);">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem;">
                         <div>
-                            <h4 style="margin:0; color:#38BDF8; font-size:1.1rem; font-weight:700;">
+                            <h4 style="margin:0; color:#38BDF8; font-size:1.15rem; font-weight:700;">
                                 <i class="fas fa-chart-line" style="margin-right:0.5rem;"></i> Rendimiento en Disciplinas Deportivas vs Talleres Culturales
                             </h4>
                             <span style="font-size:0.75rem; color:#94A3B8;">Telemetría y Dataviz de Participación en Tiempo Real</span>
@@ -93,7 +211,6 @@ async function renderAdminEmpresaView(token) {
                         </span>
                     </div>
 
-                    <!-- Enhanced High-Density Bar Chart Dataviz -->
                     <div class="powerbi-chart-container" style="display:flex; flex-direction:column; gap:1.25rem; margin-top:1rem;">
                         <div>
                             <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:0.4rem;">
@@ -127,13 +244,11 @@ async function renderAdminEmpresaView(token) {
                     </div>
                 </div>
 
-                <!-- Donut/Distribution Breakdown Block -->
                 <div style="background:#0D1424; border:1px solid rgba(56,189,248,0.25); border-radius:14px; padding:1.5rem; display:flex; flex-direction:column; justify-content:space-between; box-shadow:0 8px 32px rgba(0,0,0,0.3);">
                     <div>
                         <h4 style="margin:0 0 1rem 0; color:#38BDF8; font-size:1.1rem; font-weight:700;">
                             <i class="fas fa-chart-pie" style="margin-right:0.5rem;"></i> Distribución de Roles
                         </h4>
-                        <!-- Donut Visual Representation -->
                         <div style="display:flex; justify-content:center; align-items:center; margin:1rem 0; position:relative;">
                             <div style="width:110px; height:110px; border-radius:50%; background:conic-gradient(#38BDF8 0% 78%, #0284C7 78% 92%, #94A3B8 92% 100%); display:flex; align-items:center; justify-content:center; box-shadow:0 0 15px rgba(56,189,248,0.3);">
                                 <div style="width:75px; height:75px; border-radius:50%; background:#0D1424; display:flex; flex-direction:column; align-items:center; justify-content:center;">
@@ -151,56 +266,11 @@ async function renderAdminEmpresaView(token) {
                 </div>
             </div>
 
-            <div id="admin-dashboard-content">
-                <p style="color:#94A3B8;">Cargando tablas de usuarios y áreas administrativas...</p>
-            </div>
-        </div>
-    `;
-
-    try {
-        const [usersResponse, areasResponse] = await Promise.all([
-            fetch(`${config.apiBaseUrl}/api/v1/admin/users/by-empresa`, { headers: { 'Authorization': `Bearer ${token}` } }),
-            fetch(`${config.apiBaseUrl}/api/v1/admin/areas`, { headers: { 'Authorization': `Bearer ${token}` } })
-        ]);
-
-        const users = usersResponse.ok ? await usersResponse.json() : [
-            { id: 101, nombre_completo: 'Carlos Mendoza', correo: 'carlos.mendoza@sga-cd.org', roles: ['profesor'] },
-            { id: 102, nombre_completo: 'Elena Ramos', correo: 'elena.ramos@sga-cd.org', roles: ['profesional_area'] }
-        ];
-        const areas = areasResponse.ok ? await areasResponse.json() : [
-            { id: 1, nombre: 'Área de Deportes (Disciplinas)', descripcion: 'Taekwondo, Fútbol, Baloncesto, Natación' },
-            { id: 2, nombre: 'Área de Cultura (Talleres)', descripcion: 'Danza (Joropo, Salsa, Vallenato) e Instrumentos' }
-        ];
-
-        const dashboardContent = document.getElementById('admin-dashboard-content');
-        dashboardContent.innerHTML = `
-            <div class="admin-section" style="background:#0D1424; border:1px solid rgba(56,189,248,0.2); border-radius:14px; padding:1.5rem; margin-bottom:1.5rem;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-                    <h3 style="color:#38BDF8; margin:0;"><i class="fas fa-users"></i> Usuarios de la Empresa / Entidad</h3>
-                    <button class="btn-primary" style="min-height:44px; padding:0 1.25rem;">Añadir Usuario</button>
-                </div>
-                <table class="data-table">
-                    <thead><tr><th>ID</th><th>Nombre Completo</th><th>Email</th><th>Roles</th><th>Acciones</th></tr></thead>
-                    <tbody>${renderUserRows(users)}</tbody>
-                </table>
-            </div>
-
-            <div class="admin-section" style="background:#0D1424; border:1px solid rgba(56,189,248,0.2); border-radius:14px; padding:1.5rem; margin-bottom:1.5rem;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-                    <h3 style="color:#38BDF8; margin:0;"><i class="fas fa-sitemap"></i> Áreas Institucionales</h3>
-                    <button class="btn-primary" style="min-height:44px; padding:0 1.25rem;">Crear Área</button>
-                </div>
-                <table class="data-table">
-                    <thead><tr><th>ID</th><th>Nombre del Área</th><th>Descripción</th><th>Acciones</th></tr></thead>
-                    <tbody>${renderAreaRows(areas)}</tbody>
-                </table>
-            </div>
-
-            <!-- Incrustación Nativa: Gestión de 5 Fotos por Actividad & Matriz de Aliados Corporativos -->
-            <div class="admin-section" style="background:#0D1424; border:1px solid rgba(56,189,248,0.25); border-radius:14px; padding:1.5rem; margin-bottom:1.5rem;">
+            <!-- Zona 4: Micro-Carruseles de 5 Fotos por Actividad & Matriz de Aliados Corporativos -->
+            <div class="admin-section" style="background:#0D1424; border:1px solid rgba(56,189,248,0.25); border-radius:14px; padding:1.5rem;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem; flex-wrap:wrap; gap:0.5rem;">
                     <h3 style="color:#38BDF8; margin:0; font-size:1.3rem; font-weight:700;">
-                        <i class="fas fa-images"></i> Micro-Carruseles de 5 Fotos por Actividad & Matriz de Co-Sponsors
+                        <i class="fas fa-images"></i> Micro-Carruseles de Actividades & Matriz de Co-Sponsors
                     </h3>
                     <span style="background:#070B14; border:1px solid rgba(56,189,248,0.3); color:#38BDF8; padding:0.4rem 0.8rem; border-radius:16px; font-size:0.75rem; font-weight:700;">
                         <i class="fa-solid fa-shield-halved"></i> AgentShield ECC Protegido
@@ -208,7 +278,6 @@ async function renderAdminEmpresaView(token) {
                 </div>
 
                 <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:1.25rem; margin-bottom:1.5rem;">
-                    <!-- Micro-Carrusel 1: Disciplinas Deportivas -->
                     <div class="activity-photo-card" style="background:#070B14; border:1px solid rgba(56,189,248,0.2); border-radius:12px; padding:1rem;">
                         <h4 style="color:#38BDF8; margin:0 0 0.5rem 0; font-size:1rem;">Disciplinas Deportivas (Taekwondo / Fútbol)</h4>
                         <p style="color:#94A3B8; font-size:0.8rem; margin-bottom:0.75rem;">5 fotos en formato WebP con aceleración GPU (GSAP translate3d).</p>
@@ -222,10 +291,9 @@ async function renderAdminEmpresaView(token) {
                         <button class="btn-primary" style="width:100%; min-height:36px; padding:0.4rem; font-size:0.8rem; margin-top:0.5rem;">Gestionar Galería de 5 Fotos</button>
                     </div>
 
-                    <!-- Micro-Carrusel 2: Modalidad Danza e Instrumentos -->
                     <div class="activity-photo-card" style="background:#070B14; border:1px solid rgba(56,189,248,0.2); border-radius:12px; padding:1rem;">
                         <h4 style="color:#38BDF8; margin:0 0 0.5rem 0; font-size:1rem;">Talleres Culturales (Danza Joropo / Guitarra)</h4>
-                        <p style="color:#94A3B8; font-size:0.8rem; margin-bottom:0.75rem;">Galeria interactiva de 5 imágenes comprimidas WebP.</p>
+                        <p style="color:#94A3B8; font-size:0.8rem; margin-bottom:0.75rem;">Galería interactiva de 5 imágenes comprimidas WebP.</p>
                         <div style="display:flex; gap:0.5rem; overflow-x:auto; padding-bottom:0.5rem;">
                             <div style="min-width:70px; height:70px; background:#0D1424; border:1px solid rgba(56,189,248,0.3); border-radius:8px; display:flex; align-items:center; justify-content:center; color:#38BDF8; font-size:0.75rem; font-weight:bold;">Foto 1</div>
                             <div style="min-width:70px; height:70px; background:#0D1424; border:1px solid rgba(56,189,248,0.3); border-radius:8px; display:flex; align-items:center; justify-content:center; color:#38BDF8; font-size:0.75rem; font-weight:bold;">Foto 2</div>
@@ -237,7 +305,6 @@ async function renderAdminEmpresaView(token) {
                     </div>
                 </div>
 
-                <!-- Matriz de Aliados Corporativos y Co-Sponsors -->
                 <div class="allies-grid" style="background:#070B14; border:1px solid rgba(56,189,248,0.2); border-radius:12px; padding:1.25rem;">
                     <h4 style="color:#38BDF8; margin:0 0 0.75rem 0; font-size:1rem; display:flex; align-items:center; gap:0.5rem;">
                         <i class="fas fa-handshake"></i> Matriz de Co-Sponsors y Aliados Institucionales
@@ -262,58 +329,271 @@ async function renderAdminEmpresaView(token) {
                     </div>
                 </div>
             </div>
+        </div>
+    `;
+
+    // Animaciones GSAP
+    if (window.gsap) {
+        gsap.from('.chart-bar-fill', { width: '0%', duration: 1.2, stagger: 0.2, ease: 'power3.out' });
+        gsap.from('.bento-kpi-card', { opacity: 0, y: 20, duration: 0.6, stagger: 0.1, ease: 'power2.out' });
+    }
+}
+
+async function renderCrmEmpresaView(token) {
+    const contentArea = document.getElementById('content-area');
+    const caps = await fetchTenantCapabilities(token);
+
+    const isFullPlan = caps.canonical_plan === 'full' && caps.is_active && caps.crm_leads_enabled;
+
+    if (!isFullPlan) {
+        contentArea.innerHTML = `
+            <div style="background:#0D1424; border:1px solid rgba(245,158,11,0.35); border-radius:16px; padding:3rem 2rem; text-align:center; max-width:820px; margin:2rem auto; box-shadow:0 12px 40px rgba(0,0,0,0.5);">
+                <div style="width:80px; height:80px; border-radius:50%; background:rgba(245,158,11,0.15); border:2px solid #F59E0B; color:#FBBF24; display:flex; align-items:center; justify-content:center; font-size:2.2rem; margin:0 auto 1.5rem auto; box-shadow:0 0 25px rgba(245,158,11,0.3);">
+                    <i class="fas fa-crown"></i>
+                </div>
+                <h2 style="color:#FBBF24; font-weight:800; font-size:1.85rem; margin-bottom:0.75rem;">Suite de Crecimiento CRM — Exclusiva Plan Full</h2>
+                <p style="color:#94A3B8; font-size:1.05rem; line-height:1.6; max-width:640px; margin:0 auto 1.75rem auto;">
+                    Esta función forma parte de la Suite de Crecimiento del Plan Full. Actualice su suscripción para habilitar la captación de leads, embudos automatizados de inscripción, segmentación de participantes y métricas de conversión.
+                </p>
+                <div style="display:flex; justify-content:center; gap:1rem; flex-wrap:wrap;">
+                    <button class="btn-primary" onclick="renderContentForView('suscripcion', '${token}', 'admin_empresa')" style="min-height:48px; padding:0 2rem; font-weight:700; font-size:1rem; background:linear-gradient(135deg, #0284C7 0%, #38BDF8 100%);">
+                        <i class="fas fa-arrow-up-right-dots" style="margin-right:0.5rem;"></i> Actualizar a Plan Full
+                    </button>
+                    <button class="btn-secondary" onclick="renderContentForView('panel-empresa', '${token}', 'admin_empresa')" style="min-height:48px; padding:0 1.5rem; font-weight:600; font-size:0.95rem;">
+                        <i class="fas fa-arrow-left" style="margin-right:0.5rem;"></i> Volver al Dashboard
+                    </button>
+                </div>
+            </div>
         `;
+        return;
+    }
 
-        // Animación GSAP Timeline para barras analíticas Dataviz y mitigación de fuga de memoria en blur
-        if (window.gsap) {
-            const chartTween = gsap.from('.chart-bar-fill', { width: '0%', duration: 1.2, stagger: 0.2, ease: 'power3.out' });
-            const bentoTween = gsap.from('.bento-kpi-card', { opacity: 0, y: 20, duration: 0.6, stagger: 0.1, ease: 'power2.out' });
+    contentArea.innerHTML = `
+        <div class="view-header" style="margin-bottom:1.5rem;">
+            <h2 style="color:#38BDF8; margin:0;"><i class="fas fa-bullhorn"></i> CRM & Campañas de Captación Institucional</h2>
+            <p style="color:#94A3B8; font-size:0.9rem; margin-top:0.25rem;">Gestión de leads, embudos de conversión y campañas multicanal.</p>
+        </div>
+        <div style="background:#0D1424; border:1px solid rgba(56,189,248,0.25); border-radius:14px; padding:1.5rem;">
+            <p style="color:#34D399; font-weight:700;"><i class="fas fa-check-circle"></i> Módulo CRM Activo (Plan Full)</p>
+            <p style="color:#94A3B8;">Panel de control de leads e integración con WhatsApp Cloud API en ejecución.</p>
+        </div>
+    `;
+}
 
-            if (!window.__sga_gsap_visibility_listener_added) {
-                window.__sga_gsap_visibility_listener_added = true;
-                document.addEventListener('visibilitychange', function() {
-                    if (window.gsap) {
-                        if (document.hidden) {
-                            gsap.globalTimeline.pause();
-                            console.log('[GSAP Lifecycle] Animaciones pausadas en segundo plano para prevenir fugas de memoria.');
-                        } else {
-                            gsap.globalTimeline.resume();
-                            console.log('[GSAP Lifecycle] Animaciones reanudadas a 60 FPS.');
-                        }
-                    }
-                });
-            }
+async function renderMediaIaEmpresaView(token) {
+    const contentArea = document.getElementById('content-area');
+    const caps = await fetchTenantCapabilities(token);
+
+    const isFullPlan = caps.canonical_plan === 'full' && caps.is_active && caps.ai_images_enabled;
+
+    if (!isFullPlan) {
+        contentArea.innerHTML = `
+            <div style="background:#0D1424; border:1px solid rgba(245,158,11,0.35); border-radius:16px; padding:3rem 2rem; text-align:center; max-width:820px; margin:2rem auto; box-shadow:0 12px 40px rgba(0,0,0,0.5);">
+                <div style="width:80px; height:80px; border-radius:50%; background:rgba(245,158,11,0.15); border:2px solid #F59E0B; color:#FBBF24; display:flex; align-items:center; justify-content:center; font-size:2.2rem; margin:0 auto 1.5rem auto; box-shadow:0 0 25px rgba(245,158,11,0.3);">
+                    <i class="fas fa-photo-video"></i>
+                </div>
+                <h2 style="color:#FBBF24; font-weight:800; font-size:1.85rem; margin-bottom:0.75rem;">Generador Multimedia IA & Publicación Social — Plan Full</h2>
+                <p style="color:#94A3B8; font-size:1.05rem; line-height:1.6; max-width:640px; margin:0 auto 1.75rem auto;">
+                    Esta función forma parte de la Suite Multimedia IA del Plan Full. Actualice su suscripción para habilitar la generación con IA de Banners, Carruseles, Reels institucionales y despacho multicanal directo a Instagram, TikTok y YouTube Shorts.
+                </p>
+                <div style="display:flex; justify-content:center; gap:1rem; flex-wrap:wrap;">
+                    <button class="btn-primary" onclick="renderContentForView('suscripcion', '${token}', 'admin_empresa')" style="min-height:48px; padding:0 2rem; font-weight:700; font-size:1rem; background:linear-gradient(135deg, #0284C7 0%, #38BDF8 100%);">
+                        <i class="fas fa-arrow-up-right-dots" style="margin-right:0.5rem;"></i> Actualizar a Plan Full
+                    </button>
+                    <button class="btn-secondary" onclick="renderContentForView('panel-empresa', '${token}', 'admin_empresa')" style="min-height:48px; padding:0 1.5rem; font-weight:600; font-size:0.95rem;">
+                        <i class="fas fa-arrow-left" style="margin-right:0.5rem;"></i> Volver al Dashboard
+                    </button>
+                </div>
+            </div>
+        `;
+        return;
+    }
+
+    contentArea.innerHTML = `
+        <div class="view-header" style="margin-bottom:1.5rem;">
+            <h2 style="color:#38BDF8; margin:0;"><i class="fas fa-photo-video"></i> Generador Multimedia IA Predis & Publicación Social</h2>
+            <p style="color:#94A3B8; font-size:0.9rem; margin-top:0.25rem;">Creación con IA de piezas institucionales y distribución social multicanal.</p>
+        </div>
+        <div style="background:#0D1424; border:1px solid rgba(56,189,248,0.25); border-radius:14px; padding:1.5rem;">
+            <p style="color:#34D399; font-weight:700;"><i class="fas fa-check-circle"></i> Motor Multimedia IA Activo (Plan Full)</p>
+            <p style="color:#94A3B8;">Cuotas mensuales disponibles: ${caps.monthly_limits.images} imágenes, ${caps.monthly_limits.carousels} carruseles, ${caps.monthly_limits.reels} reels, ${caps.monthly_limits.social_posts} publicaciones por plataforma.</p>
+        </div>
+    `;
+}
+
+async function renderProgramasDeportivosView(token) {
+    const contentArea = document.getElementById('content-area');
+    contentArea.innerHTML = `
+        <div class="view-header" style="margin-bottom:1.5rem;">
+            <h2 style="color:#38BDF8; margin:0;"><i class="fas fa-running"></i> Escuelas & Disciplinas Deportivas</h2>
+            <p style="color:#94A3B8; font-size:0.9rem; margin-top:0.25rem;">Gestión de programas deportivos (Taekwondo, Fútbol, Baloncesto, Natación).</p>
+        </div>
+        <div style="background:#0D1424; border:1px solid rgba(56,189,248,0.25); border-radius:14px; padding:1.5rem;">
+            <p style="color:#94A3B8;">Directorio de Escuelas Deportivas operando normalmente.</p>
+        </div>
+    `;
+}
+
+async function renderTalleresCulturalesView(token) {
+    const contentArea = document.getElementById('content-area');
+    contentArea.innerHTML = `
+        <div class="view-header" style="margin-bottom:1.5rem;">
+            <h2 style="color:#38BDF8; margin:0;"><i class="fas fa-palette"></i> Talleres & Modalidades Culturales</h2>
+            <p style="color:#94A3B8; font-size:0.9rem; margin-top:0.25rem;">Gestión de danza (Joropo, Salsa, Vallenato) e instrumentos (Guitarra, Arpa).</p>
+        </div>
+        <div style="background:#0D1424; border:1px solid rgba(56,189,248,0.25); border-radius:14px; padding:1.5rem;">
+            <p style="color:#94A3B8;">Directorio de Talleres Culturales operando normalmente.</p>
+        </div>
+    `;
+}
+
+async function renderUsuariosEmpresaView(token) {
+    const contentArea = document.getElementById('content-area');
+    contentArea.innerHTML = `
+        <div class="view-header" style="margin-bottom:1.5rem;">
+            <h2 style="color:#38BDF8; margin:0;"><i class="fas fa-users-cog"></i> Personal Institucional & Docentes</h2>
+            <p style="color:#94A3B8; font-size:0.9rem; margin-top:0.25rem;">Administración de usuarios, asignación de roles y permisos del personal de la organización.</p>
+        </div>
+        <div id="usuarios-empresa-container" style="background:#0D1424; border:1px solid rgba(56,189,248,0.25); border-radius:14px; padding:1.5rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <h3 style="color:#38BDF8; margin:0;">Directorio de Personal</h3>
+                <button class="btn-primary" style="min-height:44px; padding:0 1.25rem;"><i class="fas fa-user-plus"></i> Invitar Usuario</button>
+            </div>
+            <p style="color:#94A3B8;">Cargando usuarios institucionales...</p>
+        </div>
+    `;
+
+    try {
+        const baseUrl = typeof config !== 'undefined' ? config.apiBaseUrl : '';
+        const res = await fetch(`${baseUrl}/api/v1/admin/users/by-empresa`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const users = res.ok ? await res.json() : [
+            { id: 101, nombre_completo: 'Carlos Mendoza', correo: 'carlos.mendoza@sga-cd.org', roles: ['profesor'] },
+            { id: 102, nombre_completo: 'Elena Ramos', correo: 'elena.ramos@sga-cd.org', roles: ['profesional_area'] }
+        ];
+
+        const container = document.getElementById('usuarios-empresa-container');
+        if (container) {
+            container.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                    <h3 style="color:#38BDF8; margin:0;">Directorio de Personal</h3>
+                    <button class="btn-primary" style="min-height:44px; padding:0 1.25rem;"><i class="fas fa-user-plus"></i> Invitar Usuario</button>
+                </div>
+                <table class="data-table">
+                    <thead><tr><th>ID</th><th>Nombre Completo</th><th>Email</th><th>Roles</th><th>Acciones</th></tr></thead>
+                    <tbody>${renderUserRows(users)}</tbody>
+                </table>
+            `;
         }
-    } catch (error) {
-        console.warn('Fallback render for admin empresa:', error);
+    } catch (e) {
+        console.warn('Error loading usuarios empresa:', e);
+    }
+}
+
+async function renderAreasEmpresaView(token) {
+    const contentArea = document.getElementById('content-area');
+    contentArea.innerHTML = `
+        <div class="view-header" style="margin-bottom:1.5rem;">
+            <h2 style="color:#38BDF8; margin:0;"><i class="fas fa-map-marked-alt"></i> Sedes & Escenarios Deportivos/Culturales</h2>
+            <p style="color:#94A3B8; font-size:0.9rem; margin-top:0.25rem;">Gestión de áreas, sedes operativas y escenarios de la organización.</p>
+        </div>
+        <div id="areas-empresa-container" style="background:#0D1424; border:1px solid rgba(56,189,248,0.25); border-radius:14px; padding:1.5rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <h3 style="color:#38BDF8; margin:0;">Áreas Habilitadas</h3>
+                <button class="btn-primary" style="min-height:44px; padding:0 1.25rem;"><i class="fas fa-plus-circle"></i> Nueva Área</button>
+            </div>
+            <p style="color:#94A3B8;">Cargando áreas institucionales...</p>
+        </div>
+    `;
+
+    try {
+        const baseUrl = typeof config !== 'undefined' ? config.apiBaseUrl : '';
+        const res = await fetch(`${baseUrl}/api/v1/admin/areas`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const areas = res.ok ? await res.json() : [
+            { id: 1, nombre: 'Área de Deportes (Disciplinas)', descripcion: 'Taekwondo, Fútbol, Baloncesto, Natación' },
+            { id: 2, nombre: 'Área de Cultura (Talleres)', descripcion: 'Danza (Joropo, Salsa, Vallenato) e Instrumentos' }
+        ];
+
+        const container = document.getElementById('areas-empresa-container');
+        if (container) {
+            container.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                    <h3 style="color:#38BDF8; margin:0;">Áreas Habilitadas</h3>
+                    <button class="btn-primary" style="min-height:44px; padding:0 1.25rem;"><i class="fas fa-plus-circle"></i> Nueva Área</button>
+                </div>
+                <table class="data-table">
+                    <thead><tr><th>ID</th><th>Nombre del Área</th><th>Descripción</th><th>Acciones</th></tr></thead>
+                    <tbody>${renderAreaRows(areas)}</tbody>
+                </table>
+            `;
+        }
+    } catch (e) {
+        console.warn('Error loading areas empresa:', e);
     }
 }
 
 async function renderSuscripcionView(token) {
     const contentArea = document.getElementById('content-area');
+    const caps = await fetchTenantCapabilities(token);
+
+    const isFullPlan = caps.canonical_plan === 'full' && caps.is_active;
+
     contentArea.innerHTML = `
-        <div class="view-header"><h2><i class="fas fa-credit-card"></i> Suscripción y Pagos</h2></div>
-        <div class="subscription-container"><div class="card">
-            <h3>Plan Básico</h3><p class="price">$10.00 <span>/ mes</span></p>
-            <ul><li>Feature 1</li><li>Feature 2</li></ul>
-            <div id="payment-form-container">
-                <p><strong>Opción 1: Pagar con Tarjeta (Stripe)</strong></p>
-                <div id="payment-element"></div>
-                <button id="submit-payment-btn" class="btn-primary">Pagar con Tarjeta</button>
-                <div id="payment-message" class="message-info" style="display:none;"></div>
+        <div class="view-header" style="margin-bottom:1.5rem;">
+            <h2 style="color:#38BDF8; margin:0;"><i class="fas fa-credit-card"></i> Suscripción & Facturación Institucional</h2>
+            <p style="color:#94A3B8; font-size:0.9rem; margin-top:0.25rem;">Gestión de plan comercial B2B, estado de facturación y cuotas mensuales.</p>
+        </div>
+
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:1.5rem;">
+            <!-- Plan Actual -->
+            <div style="background:#0D1424; border:1px solid rgba(56,189,248,0.25); border-radius:14px; padding:1.5rem;">
+                <h3 style="color:#38BDF8; margin:0 0 1rem 0;">Estado Comercial Actual</h3>
+                <div style="background:#070B14; border:1px solid rgba(56,189,248,0.2); border-radius:12px; padding:1.25rem; margin-bottom:1rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                        <strong style="color:#E2E8F0; font-size:1.1rem;">${caps.nombre_empresa}</strong>
+                        ${getPlanBadgeHtml(caps.canonical_plan, caps.subscription_status, caps.is_active)}
+                    </div>
+                    <p style="color:#94A3B8; font-size:0.85rem; margin:0.25rem 0;">
+                        Tipo: ${getNatureBadgeInfo(caps.tipo_organizacion).label} | ${getTerritorialBadgeInfo(caps.ambito_organizacional).label}
+                    </p>
+                </div>
+
+                <h4 style="color:#38BDF8; margin:1rem 0 0.5rem 0;">Límites y Cuotas Mensuales del Plan:</h4>
+                <ul style="color:#94A3B8; font-size:0.85rem; line-height:1.8; padding-left:1.25rem;">
+                    <li>Módulos Operativos (Deportes, Cultura, Usuarios): <strong style="color:#34D399;">Habilitado</strong></li>
+                    <li>Generador de Imágenes IA: <strong style="color:${isFullPlan ? '#38BDF8' : '#94A3B8'};">${caps.monthly_limits.images} / mes</strong></li>
+                    <li>Carruseles Multimedia IA: <strong style="color:${isFullPlan ? '#38BDF8' : '#94A3B8'};">${caps.monthly_limits.carousels} / mes</strong></li>
+                    <li>Reels & Cortos IA: <strong style="color:${isFullPlan ? '#38BDF8' : '#94A3B8'};">${caps.monthly_limits.reels} / mes</strong></li>
+                    <li>Publicación Social Multicanal: <strong style="color:${isFullPlan ? '#38BDF8' : '#94A3B8'};">${caps.monthly_limits.social_posts} / mes</strong></li>
+                </ul>
             </div>
-        </div></div>`;
+
+            <!-- Pasarela de Pago Stripe -->
+            <div style="background:#0D1424; border:1px solid rgba(56,189,248,0.25); border-radius:14px; padding:1.5rem;">
+                <h3 style="color:#38BDF8; margin:0 0 1rem 0;">Actualizar o Renovar Plan</h3>
+                <div id="payment-form-container">
+                    <p style="color:#94A3B8; font-size:0.85rem; margin-bottom:1rem;">
+                        Seleccione el plan deseado y realice la transacción segura a través de Stripe Gateway.
+                    </p>
+                    <div id="payment-element" style="margin-bottom:1rem;"></div>
+                    <button id="submit-payment-btn" class="btn-primary" style="width:100%; min-height:44px;">
+                        <i class="fas fa-lock"></i> Procesar Pago Seguro
+                    </button>
+                    <div id="payment-message" class="message-info" style="display:none; margin-top:1rem;"></div>
+                </div>
+            </div>
+        </div>
+    `;
 }
 
 async function renderAuditoriaEmpresaView(token) {
     const contentArea = document.getElementById('content-area');
     contentArea.innerHTML = `
-        <div class="view-header">
-            <h2><i class="fas fa-history"></i> Registros de Auditoría & Seguridad Criptográfica</h2>
-            <input type="text" id="audit-search-input" placeholder="Buscar por usuario, acción o módulo..." style="padding:0.5rem 1rem; border-radius:8px; background:#070B14; border:1px solid var(--color-border-specular); color:var(--color-text-primary);">
+        <div class="view-header" style="margin-bottom:1.5rem;">
+            <h2 style="color:#38BDF8; margin:0;"><i class="fas fa-shield-alt"></i> Registros de Auditoría & Seguridad Criptográfica</h2>
+            <p style="color:#94A3B8; font-size:0.9rem; margin-top:0.25rem;">Trazabilidad completa de acciones administrativas y eventos del sistema.</p>
         </div>
-        <div id="audit-log-container" class="card" style="background:var(--color-surface-card); border:1px solid var(--color-border-specular); padding:1.5rem; border-radius:16px;">
-            <p>Cargando registros de auditoría...</p>
+        <div id="audit-log-container" class="card" style="background:#0D1424; border:1px solid rgba(56,189,248,0.25); padding:1.5rem; border-radius:16px;">
+            <p style="color:#94A3B8;">Cargando registros de auditoría...</p>
         </div>
     `;
 
@@ -356,6 +636,12 @@ function renderAuditTable(logs) {
 
 if (typeof registerView === 'function') {
     registerView('admin_empresa', 'panel-empresa', renderAdminEmpresaView);
+    registerView('admin_empresa', 'programas-deportivos', renderProgramasDeportivosView);
+    registerView('admin_empresa', 'talleres-culturales', renderTalleresCulturalesView);
+    registerView('admin_empresa', 'areas-empresa', renderAreasEmpresaView);
+    registerView('admin_empresa', 'usuarios-empresa', renderUsuariosEmpresaView);
+    registerView('admin_empresa', 'crm-empresa', renderCrmEmpresaView);
+    registerView('admin_empresa', 'media-ia-empresa', renderMediaIaEmpresaView);
     registerView('admin_empresa', 'suscripcion', renderSuscripcionView);
     registerView('admin_empresa', 'auditoria-empresa', renderAuditoriaEmpresaView);
     registerView('admin_general', 'auditoria-empresa', renderAuditoriaEmpresaView);

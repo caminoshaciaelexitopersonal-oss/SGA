@@ -66,13 +66,49 @@ const navLinks = {
             ]
         }
     ],
-    // Rol 2: Admin de Empresa
+    // Rol 2: Admin de Empresa (Estructura Categorizada con Submenús)
     admin_empresa: [
-        { text: 'Panel de Empresa', view: 'panel-empresa', icon: 'fa-tachometer-alt' },
-        { text: 'Suscripción y Pagos', view: 'suscripcion', icon: 'fa-credit-card' },
-        { text: 'Reportes', view: 'reportes-empresa', icon: 'fa-chart-bar' },
-        { text: 'Auditoría', view: 'auditoria-empresa', icon: 'fa-history' },
-        { text: 'Configuración', view: 'config-empresa', icon: 'fa-cog' }
+        {
+            text: 'PANEL PRINCIPAL',
+            icon: 'fa-chart-pie',
+            submenu: [
+                { text: 'Dashboard General', view: 'panel-empresa', icon: 'fa-chart-pie' },
+                { text: 'Indicadores de Gestión', view: 'panel-empresa', icon: 'fa-tachometer-alt' }
+            ]
+        },
+        {
+            text: 'GESTIÓN OPERATIVA',
+            icon: 'fa-tasks',
+            submenu: [
+                { text: 'Escuelas Deportivas', view: 'programas-deportivos', icon: 'fa-running' },
+                { text: 'Talleres Culturales', view: 'talleres-culturales', icon: 'fa-palette' },
+                { text: 'Sedes y Escenarios', view: 'areas-empresa', icon: 'fa-map-marked-alt' }
+            ]
+        },
+        {
+            text: 'TALENTO Y USUARIOS',
+            icon: 'fa-users-cog',
+            submenu: [
+                { text: 'Personal y Profesores', view: 'usuarios-empresa', icon: 'fa-users-cog' },
+                { text: 'Roster de Estudiantes', view: 'usuarios-empresa', icon: 'fa-user-graduate' }
+            ]
+        },
+        {
+            text: 'MARKETING Y CRM',
+            icon: 'fa-bullhorn',
+            submenu: [
+                { text: 'Campañas y Captación', view: 'crm-empresa', icon: 'fa-bullhorn' },
+                { text: 'Generador Multimedia IA', view: 'media-ia-empresa', icon: 'fa-photo-video' }
+            ]
+        },
+        {
+            text: 'CONFIGURACIÓN Y CONTROL',
+            icon: 'fa-shield-alt',
+            submenu: [
+                { text: 'Suscripción y Pagos', view: 'suscripcion', icon: 'fa-credit-card' },
+                { text: 'Auditoría y Seguridad', view: 'auditoria-empresa', icon: 'fa-shield-alt' }
+            ]
+        }
     ],
     // Rol 3: Jefe de Área
     jefe_area: [
