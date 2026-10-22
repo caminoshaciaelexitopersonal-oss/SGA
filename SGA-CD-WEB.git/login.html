@@ -25,11 +25,17 @@
         <main role="main">
             <section id="login-section" style="max-width: 450px; margin: 4rem auto;" class="glass-panel">
                 <h2 style="text-align: center; color: var(--color-accent-cyan);"><i class="fa-solid fa-lock" style="margin-right:0.5rem;"></i> Acceso Institucional</h2>
-                <form id="login-form" style="margin-top: 1.5rem;">
-                    <input type="text" id="username" placeholder="Nombre de Usuario o Email" required autocomplete="username">
-                    <input type="password" id="password" placeholder="Contraseña" required autocomplete="current-password">
-                    <div id="login-mensaje" style="margin-bottom: 1rem;"></div>
-                    <button type="submit" class="cta-button" style="width: 100%;">Ingresar</button>
+                <form id="login-form" style="display: flex; flex-direction: column; gap: 1.25rem; width: 100%; margin-top: 1.5rem;">
+                    <div style="display: flex; flex-direction: column; gap: 0.4rem; width: 100%;">
+                        <label for="username" style="font-size: 0.85rem; color: var(--color-text-muted); font-weight: 600;">Nombre de Usuario o Email</label>
+                        <input type="text" id="username" placeholder="ejemplo@institucion.gov.co" required autocomplete="username" style="width: 100%; min-height: 48px; padding: 0.75rem 1rem; background: #070B14; border: 1px solid var(--color-border-specular); border-radius: 10px; color: var(--color-text-primary); font-size: 0.95rem; box-sizing: border-box;">
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 0.4rem; width: 100%;">
+                        <label for="password" style="font-size: 0.85rem; color: var(--color-text-muted); font-weight: 600;">Contraseña</label>
+                        <input type="password" id="password" placeholder="••••••••••••" required autocomplete="current-password" style="width: 100%; min-height: 48px; padding: 0.75rem 1rem; background: #070B14; border: 1px solid var(--color-border-specular); border-radius: 10px; color: var(--color-text-primary); font-size: 0.95rem; box-sizing: border-box;">
+                    </div>
+                    <div id="login-mensaje" style="margin-bottom: 0.5rem;"></div>
+                    <button type="submit" class="cta-button" style="width: 100%; min-height: 48px;">Ingresar</button>
                 </form>
 
                 <div class="social-login-divider" style="text-align: center; margin: 2rem 0; position: relative;">
