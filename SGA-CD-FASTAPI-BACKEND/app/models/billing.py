@@ -1,7 +1,8 @@
 from sqlalchemy import (
-    Column, Integer, String, ForeignKey, DateTime, Float
+    Column, Integer, String, ForeignKey, DateTime, Float, UniqueConstraint
 )
 from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
 from .base import Base
 
 class Suscripcion(Base):
@@ -30,4 +31,18 @@ class Factura(Base):
     pdf_url = Column(String)
 
     suscripcion = relationship("Suscripcion")
+    inquilino = relationship("Inquilino")
+
+class ConsumoInquilino(Base):
+    __tablename__ = "consumo_inquilinos"
+    __table_args__ = (
+        UniqueConstraint("inquilino_id", "periodo", "capacidad", name="uq_consumo_inquilino_periodo_capacidad"),
+    )
+    id = Column(Integer, primary_key=True, index=True)
+    inquilino_id = Column(Integer, ForeignKey("inquilinos.id"), nullable=False, index=True)
+    periodo = Column(String, nullable=False, index=True) # Formato "YYYY-MM"
+    capacidad = Column(String, nullable=False, index=True) # ej. "images", "carousels", "videos", "reels", "llm_prompts", "social_posts"
+    cantidad_usada = Column(Integer, default=0, nullable=False)
+    ultima_actualizacion = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
     inquilino = relationship("Inquilino")

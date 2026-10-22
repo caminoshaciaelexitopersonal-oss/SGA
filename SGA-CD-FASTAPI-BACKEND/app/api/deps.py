@@ -99,6 +99,92 @@ def role_required(required_roles: List[str]):
     return role_checker
 
 
+def require_plan_capability(capability_name: str):
+    """
+    Dependency factory enforcing commercial feature access based on the tenant's Plan & Subscription.
+    Derives identity exclusively from current_user (JWT).
+    Checks PlanCapabilityService.resolve_capabilities and raises:
+      - 400 Bad Request if user has no inquilino_id associated.
+      - 404 Not Found if tenant record does not exist in DB.
+      - 403 Forbidden if tenant account is inactive.
+      - 402 Payment Required if requested capability is not enabled in tenant's Plan or subscription is expired/canceled.
+      - 403 Forbidden if capability_name is unrecognized.
+    Does NOT write to DB.
+    """
+    def capability_checker(
+        db: Session = Depends(get_db),
+        current_user: user_model.Usuario = Depends(get_current_active_user)
+    ) -> user_model.Usuario:
+        if current_user.inquilino_id is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="User is not associated with any organization tenant."
+            )
+
+        from app.models.tenancy import Inquilino
+        from app.models.billing import Suscripcion
+        from app.services.plan_capability_service import PlanCapabilityService
+
+        tenant = db.query(Inquilino).filter(Inquilino.id == current_user.inquilino_id).first()
+        if not tenant:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Organization tenant not found."
+            )
+
+        if not getattr(tenant, "activo", True):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Organization tenant account is inactive."
+            )
+
+        sub = db.query(Suscripcion).filter(Suscripcion.inquilino_id == tenant.id).order_by(Suscripcion.id.desc()).first()
+
+        tenant_data = {
+            "id": tenant.id,
+            "nombre_empresa": getattr(tenant, "nombre_empresa", ""),
+            "tipo_organizacion": getattr(tenant, "tipo_organizacion", "entidad_publica"),
+            "ambito_organizacional": getattr(tenant, "ambito_organizacional", "municipal"),
+            "plan": getattr(tenant, "plan", "basico"),
+            "activo": getattr(tenant, "activo", True),
+        }
+
+        sub_data = None
+        if sub:
+            sub_data = {
+                "id": getattr(sub, "id", None),
+                "plan": getattr(sub, "plan", None),
+                "estado": getattr(sub, "estado", None),
+                "fecha_inicio": getattr(sub, "fecha_inicio", None),
+                "fecha_fin": getattr(sub, "fecha_fin", None),
+            }
+
+        effective_caps = PlanCapabilityService.resolve_capabilities(
+            tenant_data=tenant_data,
+            subscription_data=sub_data
+        )
+
+        caps_dict = effective_caps.dict()
+
+        target_key = capability_name if capability_name.endswith("_enabled") else f"{capability_name}_enabled"
+
+        if target_key not in caps_dict:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Unknown capability '{capability_name}' requested."
+            )
+
+        if not caps_dict[target_key]:
+            raise HTTPException(
+                status_code=status.HTTP_402_PAYMENT_REQUIRED,
+                detail=f"Capability '{capability_name}' is not enabled for your organization plan or subscription is inactive. Please upgrade to Plan Full."
+            )
+
+        return current_user
+
+    return capability_checker
+
+
 def verify_resource_tenant_and_owner(
     db_obj: Any,
     current_user: user_model.Usuario,

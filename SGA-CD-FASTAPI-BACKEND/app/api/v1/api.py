@@ -27,6 +27,7 @@ from .endpoints import (
     video_distribution,
     meta,
     google,
+    catalogo,
 )
 
 api_router = APIRouter()
@@ -39,6 +40,7 @@ api_router.include_router(auth.router, prefix="/auth", tags=["Authentication"])
 api_router.include_router(meta.router, prefix="/auth", tags=["Meta Authentication"]) # Using /auth prefix
 api_router.include_router(google.router, prefix="/auth", tags=["Google Authentication"])
 api_router.include_router(tenancy.router, prefix="/tenants", tags=["Tenants"])
+api_router.include_router(catalogo.router, prefix="/catalogo", tags=["Catálogo de Especialidades"])
 api_router.include_router(padre.router, prefix="/padre", tags=["Padre Acudiente"])
 api_router.include_router(profesor.router, prefix="/profesor", tags=["Profesor"])
 api_router.include_router(jefe_area.router, prefix="/jefe_area", tags=["Jefe de Área"])

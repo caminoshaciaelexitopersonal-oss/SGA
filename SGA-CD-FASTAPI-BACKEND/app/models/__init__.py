@@ -29,3 +29,6 @@ from .dropdowns import (
     Genero, GrupoEtario, TipoDocumento, Escolaridad, Discapacidad,
     GrupoPoblacional, Barrio, Vereda, Resguardo, TipoEscenario
 )
+from .catalog import (
+    CatalogoEspecialidad, EmpresaEspecialidad, ProfesorEspecialidad
+)

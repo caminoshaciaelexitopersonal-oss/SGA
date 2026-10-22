@@ -20,6 +20,7 @@ class Inquilino(Base):
     # --- Classification B2B (Naturaleza x Ámbito - 12 Combinaciones) ---
     tipo_organizacion = Column(String, default="entidad_publica") # entidad_publica, entidad_privada, empresa_publica, empresa_privada
     ambito_organizacional = Column(String, default="municipal")    # nacional, departamental, municipal
+    vocacion_institucional = Column(String(20), nullable=False, default="deportiva", server_default="deportiva") # deportiva | cultural
 
     # Location columns
     direccion = Column(String)
