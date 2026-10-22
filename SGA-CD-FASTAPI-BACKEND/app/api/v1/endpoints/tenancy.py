@@ -69,6 +69,7 @@ def get_my_plan_capabilities(
         "nombre_empresa": getattr(tenant, "nombre_empresa", ""),
         "tipo_organizacion": getattr(tenant, "tipo_organizacion", "entidad_publica"),
         "ambito_organizacional": getattr(tenant, "ambito_organizacional", "municipal"),
+        "vocacion_institucional": getattr(tenant, "vocacion_institucional", "deportiva"),
         "plan": getattr(tenant, "plan", "basico"),
         "activo": getattr(tenant, "activo", True),
     }

@@ -12,7 +12,10 @@ from unittest.mock import MagicMock
 from datetime import datetime, timezone, timedelta
 
 # Lightweight FastAPI / SQLAlchemy / Pydantic / Security module mock layer for standalone test execution
-if "fastapi" not in sys.modules or not hasattr(sys.modules.get("fastapi"), "DummyStatus"):
+try:
+    import fastapi
+    from fastapi import HTTPException, status
+except ImportError:
     class DummyHTTPException(Exception):
         def __init__(self, status_code: int, detail: str):
             self.status_code = status_code
@@ -44,8 +47,12 @@ if "fastapi" not in sys.modules or not hasattr(sys.modules.get("fastapi"), "Dumm
     fastapi_mock.DummyStatus = DummyStatus
     sys.modules["fastapi"] = fastapi_mock
     sys.modules["fastapi.security"] = MagicMock()
+    HTTPException = DummyHTTPException
+    status = DummyStatus
 
-if "sqlalchemy" not in sys.modules:
+try:
+    import sqlalchemy
+except ImportError:
     sqla_mock = MagicMock()
     orm_mock = MagicMock()
     class DummyDeclarativeBase:
@@ -55,7 +62,9 @@ if "sqlalchemy" not in sys.modules:
     sys.modules["sqlalchemy.orm"] = orm_mock
     sys.modules["sqlalchemy.sql"] = MagicMock()
 
-if "pydantic" not in sys.modules or not hasattr(sys.modules.get("pydantic"), "DummyBaseModel"):
+try:
+    import pydantic
+except ImportError:
     class DummyBaseModel:
         def __init__(self, **kwargs):
             for k, v in kwargs.items():

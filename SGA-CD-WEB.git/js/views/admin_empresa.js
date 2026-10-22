@@ -1,4 +1,4 @@
-// js/views/admin_empresa.js — Dashboard Bento Grid Estilo Power BI con Branding Institucional y Desacople Modular
+// js/views/admin_empresa.js — Dashboard Bento Grid Estilo Power BI con Catálogo Maestro Dual, Creación On-The-Fly y Especialización Exclusiva
 
 function getNatureBadgeInfo(tipoOrg) {
     const map = {
@@ -72,6 +72,7 @@ async function fetchTenantCapabilities(token) {
         nombre_empresa: 'Instituto Municipal de Deporte y Recreación — IMDER',
         tipo_organizacion: 'entidad_publica',
         ambito_organizacional: 'municipal',
+        vocacion_institucional: 'deportiva',
         canonical_plan: 'basico',
         subscription_status: 'sin_suscripcion',
         is_active: true,
@@ -105,22 +106,216 @@ async function fetchTenantCapabilities(token) {
     }
 }
 
+async function fetchMyCompanySpecialties(token) {
+    if (!token) return [];
+    try {
+        const baseUrl = typeof config !== 'undefined' ? config.apiBaseUrl : '';
+        const res = await fetch(`${baseUrl}/api/v1/catalogo/my-specialties`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) return [];
+        return await res.json();
+    } catch (e) {
+        console.warn('Error fetching company specialties:', e);
+        return [];
+    }
+}
+
+// Global functions attached to window for interactive UI actions
+window.switchTenantVocacion = async function(token, newVocacion) {
+    try {
+        const baseUrl = typeof config !== 'undefined' ? config.apiBaseUrl : '';
+        const res = await fetch(`${baseUrl}/api/v1/catalogo/vocacion`, {
+            method: 'PATCH',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ vocacion_institucional: newVocacion })
+        });
+        if (res.ok) {
+            renderAdminEmpresaView(token);
+        } else {
+            alert('No se pudo actualizar la vocación institucional.');
+        }
+    } catch (e) {
+        alert('Error de conexión al cambiar la vocación.');
+    }
+};
+
+window.unadoptCompanySpecialty = async function(token, especialidadId) {
+    try {
+        const baseUrl = typeof config !== 'undefined' ? config.apiBaseUrl : '';
+        const res = await fetch(`${baseUrl}/api/v1/catalogo/my-specialties/${especialidadId}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+            renderAdminEmpresaView(token);
+        }
+    } catch (e) {
+        console.warn('Error unadopting specialty:', e);
+    }
+};
+
+window.adoptCatalogSpecialty = async function(token, especialidadId) {
+    try {
+        const baseUrl = typeof config !== 'undefined' ? config.apiBaseUrl : '';
+        const res = await fetch(`${baseUrl}/api/v1/catalogo/my-specialties/adopt`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ especialidad_ids: [especialidadId] })
+        });
+        if (res.ok) {
+            renderAdminEmpresaView(token);
+        }
+    } catch (e) {
+        console.warn('Error adopting specialty:', e);
+    }
+};
+
+window.createCustomSpecialtyOnTheFlyAction = async function(token, vertical, name) {
+    if (!name || name.trim().length < 2) return;
+    try {
+        const baseUrl = typeof config !== 'undefined' ? config.apiBaseUrl : '';
+        const res = await fetch(`${baseUrl}/api/v1/catalogo/especialidades/custom`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ vertical: vertical, nombre: name.trim(), categoria: 'Personalizada On-The-Fly' })
+        });
+        if (res.ok) {
+            renderAdminEmpresaView(token);
+        } else {
+            const err = await res.json();
+            alert(`Error: ${err.detail || 'No se pudo crear la especialidad.'}`);
+        }
+    } catch (e) {
+        alert('Error de red al crear especialidad personalizada.');
+    }
+};
+
+window.handleCatalogSearchInput = async function(event, token, vertical) {
+    const query = event.target.value;
+    const dropdown = document.getElementById('catalog-search-results-dropdown');
+    if (!dropdown) return;
+
+    if (!query || query.trim().length < 1) {
+        dropdown.style.display = 'none';
+        return;
+    }
+
+    try {
+        const baseUrl = typeof config !== 'undefined' ? config.apiBaseUrl : '';
+        const res = await fetch(`${baseUrl}/api/v1/catalogo/especialidades?vertical=${vertical}&search=${encodeURIComponent(query.trim())}&limit=12`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const items = res.ok ? await res.json() : [];
+
+        const cleanQuery = query.trim();
+        const exactMatch = items.some(item => item.nombre.toLowerCase() === cleanQuery.toLowerCase());
+
+        let dropdownHtml = '';
+
+        // On-the-fly creation option at top
+        if (!exactMatch) {
+            dropdownHtml += `
+                <div class="dropdown-item-custom-create" onclick="window.createCustomSpecialtyOnTheFlyAction('${token}', '${vertical}', '${cleanQuery.replace(/'/g, "\\'")}')" style="padding:0.75rem 1rem; background:rgba(56,189,248,0.12); border-bottom:1px solid rgba(56,189,248,0.25); color:#38BDF8; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:space-between;">
+                    <span><i class="fas fa-plus-circle" style="margin-right:0.5rem;"></i> Crear y Registrar: "<strong>${cleanQuery}</strong>"</span>
+                    <span class="badge" style="background:#38BDF8; color:#070B14; font-size:0.7rem; font-weight:800;">ON-THE-FLY</span>
+                </div>
+            `;
+        }
+
+        if (items.length > 0) {
+            dropdownHtml += items.map(item => `
+                <div class="dropdown-item-spec" onclick="window.adoptCatalogSpecialty('${token}', ${item.id})" style="padding:0.6rem 1rem; border-bottom:1px solid rgba(255,255,255,0.05); cursor:pointer; display:flex; justify-content:space-between; align-items:center;" onmouseover="this.style.background='rgba(56,189,248,0.1)'" onmouseout="this.style.background='transparent'">
+                    <div>
+                        <strong style="color:#E2E8F0; font-size:0.85rem;">${item.nombre}</strong>
+                        <div style="font-size:0.75rem; color:#94A3B8;">${item.categoria}</div>
+                    </div>
+                    <span style="color:#38BDF8; font-size:0.75rem; font-weight:600;"><i class="fas fa-plus"></i> Adoptar</span>
+                </div>
+            `).join('');
+        } else if (exactMatch) {
+            dropdownHtml += `<div style="padding:0.75rem; color:#94A3B8; font-size:0.85rem; text-align:center;">Todas las especialidades encontradas están en la lista.</div>`;
+        }
+
+        dropdown.innerHTML = dropdownHtml;
+        dropdown.style.display = 'block';
+    } catch (e) {
+        console.warn('Error searching catalog:', e);
+    }
+};
+
 async function renderAdminEmpresaView(token) {
     const contentArea = document.getElementById('content-area');
 
-    // 1. Fetch Tenant Capabilities asynchronously from backend
-    const caps = await fetchTenantCapabilities(token);
+    // 1. Fetch Tenant Capabilities & Adopted Specialties asynchronously
+    const [caps, adoptedSpecs] = await Promise.all([
+        fetchTenantCapabilities(token),
+        fetchMyCompanySpecialties(token)
+    ]);
 
+    const isCultural = (caps.vocacion_institucional || 'deportiva') === 'cultural';
     const natureBadge = getNatureBadgeInfo(caps.tipo_organizacion);
     const territorialBadge = getTerritorialBadgeInfo(caps.ambito_organizacional);
     const planBadgeHtml = getPlanBadgeHtml(caps.canonical_plan, caps.subscription_status, caps.is_active);
 
     const isSubscriptionExpired = caps.subscription_status === 'vencida' || !caps.is_active;
 
+    // Vocabularies strictly separated
+    const vocab = isCultural ? {
+        title: 'Talleres & Modalidades Culturales',
+        vertical: 'cultura',
+        verticalLabel: 'Vocación Cultural & Artística',
+        specialtiesTitle: 'Modalidades Culturales Adoptadas',
+        searchPlaceholder: 'Buscar o registrar modalidad cultural (ej. Joropo, Guitarra, Escultura)...',
+        kpiTotalStudents: 'TOTAL PARTICIPANTES EN TALLERES',
+        kpiTeachers: 'INSTRUCTORES Y MAESTROS CULTURALES',
+        kpiVenues: 'CASAS DE CULTURA Y ESCENARIOS',
+        chartTitle: 'Rendimiento por Modalidades Culturales Adoptadas',
+        icon: 'fa-masks-theater',
+        fallbackSpecs: ['Danza Joropo / Llanera', 'Guitarra Clásica & Acústica', 'Teatro & Expresión Corporal', 'Pintura & Artes Plásticas', 'Canto Folclórico & Coros']
+    } : {
+        title: 'Escuelas & Disciplinas Deportivas',
+        vertical: 'deporte',
+        verticalLabel: 'Vocación Deportiva & Fitness',
+        specialtiesTitle: 'Disciplinas Deportivas / Fitness Adoptadas',
+        searchPlaceholder: 'Buscar o registrar disciplina deportiva (ej. Taekwondo, Musculación, CrossFit, Fútbol)...',
+        kpiTotalStudents: 'TOTAL ALUMNOS DEPORTISTAS',
+        kpiTeachers: 'ENTRENADORES Y DOCENTES ACTIVOS',
+        kpiVenues: 'COLISEOS, CAMPOS Y GIMNASIOS',
+        chartTitle: 'Rendimiento por Disciplinas Deportivas Adoptadas',
+        icon: 'fa-volleyball',
+        fallbackSpecs: ['Taekwondo (WT/ITF)', 'Fútbol Campo & Futsal FIFA', 'Musculación & Fitness Funcional', 'Baloncesto 3x3', 'Natación Clásica']
+    };
+
+    // Filter adopted specialties for current vertical
+    const filteredAdopted = adoptedSpecs.filter(s => s.vertical === vocab.vertical);
+
+    // Active chart specialties
+    const chartSpecs = filteredAdopted.length > 0
+        ? filteredAdopted.slice(0, 5).map((s, idx) => ({
+            name: s.nombre,
+            pct: 82 + ((idx * 3) % 15),
+            ratio: `${15 + ((idx * 2) % 10)}:1`
+        }))
+        : vocab.fallbackSpecs.map((name, idx) => ({
+            name: name,
+            pct: 88 - (idx * 3),
+            ratio: `${18 - idx}:1`
+        }));
+
     contentArea.innerHTML = `
         <div class="admin-dashboard" style="background:#070B14; color:#E2E8F0; padding:1.5rem; border-radius:16px;">
 
-            <!-- Zona 1: Cabecera de Branding Institucional Permanente (Logo + Nombre Real + Badges B2B) -->
+            <!-- Zona 1: Cabecera de Branding Institucional Permanente & Toggle de Vocación Dual -->
             <div class="corporate-header-banner" style="background:linear-gradient(135deg, #0D1424 0%, #162032 100%); border:1px solid rgba(56,189,248,0.3); border-radius:16px; padding:1.5rem; margin-bottom:1.75rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1.25rem; box-shadow:0 10px 30px rgba(0,0,0,0.4);">
                 <div style="display:flex; align-items:center; gap:1.25rem; flex-wrap:wrap;">
                     <!-- Logo / Emblema Heráldico Institucional -->
@@ -147,13 +342,23 @@ async function renderAdminEmpresaView(token) {
                             <span style="background:#070B14; border:1px solid rgba(56,189,248,0.25); padding:0.25rem 0.75rem; border-radius:12px; color:#E2E8F0; font-weight:700;">
                                 ${territorialBadge.badge} ${territorialBadge.label}
                             </span>
-                            <span style="color:#94A3B8;"><i class="fa-solid fa-shield-halved" style="color:#38BDF8;"></i> Panel de Control Oficial SGA-CD</span>
+                            <span style="color:#94A3B8;"><i class="fa-solid fa-shield-halved" style="color:#38BDF8;"></i> Panel Oficial SGA-CD</span>
                         </div>
                     </div>
                 </div>
-                <div style="display:flex; gap:0.5rem; align-items:center;">
-                    <span style="background:#070B14; border:1px solid rgba(56,189,248,0.35); color:#38BDF8; padding:0.5rem 1.1rem; border-radius:20px; font-size:0.8rem; font-weight:700; display:flex; align-items:center; gap:0.5rem;">
-                        <i class="fa-solid fa-satellite-dish" style="color:#34D399;"></i> Operación en Vivo (60 FPS)
+
+                <!-- Toggle Selector de Vocación Exclusiva (Deportiva / Cultural) -->
+                <div style="display:flex; flex-direction:column; align-items:flex-end; gap:0.5rem;">
+                    <div style="background:#070B14; border:1px solid rgba(56,189,248,0.35); padding:0.3rem; border-radius:24px; display:flex; gap:0.25rem;">
+                        <button onclick="window.switchTenantVocacion('${token}', 'deportiva')" style="background:${!isCultural ? 'linear-gradient(135deg, #0284C7 0%, #38BDF8 100%)' : 'transparent'}; color:${!isCultural ? '#070B14' : '#94A3B8'}; border:none; padding:0.4rem 0.9rem; border-radius:20px; font-weight:800; font-size:0.8rem; cursor:pointer; transition:all 0.25s ease;">
+                            <i class="fas fa-running"></i> Vocación Deportiva
+                        </button>
+                        <button onclick="window.switchTenantVocacion('${token}', 'cultural')" style="background:${isCultural ? 'linear-gradient(135deg, #0284C7 0%, #38BDF8 100%)' : 'transparent'}; color:${isCultural ? '#070B14' : '#94A3B8'}; border:none; padding:0.4rem 0.9rem; border-radius:20px; font-weight:800; font-size:0.8rem; cursor:pointer; transition:all 0.25s ease;">
+                            <i class="fas fa-palette"></i> Vocación Cultural
+                        </button>
+                    </div>
+                    <span style="font-size:0.75rem; color:#38BDF8; font-weight:600;">
+                        <i class="fas fa-sliders"></i> ${vocab.verticalLabel}
                     </span>
                 </div>
             </div>
@@ -169,16 +374,56 @@ async function renderAdminEmpresaView(token) {
                 </div>
             </div>` : ''}
 
-            <!-- Zona 2: KPIs Operativos Enfocados en la Misión Deportiva y Cultural -->
+            <!-- Zona 2: Gestión de Especialidades del Catálogo Maestro Dual (1.000 + On-The-Fly) -->
+            <div style="background:#0D1424; border:1px solid rgba(56,189,248,0.3); border-radius:14px; padding:1.5rem; margin-bottom:1.75rem; box-shadow:0 8px 30px rgba(0,0,0,0.3);">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:0.75rem;">
+                    <div>
+                        <h3 style="color:#38BDF8; margin:0; font-size:1.2rem; font-weight:800; display:flex; align-items:center; gap:0.5rem;">
+                            <i class="fas ${vocab.icon}"></i> ${vocab.specialtiesTitle}
+                        </h3>
+                        <span style="font-size:0.75rem; color:#94A3B8;">Catálogo Maestro Oficial SGA-CD (500 Deporte + 500 Cultura) con Registro On-The-Fly</span>
+                    </div>
+                    <span style="background:#070B14; border:1px solid rgba(56,189,248,0.25); color:#38BDF8; padding:0.3rem 0.75rem; border-radius:12px; font-size:0.75rem; font-weight:700;">
+                        ${filteredAdopted.length} Especialidad(es) Activa(s)
+                    </span>
+                </div>
+
+                <!-- Pills / Badges de Especialidades Adoptadas -->
+                <div style="display:flex; flex-wrap:wrap; gap:0.6rem; margin-bottom:1.25rem;">
+                    ${filteredAdopted.length > 0 ? filteredAdopted.map(spec => `
+                        <div style="background:linear-gradient(135deg, rgba(2,132,199,0.2) 0%, rgba(56,189,248,0.1) 100%); border:1px solid #38BDF8; border-radius:20px; padding:0.4rem 0.85rem; display:flex; align-items:center; gap:0.5rem; color:#E2E8F0; font-size:0.85rem; font-weight:700;">
+                            <span>${spec.nombre}</span>
+                            ${spec.es_estandar ? '' : '<span style="font-size:0.65rem; background:#38BDF8; color:#070B14; padding:0.1rem 0.4rem; border-radius:8px; font-weight:800;">CUSTOM</span>'}
+                            <button onclick="window.unadoptCompanySpecialty('${token}', ${spec.especialidad_id})" style="background:none; border:none; color:#F87171; cursor:pointer; font-size:0.9rem; padding:0; margin-left:0.2rem;" title="Remover de la organización">&times;</button>
+                        </div>
+                    `).join('') : `
+                        <div style="color:#94A3B8; font-size:0.85rem; font-style:italic;">
+                            No hay especialidades registradas en su catálogo. Utilice el buscador para adoptar disciplinas del catálogo oficial de 1.000 o crear una on-the-fly.
+                        </div>
+                    `}
+                </div>
+
+                <!-- Buscador Multiselect Autocomplete con Creación On-The-Fly -->
+                <div style="position:relative; max-width:600px;">
+                    <div style="display:flex; align-items:center; background:#070B14; border:1px solid rgba(56,189,248,0.35); border-radius:12px; padding:0.5rem 0.85rem;">
+                        <i class="fas fa-search" style="color:#38BDF8; margin-right:0.6rem;"></i>
+                        <input type="text" id="catalog-search-input" placeholder="${vocab.searchPlaceholder}" oninput="window.handleCatalogSearchInput(event, '${token}', '${vocab.vertical}')" style="background:transparent; border:none; color:#E2E8F0; width:100%; font-size:0.9rem; outline:none;" autocomplete="off" />
+                    </div>
+                    <!-- Dropdown Container -->
+                    <div id="catalog-search-results-dropdown" style="display:none; position:absolute; top:105%; left:0; right:0; background:#0D1424; border:1px solid #38BDF8; border-radius:12px; max-height:260px; overflow-y:auto; z-index:100; box-shadow:0 12px 36px rgba(0,0,0,0.6);"></div>
+                </div>
+            </div>
+
+            <!-- Zona 3: KPIs Operativos Misionales -->
             <div class="bento-grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:1.25rem; margin-bottom:2rem;">
                 <div class="bento-kpi-card" style="background:#0D1424; border:1px solid rgba(56,189,248,0.25); border-radius:14px; padding:1.25rem; position:relative; overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,0.2);">
-                    <span style="color:#94A3B8; font-size:0.75rem; font-weight:700; text-transform:uppercase;">TOTAL ALUMNOS INSCRITOS</span>
+                    <span style="color:#94A3B8; font-size:0.75rem; font-weight:700; text-transform:uppercase;">${vocab.kpiTotalStudents}</span>
                     <h3 class="powerbi-counter" style="color:#38BDF8; font-size:2.1rem; font-weight:800; margin:0.3rem 0;">1,420</h3>
                     <div style="font-size:0.75rem; color:#94A3B8;"><i class="fa-solid fa-arrow-trend-up" style="color:#34D399;"></i> +14.2% vs mes anterior</div>
                 </div>
 
                 <div class="bento-kpi-card" style="background:#0D1424; border:1px solid rgba(56,189,248,0.25); border-radius:14px; padding:1.25rem; position:relative; overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,0.2);">
-                    <span style="color:#94A3B8; font-size:0.75rem; font-weight:700; text-transform:uppercase;">DOCENTES E INSTRUCTORES ACTIVOS</span>
+                    <span style="color:#94A3B8; font-size:0.75rem; font-weight:700; text-transform:uppercase;">${vocab.kpiTeachers}</span>
                     <h3 class="powerbi-counter" style="color:#38BDF8; font-size:2.1rem; font-weight:800; margin:0.3rem 0;">48</h3>
                     <div style="font-size:0.75rem; color:#94A3B8;"><i class="fa-solid fa-chalkboard-user" style="color:#38BDF8;"></i> 100% Verificados en BD</div>
                 </div>
@@ -196,15 +441,15 @@ async function renderAdminEmpresaView(token) {
                 </div>
             </div>
 
-            <!-- Zona 3: Telemetría de Rendimiento en Tiempo Real (Disciplinas Deportivas vs Talleres Culturales) -->
-            <div style="display:grid; grid-template-columns: 2fr 1fr; gap:1.5rem; margin-bottom:2rem;">
+            <!-- Zona 4: Centro de Analítica Power BI Dinámico (analitica-powerbi) -->
+            <div id="analitica-powerbi" style="display:grid; grid-template-columns: 2fr 1fr; gap:1.5rem; margin-bottom:2rem;">
                 <div style="background:#0D1424; border:1px solid rgba(56,189,248,0.25); border-radius:14px; padding:1.5rem; box-shadow:0 8px 32px rgba(0,0,0,0.3);">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem;">
                         <div>
                             <h4 style="margin:0; color:#38BDF8; font-size:1.15rem; font-weight:700;">
-                                <i class="fas fa-chart-line" style="margin-right:0.5rem;"></i> Rendimiento en Disciplinas Deportivas vs Talleres Culturales
+                                <i class="fas fa-chart-bar" style="margin-right:0.5rem;"></i> ${vocab.chartTitle}
                             </h4>
-                            <span style="font-size:0.75rem; color:#94A3B8;">Telemetría y Dataviz de Participación en Tiempo Real</span>
+                            <span style="font-size:0.75rem; color:#94A3B8;">Análisis de Desempeño y Ratios Alumno/Profesor por Especialidad</span>
                         </div>
                         <span style="background:rgba(56,189,248,0.1); border:1px solid rgba(56,189,248,0.3); color:#38BDF8; padding:0.25rem 0.75rem; border-radius:12px; font-size:0.75rem; font-weight:600;">
                             Power BI Engine 60 FPS
@@ -212,35 +457,17 @@ async function renderAdminEmpresaView(token) {
                     </div>
 
                     <div class="powerbi-chart-container" style="display:flex; flex-direction:column; gap:1.25rem; margin-top:1rem;">
-                        <div>
-                            <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:0.4rem;">
-                                <span style="color:#E2E8F0; font-weight:600;"><i class="fas fa-running" style="color:#38BDF8; width:20px;"></i> Disciplinas Deportivas (Taekwondo, Fútbol, Baloncesto)</span>
-                                <span style="color:#38BDF8; font-weight:800;">88% Desempeño</span>
+                        ${chartSpecs.map(cs => `
+                            <div>
+                                <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:0.4rem;">
+                                    <span style="color:#E2E8F0; font-weight:600;"><i class="fas ${vocab.icon}" style="color:#38BDF8; width:20px;"></i> ${cs.name}</span>
+                                    <span style="color:#38BDF8; font-weight:800;">${cs.pct}% Desempeño — Ratio ${cs.ratio}</span>
+                                </div>
+                                <div style="background:#070B14; height:16px; border-radius:8px; overflow:hidden; border:1px solid rgba(56,189,248,0.2); padding:2px;">
+                                    <div class="chart-bar-fill" style="width:${cs.pct}%; height:100%; background:linear-gradient(90deg, #0284C7 0%, #38BDF8 100%); border-radius:6px; box-shadow: 0 0 10px rgba(56,189,248,0.5);"></div>
+                                </div>
                             </div>
-                            <div style="background:#070B14; height:16px; border-radius:8px; overflow:hidden; border:1px solid rgba(56,189,248,0.2); padding:2px;">
-                                <div class="chart-bar-fill" style="width:88%; height:100%; background:linear-gradient(90deg, #0284C7 0%, #38BDF8 100%); border-radius:6px; box-shadow: 0 0 10px rgba(56,189,248,0.5);"></div>
-                            </div>
-                        </div>
-
-                        <div>
-                            <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:0.4rem;">
-                                <span style="color:#E2E8F0; font-weight:600;"><i class="fas fa-music" style="color:#38BDF8; width:20px;"></i> Modalidades Danza (Joropo/Llanera, Salsa, Vallenato)</span>
-                                <span style="color:#38BDF8; font-weight:800;">92% Desempeño</span>
-                            </div>
-                            <div style="background:#070B14; height:16px; border-radius:8px; overflow:hidden; border:1px solid rgba(56,189,248,0.2); padding:2px;">
-                                <div class="chart-bar-fill" style="width:92%; height:100%; background:linear-gradient(90deg, #0284C7 0%, #38BDF8 100%); border-radius:6px; box-shadow: 0 0 10px rgba(56,189,248,0.5);"></div>
-                            </div>
-                        </div>
-
-                        <div>
-                            <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:0.4rem;">
-                                <span style="color:#E2E8F0; font-weight:600;"><i class="fas fa-guitar" style="color:#38BDF8; width:20px;"></i> Instrumentos Culturales (Guitarra, Arpa)</span>
-                                <span style="color:#38BDF8; font-weight:800;">84% Desempeño</span>
-                            </div>
-                            <div style="background:#070B14; height:16px; border-radius:8px; overflow:hidden; border:1px solid rgba(56,189,248,0.2); padding:2px;">
-                                <div class="chart-bar-fill" style="width:84%; height:100%; background:linear-gradient(90deg, #0284C7 0%, #38BDF8 100%); border-radius:6px; box-shadow: 0 0 10px rgba(56,189,248,0.5);"></div>
-                            </div>
-                        </div>
+                        `).join('')}
                     </div>
                 </div>
 
@@ -260,13 +487,13 @@ async function renderAdminEmpresaView(token) {
                     </div>
                     <div style="font-size:0.85rem; line-height:1.8; color:#94A3B8; background:#070B14; padding:0.75rem; border-radius:8px; border:1px solid rgba(56,189,248,0.15);">
                         <p style="margin:0; display:flex; justify-content:space-between;"><span style="color:#E2E8F0;"><i class="fas fa-circle" style="color:#38BDF8; font-size:0.6rem; vertical-align:middle; margin-right:4px;"></i> Estudiantes & Padres:</span> <strong style="color:#38BDF8;">78%</strong></p>
-                        <p style="margin:0; display:flex; justify-content:space-between;"><span style="color:#E2E8F0;"><i class="fas fa-circle" style="color:#0284C7; font-size:0.6rem; vertical-align:middle; margin-right:4px;"></i> Profesores e Instructores:</span> <strong style="color:#38BDF8;">14%</strong></p>
-                        <p style="margin:0; display:flex; justify-content:space-between;"><span style="color:#E2E8F0;"><i class="fas fa-circle" style="color:#94A3B8; font-size:0.6rem; vertical-align:middle; margin-right:4px;"></i> Entidades & Coordinadores:</span> <strong style="color:#38BDF8;">8%</strong></p>
+                        <p style="margin:0; display:flex; justify-content:space-between;"><span style="color:#E2E8F0;"><i class="fas fa-circle" style="color:#0284C7; font-size:0.6rem; vertical-align:middle; margin-right:4px;"></i> Instructores & Entrenadores:</span> <strong style="color:#38BDF8;">14%</strong></p>
+                        <p style="margin:0; display:flex; justify-content:space-between;"><span style="color:#E2E8F0;"><i class="fas fa-circle" style="color:#94A3B8; font-size:0.6rem; vertical-align:middle; margin-right:4px;"></i> Coordinación & Directivos:</span> <strong style="color:#38BDF8;">8%</strong></p>
                     </div>
                 </div>
             </div>
 
-            <!-- Zona 4: Micro-Carruseles de 5 Fotos por Actividad & Matriz de Aliados Corporativos -->
+            <!-- Zona 5: Micro-Carruseles de Actividades & Co-Sponsors -->
             <div class="admin-section" style="background:#0D1424; border:1px solid rgba(56,189,248,0.25); border-radius:14px; padding:1.5rem;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem; flex-wrap:wrap; gap:0.5rem;">
                     <h3 style="color:#38BDF8; margin:0; font-size:1.3rem; font-weight:700;">
@@ -279,7 +506,7 @@ async function renderAdminEmpresaView(token) {
 
                 <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:1.25rem; margin-bottom:1.5rem;">
                     <div class="activity-photo-card" style="background:#070B14; border:1px solid rgba(56,189,248,0.2); border-radius:12px; padding:1rem;">
-                        <h4 style="color:#38BDF8; margin:0 0 0.5rem 0; font-size:1rem;">Disciplinas Deportivas (Taekwondo / Fútbol)</h4>
+                        <h4 style="color:#38BDF8; margin:0 0 0.5rem 0; font-size:1rem;">Actividades en ${vocab.title}</h4>
                         <p style="color:#94A3B8; font-size:0.8rem; margin-bottom:0.75rem;">5 fotos en formato WebP con aceleración GPU (GSAP translate3d).</p>
                         <div style="display:flex; gap:0.5rem; overflow-x:auto; padding-bottom:0.5rem;">
                             <div style="min-width:70px; height:70px; background:#0D1424; border:1px solid rgba(56,189,248,0.3); border-radius:8px; display:flex; align-items:center; justify-content:center; color:#38BDF8; font-size:0.75rem; font-weight:bold;">Foto 1</div>
@@ -292,7 +519,7 @@ async function renderAdminEmpresaView(token) {
                     </div>
 
                     <div class="activity-photo-card" style="background:#070B14; border:1px solid rgba(56,189,248,0.2); border-radius:12px; padding:1rem;">
-                        <h4 style="color:#38BDF8; margin:0 0 0.5rem 0; font-size:1rem;">Talleres Culturales (Danza Joropo / Guitarra)</h4>
+                        <h4 style="color:#38BDF8; margin:0 0 0.5rem 0; font-size:1rem;">Galería Institucional</h4>
                         <p style="color:#94A3B8; font-size:0.8rem; margin-bottom:0.75rem;">Galería interactiva de 5 imágenes comprimidas WebP.</p>
                         <div style="display:flex; gap:0.5rem; overflow-x:auto; padding-bottom:0.5rem;">
                             <div style="min-width:70px; height:70px; background:#0D1424; border:1px solid rgba(56,189,248,0.3); border-radius:8px; display:flex; align-items:center; justify-content:center; color:#38BDF8; font-size:0.75rem; font-weight:bold;">Foto 1</div>
@@ -319,11 +546,11 @@ async function renderAdminEmpresaView(token) {
                             <p style="color:#94A3B8; font-size:0.75rem; margin:0.2rem 0 0 0;">Orden Municipal</p>
                         </div>
                         <div style="background:#0D1424; border:1px solid rgba(56,189,248,0.25); border-radius:8px; padding:0.75rem; text-align:center;">
-                            <strong style="color:#38BDF8; font-size:0.85rem;">Instituto de Deportes</strong>
+                            <strong style="color:#38BDF8; font-size:0.85rem;">Instituto de Deportes & Cultura</strong>
                             <p style="color:#94A3B8; font-size:0.75rem; margin:0.2rem 0 0 0;">Público - Descentralizado</p>
                         </div>
                         <div style="background:#0D1424; border:1px solid rgba(56,189,248,0.25); border-radius:8px; padding:0.75rem; text-align:center;">
-                            <strong style="color:#38BDF8; font-size:0.85rem;">Fundación Cultura Viva</strong>
+                            <strong style="color:#38BDF8; font-size:0.85rem;">Fundación Deporte y Patria</strong>
                             <p style="color:#94A3B8; font-size:0.75rem; margin:0.2rem 0 0 0;">Privada B2B</p>
                         </div>
                     </div>
@@ -334,7 +561,7 @@ async function renderAdminEmpresaView(token) {
 
     // Animaciones GSAP
     if (window.gsap) {
-        gsap.from('.chart-bar-fill', { width: '0%', duration: 1.2, stagger: 0.2, ease: 'power3.out' });
+        gsap.from('.chart-bar-fill', { width: '0%', duration: 1.2, stagger: 0.15, ease: 'power3.out' });
         gsap.from('.bento-kpi-card', { opacity: 0, y: 20, duration: 0.6, stagger: 0.1, ease: 'power2.out' });
     }
 }
@@ -425,8 +652,8 @@ async function renderProgramasDeportivosView(token) {
     const contentArea = document.getElementById('content-area');
     contentArea.innerHTML = `
         <div class="view-header" style="margin-bottom:1.5rem;">
-            <h2 style="color:#38BDF8; margin:0;"><i class="fas fa-running"></i> Escuelas & Disciplinas Deportivas</h2>
-            <p style="color:#94A3B8; font-size:0.9rem; margin-top:0.25rem;">Gestión de programas deportivos (Taekwondo, Fútbol, Baloncesto, Natación).</p>
+            <h2 style="color:#38BDF8; margin:0;"><i class="fas fa-running"></i> Escuelas & Disciplinas Deportivas / Fitness</h2>
+            <p style="color:#94A3B8; font-size:0.9rem; margin-top:0.25rem;">Gestión de programas deportivos y entrenamiento funcional.</p>
         </div>
         <div style="background:#0D1424; border:1px solid rgba(56,189,248,0.25); border-radius:14px; padding:1.5rem;">
             <p style="color:#94A3B8;">Directorio de Escuelas Deportivas operando normalmente.</p>
@@ -439,7 +666,7 @@ async function renderTalleresCulturalesView(token) {
     contentArea.innerHTML = `
         <div class="view-header" style="margin-bottom:1.5rem;">
             <h2 style="color:#38BDF8; margin:0;"><i class="fas fa-palette"></i> Talleres & Modalidades Culturales</h2>
-            <p style="color:#94A3B8; font-size:0.9rem; margin-top:0.25rem;">Gestión de danza (Joropo, Salsa, Vallenato) e instrumentos (Guitarra, Arpa).</p>
+            <p style="color:#94A3B8; font-size:0.9rem; margin-top:0.25rem;">Gestión de talleres de danza, música, teatro, letras y artes plásticas.</p>
         </div>
         <div style="background:#0D1424; border:1px solid rgba(56,189,248,0.25); border-radius:14px; padding:1.5rem;">
             <p style="color:#94A3B8;">Directorio de Talleres Culturales operando normalmente.</p>
@@ -509,8 +736,8 @@ async function renderAreasEmpresaView(token) {
         const baseUrl = typeof config !== 'undefined' ? config.apiBaseUrl : '';
         const res = await fetch(`${baseUrl}/api/v1/admin/areas`, { headers: { 'Authorization': `Bearer ${token}` } });
         const areas = res.ok ? await res.json() : [
-            { id: 1, nombre: 'Área de Deportes (Disciplinas)', descripcion: 'Taekwondo, Fútbol, Baloncesto, Natación' },
-            { id: 2, nombre: 'Área de Cultura (Talleres)', descripcion: 'Danza (Joropo, Salsa, Vallenato) e Instrumentos' }
+            { id: 1, nombre: 'Área de Deportes (Disciplinas & Fitness)', descripcion: 'Taekwondo, Fútbol, Baloncesto, Musculación, Natación' },
+            { id: 2, nombre: 'Área de Cultura (Talleres)', descripcion: 'Danza (Joropo, Salsa, Vallenato), Música e Instrumentos' }
         ];
 
         const container = document.getElementById('areas-empresa-container');
@@ -553,7 +780,7 @@ async function renderSuscripcionView(token) {
                         ${getPlanBadgeHtml(caps.canonical_plan, caps.subscription_status, caps.is_active)}
                     </div>
                     <p style="color:#94A3B8; font-size:0.85rem; margin:0.25rem 0;">
-                        Tipo: ${getNatureBadgeInfo(caps.tipo_organizacion).label} | ${getTerritorialBadgeInfo(caps.ambito_organizacional).label}
+                        Tipo: ${getNatureBadgeInfo(caps.tipo_organizacion).label} | ${getTerritorialBadgeInfo(caps.ambito_organizacional).label} | Vocación: ${(caps.vocacion_institucional || 'deportiva').toUpperCase()}
                     </p>
                 </div>
 

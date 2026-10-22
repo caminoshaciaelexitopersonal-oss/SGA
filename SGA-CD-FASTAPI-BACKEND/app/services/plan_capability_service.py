@@ -34,6 +34,7 @@ try:
         nombre_empresa: str = ""
         tipo_organizacion: str = "entidad_publica"
         ambito_organizacional: str = "municipal"
+        vocacion_institucional: str = "deportiva"
         canonical_plan: str = "basico"
         subscription_status: str = "sin_suscripcion"
         is_active: bool = False
@@ -99,6 +100,7 @@ except ImportError:
             self.nombre_empresa = nombre_empresa
             self.tipo_organizacion = tipo_organizacion
             self.ambito_organizacional = ambito_organizacional
+            self.vocacion_institucional = tenant_data.get("vocacion_institucional", "deportiva") if isinstance(tenant_data, dict) else "deportiva"
             self.canonical_plan = canonical_plan
             self.subscription_status = subscription_status
             self.is_active = is_active
@@ -128,6 +130,7 @@ except ImportError:
                 "nombre_empresa": self.nombre_empresa,
                 "tipo_organizacion": self.tipo_organizacion,
                 "ambito_organizacional": self.ambito_organizacional,
+                "vocacion_institucional": getattr(self, "vocacion_institucional", "deportiva"),
                 "canonical_plan": self.canonical_plan,
                 "subscription_status": self.subscription_status,
                 "is_active": self.is_active,
@@ -263,6 +266,7 @@ class PlanCapabilityService:
         nombre_empresa = str(tenant_data.get("nombre_empresa", ""))
         tipo_org = str(tenant_data.get("tipo_organizacion", "entidad_publica"))
         ambito_org = str(tenant_data.get("ambito_organizacional", "municipal"))
+        vocacion_inst = str(tenant_data.get("vocacion_institucional", "deportiva"))
         raw_plan = tenant_data.get("plan")
 
         canonical_plan = normalize_plan_code(raw_plan)
@@ -283,6 +287,7 @@ class PlanCapabilityService:
             nombre_empresa=nombre_empresa,
             tipo_organizacion=tipo_org,
             ambito_organizacional=ambito_org,
+            vocacion_institucional=vocacion_inst,
             canonical_plan=canonical_plan,
             subscription_status=sub_status,
             is_active=is_effective_active,

@@ -33,6 +33,7 @@ class TenantCapabilitiesResponse(BaseModel):
     nombre_empresa: str
     tipo_organizacion: str
     ambito_organizacional: str
+    vocacion_institucional: str = "deportiva"
     canonical_plan: str
     subscription_status: str
     is_active: bool
