@@ -16,60 +16,69 @@ depends_on = None
 
 
 def upgrade():
-    # 1. Add vocacion_institucional to inquilinos
-    op.add_column(
-        'inquilinos',
-        sa.Column('vocacion_institucional', sa.String(length=20), nullable=False, server_default='deportiva')
-    )
+    bind = op.get_bind()
+    inspector = sa.inspect(bind)
+
+    # 1. Add vocacion_institucional to inquilinos if not present
+    if inspector.has_table('inquilinos'):
+        existing_cols = [c['name'] for c in inspector.get_columns('inquilinos')]
+        if 'vocacion_institucional' not in existing_cols:
+            op.add_column(
+                'inquilinos',
+                sa.Column('vocacion_institucional', sa.String(length=20), nullable=False, server_default='deportiva')
+            )
 
     # 2. Create catalogo_especialidades
-    op.create_table(
-        'catalogo_especialidades',
-        sa.Column('id', sa.Integer(), nullable=False),
-        sa.Column('vertical', sa.String(length=20), nullable=False),
-        sa.Column('categoria', sa.String(length=100), nullable=False),
-        sa.Column('codigo_canonico', sa.String(length=150), nullable=False),
-        sa.Column('nombre', sa.String(length=200), nullable=False),
-        sa.Column('es_estandar', sa.Boolean(), nullable=True, server_default='true'),
-        sa.Column('creado_por_inquilino_id', sa.Integer(), nullable=True),
-        sa.Column('activo', sa.Boolean(), nullable=True, server_default='true'),
-        sa.Column('fecha_creacion', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
-        sa.ForeignKeyConstraint(['creado_por_inquilino_id'], ['inquilinos.id'], ),
-        sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_catalogo_especialidades_id'), 'catalogo_especialidades', ['id'], unique=False)
-    op.execute(
-        "CREATE UNIQUE INDEX uq_especialidad_clean ON catalogo_especialidades (vertical, lower(trim(nombre)))"
-    )
+    if not inspector.has_table('catalogo_especialidades'):
+        op.create_table(
+            'catalogo_especialidades',
+            sa.Column('id', sa.Integer(), nullable=False),
+            sa.Column('vertical', sa.String(length=20), nullable=False),
+            sa.Column('categoria', sa.String(length=100), nullable=False),
+            sa.Column('codigo_canonico', sa.String(length=150), nullable=False),
+            sa.Column('nombre', sa.String(length=200), nullable=False),
+            sa.Column('es_estandar', sa.Boolean(), nullable=True, server_default='true'),
+            sa.Column('creado_por_inquilino_id', sa.Integer(), nullable=True),
+            sa.Column('activo', sa.Boolean(), nullable=True, server_default='true'),
+            sa.Column('fecha_creacion', sa.DateTime(timezone=True), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=True),
+            sa.ForeignKeyConstraint(['creado_por_inquilino_id'], ['inquilinos.id'], ),
+            sa.PrimaryKeyConstraint('id')
+        )
+        op.create_index(op.f('ix_catalogo_especialidades_id'), 'catalogo_especialidades', ['id'], unique=False)
+        op.execute(
+            "CREATE UNIQUE INDEX IF NOT EXISTS uq_especialidad_clean ON catalogo_especialidades (vertical, lower(trim(nombre)))"
+        )
 
     # 3. Create empresa_especialidades
-    op.create_table(
-        'empresa_especialidades',
-        sa.Column('id', sa.Integer(), nullable=False),
-        sa.Column('inquilino_id', sa.Integer(), nullable=False),
-        sa.Column('especialidad_id', sa.Integer(), nullable=False),
-        sa.Column('activa', sa.Boolean(), nullable=True, server_default='true'),
-        sa.Column('fecha_adopcion', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
-        sa.ForeignKeyConstraint(['inquilino_id'], ['inquilinos.id'], ),
-        sa.ForeignKeyConstraint(['especialidad_id'], ['catalogo_especialidades.id'], ),
-        sa.PrimaryKeyConstraint('id'),
-        sa.UniqueConstraint('inquilino_id', 'especialidad_id', name='uq_empresa_especialidad')
-    )
-    op.create_index(op.f('ix_empresa_especialidades_id'), 'empresa_especialidades', ['id'], unique=False)
+    if not inspector.has_table('empresa_especialidades'):
+        op.create_table(
+            'empresa_especialidades',
+            sa.Column('id', sa.Integer(), nullable=False),
+            sa.Column('inquilino_id', sa.Integer(), nullable=False),
+            sa.Column('especialidad_id', sa.Integer(), nullable=False),
+            sa.Column('activa', sa.Boolean(), nullable=True, server_default='true'),
+            sa.Column('fecha_adopcion', sa.DateTime(timezone=True), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=True),
+            sa.ForeignKeyConstraint(['inquilino_id'], ['inquilinos.id'], ),
+            sa.ForeignKeyConstraint(['especialidad_id'], ['catalogo_especialidades.id'], ),
+            sa.PrimaryKeyConstraint('id'),
+            sa.UniqueConstraint('inquilino_id', 'especialidad_id', name='uq_empresa_especialidad')
+        )
+        op.create_index(op.f('ix_empresa_especialidades_id'), 'empresa_especialidades', ['id'], unique=False)
 
     # 4. Create profesor_especialidades
-    op.create_table(
-        'profesor_especialidades',
-        sa.Column('id', sa.Integer(), nullable=False),
-        sa.Column('usuario_id', sa.Integer(), nullable=False),
-        sa.Column('empresa_especialidad_id', sa.Integer(), nullable=False),
-        sa.Column('certificacion_avalada', sa.Boolean(), nullable=True, server_default='false'),
-        sa.Column('nivel_academico', sa.String(length=100), nullable=True),
-        sa.ForeignKeyConstraint(['usuario_id'], ['usuarios.id'], ),
-        sa.ForeignKeyConstraint(['empresa_especialidad_id'], ['empresa_especialidades.id'], ),
-        sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_profesor_especialidades_id'), 'profesor_especialidades', ['id'], unique=False)
+    if not inspector.has_table('profesor_especialidades'):
+        op.create_table(
+            'profesor_especialidades',
+            sa.Column('id', sa.Integer(), nullable=False),
+            sa.Column('usuario_id', sa.Integer(), nullable=False),
+            sa.Column('empresa_especialidad_id', sa.Integer(), nullable=False),
+            sa.Column('certificacion_avalada', sa.Boolean(), nullable=True, server_default='false'),
+            sa.Column('nivel_academico', sa.String(length=100), nullable=True),
+            sa.ForeignKeyConstraint(['usuario_id'], ['usuarios.id'], ),
+            sa.ForeignKeyConstraint(['empresa_especialidad_id'], ['empresa_especialidades.id'], ),
+            sa.PrimaryKeyConstraint('id')
+        )
+        op.create_index(op.f('ix_profesor_especialidades_id'), 'profesor_especialidades', ['id'], unique=False)
 
 
 def downgrade():

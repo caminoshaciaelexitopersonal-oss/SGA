@@ -16,23 +16,26 @@ depends_on = None
 
 
 def upgrade():
-    # 1. Create table consumo_inquilinos if not exists
-    op.create_table(
-        'consumo_inquilinos',
-        sa.Column('id', sa.Integer(), nullable=False),
-        sa.Column('inquilino_id', sa.Integer(), nullable=False),
-        sa.Column('periodo', sa.String(), nullable=False),
-        sa.Column('capacidad', sa.String(), nullable=False),
-        sa.Column('cantidad_usada', sa.Integer(), nullable=False, server_default='0'),
-        sa.Column('ultima_actualizacion', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
-        sa.ForeignKeyConstraint(['inquilino_id'], ['inquilinos.id'], ),
-        sa.PrimaryKeyConstraint('id'),
-        sa.UniqueConstraint('inquilino_id', 'periodo', 'capacidad', name='uq_consumo_inquilino_periodo_capacidad')
-    )
-    op.create_index(op.f('ix_consumo_inquilinos_id'), 'consumo_inquilinos', ['id'], unique=False)
-    op.create_index(op.f('ix_consumo_inquilinos_inquilino_id'), 'consumo_inquilinos', ['inquilino_id'], unique=False)
-    op.create_index(op.f('ix_consumo_inquilinos_periodo'), 'consumo_inquilinos', ['periodo'], unique=False)
-    op.create_index(op.f('ix_consumo_inquilinos_capacidad'), 'consumo_inquilinos', ['capacidad'], unique=False)
+    bind = op.get_bind()
+    inspector = sa.inspect(bind)
+
+    if not inspector.has_table('consumo_inquilinos'):
+        op.create_table(
+            'consumo_inquilinos',
+            sa.Column('id', sa.Integer(), nullable=False),
+            sa.Column('inquilino_id', sa.Integer(), nullable=False),
+            sa.Column('periodo', sa.String(), nullable=False),
+            sa.Column('capacidad', sa.String(), nullable=False),
+            sa.Column('cantidad_usada', sa.Integer(), nullable=False, server_default='0'),
+            sa.Column('ultima_actualizacion', sa.DateTime(timezone=True), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=True),
+            sa.ForeignKeyConstraint(['inquilino_id'], ['inquilinos.id'], ),
+            sa.PrimaryKeyConstraint('id'),
+            sa.UniqueConstraint('inquilino_id', 'periodo', 'capacidad', name='uq_consumo_inquilino_periodo_capacidad')
+        )
+        op.create_index(op.f('ix_consumo_inquilinos_id'), 'consumo_inquilinos', ['id'], unique=False)
+        op.create_index(op.f('ix_consumo_inquilinos_inquilino_id'), 'consumo_inquilinos', ['inquilino_id'], unique=False)
+        op.create_index(op.f('ix_consumo_inquilinos_periodo'), 'consumo_inquilinos', ['periodo'], unique=False)
+        op.create_index(op.f('ix_consumo_inquilinos_capacidad'), 'consumo_inquilinos', ['capacidad'], unique=False)
 
 
 def downgrade():

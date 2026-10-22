@@ -18,26 +18,46 @@ depends_on = None
 
 def upgrade():
     # Performance indexes for tenant isolation & foreign key queries
-    op.create_index('ix_usuarios_inquilino_id', 'usuarios', ['inquilino_id'], unique=False, if_not_exists=True)
-    op.create_index('ix_alumnos_inquilino_id', 'alumnos', ['inquilino_id'], unique=False, if_not_exists=True)
-    op.create_index('ix_alumnos_usuario_id', 'alumnos', ['usuario_id'], unique=False, if_not_exists=True)
-    op.create_index('ix_mallas_inquilino_id', 'mallas_curriculares', ['inquilino_id'], unique=False, if_not_exists=True)
-    op.create_index('ix_asignaturas_inquilino_id', 'asignaturas', ['inquilino_id'], unique=False, if_not_exists=True)
-    op.create_index('ix_elementos_inquilino_estado', 'elementos', ['inquilino_id', 'estado'], unique=False, if_not_exists=True)
-    op.create_index('ix_prestamos_inquilino_estado', 'prestamos', ['inquilino_id', 'estado'], unique=False, if_not_exists=True)
-    op.create_index('ix_inscripciones_inquilino_alumno', 'inscripciones', ['inquilino_id', 'alumno_id'], unique=False, if_not_exists=True)
-    op.create_index('ix_asistencias_inquilino_clase', 'asistencias', ['inquilino_id', 'clase_id'], unique=False, if_not_exists=True)
-    op.create_index('ix_notificaciones_inquilino_usuario', 'notificaciones', ['inquilino_id', 'usuario_id', 'leida'], unique=False, if_not_exists=True)
+    bind = op.get_bind()
+    inspector = sa.inspect(bind)
+
+    indexes_to_create = [
+        ('ix_usuarios_inquilino_id', 'usuarios', ['inquilino_id']),
+        ('ix_alumnos_inquilino_id', 'alumnos', ['inquilino_id']),
+        ('ix_alumnos_usuario_id', 'alumnos', ['usuario_id']),
+        ('ix_mallas_inquilino_id', 'mallas_curriculares', ['inquilino_id']),
+        ('ix_asignaturas_inquilino_id', 'asignaturas', ['inquilino_id']),
+        ('ix_elementos_inquilino_estado', 'elementos', ['inquilino_id', 'estado']),
+        ('ix_prestamos_inquilino_estado', 'prestamos', ['inquilino_id', 'estado']),
+        ('ix_inscripciones_inquilino_alumno', 'inscripciones', ['inquilino_id', 'alumno_id']),
+        ('ix_asistencias_inquilino_clase', 'asistencias', ['inquilino_id', 'clase_id']),
+        ('ix_notificaciones_inquilino_usuario', 'notificaciones', ['inquilino_id', 'usuario_id', 'leida']),
+    ]
+
+    for idx_name, table_name, columns in indexes_to_create:
+        if inspector.has_table(table_name):
+            existing_cols = [c['name'] for c in inspector.get_columns(table_name)]
+            if all(col in existing_cols for col in columns):
+                op.create_index(idx_name, table_name, columns, unique=False, if_not_exists=True)
 
 
 def downgrade():
-    op.drop_index('ix_notificaciones_inquilino_usuario', table_name='notificaciones', if_exists=True)
-    op.drop_index('ix_asistencias_inquilino_clase', table_name='asistencias', if_exists=True)
-    op.drop_index('ix_inscripciones_inquilino_alumno', table_name='inscripciones', if_exists=True)
-    op.drop_index('ix_prestamos_inquilino_estado', table_name='prestamos', if_exists=True)
-    op.drop_index('ix_elementos_inquilino_estado', table_name='elementos', if_exists=True)
-    op.drop_index('ix_asignaturas_inquilino_id', table_name='asignaturas', if_exists=True)
-    op.drop_index('ix_mallas_inquilino_id', table_name='mallas_curriculares', if_exists=True)
-    op.drop_index('ix_alumnos_usuario_id', table_name='alumnos', if_exists=True)
-    op.drop_index('ix_alumnos_inquilino_id', table_name='alumnos', if_exists=True)
-    op.drop_index('ix_usuarios_inquilino_id', table_name='usuarios', if_exists=True)
+    bind = op.get_bind()
+    inspector = sa.inspect(bind)
+
+    indexes_to_drop = [
+        ('ix_notificaciones_inquilino_usuario', 'notificaciones'),
+        ('ix_asistencias_inquilino_clase', 'asistencias'),
+        ('ix_inscripciones_inquilino_alumno', 'inscripciones'),
+        ('ix_prestamos_inquilino_estado', 'prestamos'),
+        ('ix_elementos_inquilino_estado', 'elementos'),
+        ('ix_asignaturas_inquilino_id', 'asignaturas'),
+        ('ix_mallas_inquilino_id', 'mallas_curriculares'),
+        ('ix_alumnos_usuario_id', 'alumnos'),
+        ('ix_alumnos_inquilino_id', 'alumnos'),
+        ('ix_usuarios_inquilino_id', 'usuarios'),
+    ]
+
+    for idx_name, table_name in indexes_to_drop:
+        if inspector.has_table(table_name):
+            op.drop_index(idx_name, table_name=table_name, if_exists=True)
