@@ -37,18 +37,22 @@ function getPlanBadgeHtml(canonicalPlan, subStatus, isActive) {
 
 function renderUserRows(users) {
     if (!users || users.length === 0) return '<tr><td colspan="5">No se encontraron usuarios.</td></tr>';
-    return users.map(user => `
+    return users.map(user => {
+        const safeName = (user.nombre_completo || 'Usuario').replace(/'/g, "\\'");
+        return `
         <tr>
             <td><strong>#${user.id}</strong></td>
-            <td>${user.nombre_completo}</td>
-            <td>${user.correo}</td>
+            <td>${user.nombre_completo || 'N/A'}</td>
+            <td>${user.correo || 'N/A'}</td>
             <td><span class="badge" style="background:rgba(56,189,248,0.1); color:#38BDF8; font-size:0.75rem;">${Array.isArray(user.roles) ? user.roles.join(', ') : (user.rol || 'usuario')}</span></td>
             <td>
-                <button class="btn-secondary" style="min-height:36px; padding:0.25rem 0.75rem;">Editar</button>
+                <button class="btn-primary" style="min-height:36px; padding:0.25rem 0.75rem;" onclick="window.sgaOpenTeacherSpecialtiesModal(${user.id}, '${safeName}')"><i class="fas fa-award"></i> Especialidades / Aval</button>
+                <button class="btn-secondary" style="min-height:36px; padding:0.25rem 0.75rem; margin-left:0.25rem;">Editar</button>
                 <button class="btn-danger" style="min-height:36px; padding:0.25rem 0.75rem; margin-left:0.25rem;">Eliminar</button>
             </td>
         </tr>
-    `).join('');
+    `;
+    }).join('');
 }
 
 function renderAreaRows(areas) {
@@ -676,14 +680,29 @@ async function renderTalleresCulturalesView(token) {
 
 async function renderUsuariosEmpresaView(token) {
     const contentArea = document.getElementById('content-area');
+    const baseUrl = typeof config !== 'undefined' ? config.apiBaseUrl : '';
+
+    let caps = { vocacion_institucional: 'deportiva' };
+    try {
+        const capsRes = await fetch(`${baseUrl}/api/v1/tenants/my-plan-capabilities`, { headers: { 'Authorization': `Bearer ${token}` } });
+        if (capsRes.ok) caps = await capsRes.json();
+    } catch (e) {
+        console.warn('Error loading tenant capabilities for vocacion adaptation:', e);
+    }
+
+    const isCultural = (caps.vocacion_institucional || 'deportiva') === 'cultural';
+    const headerTitle = isCultural ? 'Maestros Formadores & Talleristas Culturales' : 'Entrenadores & Instructores Deportivos';
+    const headerIcon = isCultural ? 'fa-chalkboard-teacher' : 'fa-running';
+    const headerSub = isCultural ? 'Gestión de formadores, talleristas y aval de modalidades culturales de la entidad.' : 'Gestión de entrenadores, instructores deportivos y aval de disciplinas de la entidad.';
+
     contentArea.innerHTML = `
         <div class="view-header" style="margin-bottom:1.5rem;">
-            <h2 style="color:#38BDF8; margin:0;"><i class="fas fa-users-cog"></i> Personal Institucional & Docentes</h2>
-            <p style="color:#94A3B8; font-size:0.9rem; margin-top:0.25rem;">Administración de usuarios, asignación de roles y permisos del personal de la organización.</p>
+            <h2 style="color:#38BDF8; margin:0;"><i class="fas ${headerIcon}"></i> ${headerTitle}</h2>
+            <p style="color:#94A3B8; font-size:0.9rem; margin-top:0.25rem;">${headerSub}</p>
         </div>
         <div id="usuarios-empresa-container" style="background:#0D1424; border:1px solid rgba(56,189,248,0.25); border-radius:14px; padding:1.5rem;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-                <h3 style="color:#38BDF8; margin:0;">Directorio de Personal</h3>
+                <h3 style="color:#38BDF8; margin:0;">Directorio de Personal (${isCultural ? 'Área Cultural' : 'Área Deportiva'})</h3>
                 <button class="btn-primary" style="min-height:44px; padding:0 1.25rem;"><i class="fas fa-user-plus"></i> Invitar Usuario</button>
             </div>
             <p style="color:#94A3B8;">Cargando usuarios institucionales...</p>
@@ -691,7 +710,6 @@ async function renderUsuariosEmpresaView(token) {
     `;
 
     try {
-        const baseUrl = typeof config !== 'undefined' ? config.apiBaseUrl : '';
         const res = await fetch(`${baseUrl}/api/v1/admin/users/by-empresa`, { headers: { 'Authorization': `Bearer ${token}` } });
         const users = res.ok ? await res.json() : [
             { id: 101, nombre_completo: 'Carlos Mendoza', correo: 'carlos.mendoza@sga-cd.org', roles: ['profesor'] },
@@ -702,11 +720,11 @@ async function renderUsuariosEmpresaView(token) {
         if (container) {
             container.innerHTML = `
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-                    <h3 style="color:#38BDF8; margin:0;">Directorio de Personal</h3>
+                    <h3 style="color:#38BDF8; margin:0;">Directorio de Personal (${isCultural ? 'Área Cultural' : 'Área Deportiva'})</h3>
                     <button class="btn-primary" style="min-height:44px; padding:0 1.25rem;"><i class="fas fa-user-plus"></i> Invitar Usuario</button>
                 </div>
                 <table class="data-table">
-                    <thead><tr><th>ID</th><th>Nombre Completo</th><th>Email</th><th>Roles</th><th>Acciones</th></tr></thead>
+                    <thead><tr><th>ID</th><th>Nombre Completo</th><th>Email</th><th>Roles</th><th>Especialidades & Aval</th></tr></thead>
                     <tbody>${renderUserRows(users)}</tbody>
                 </table>
             `;
@@ -860,6 +878,195 @@ function renderAuditTable(logs) {
         </table>
     `;
 }
+
+window.sgaOpenTeacherSpecialtiesModal = async function(teacherId, teacherName) {
+    let modal = document.getElementById('teacher-specialties-modal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'teacher-specialties-modal';
+        modal.style.cssText = 'position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(7,11,20,0.85); backdrop-filter:blur(8px); z-index:99999; display:flex; justify-content:center; align-items:center; padding:1.5rem;';
+        document.body.appendChild(modal);
+    }
+    modal.style.display = 'flex';
+
+    modal.innerHTML = `
+        <div style="background:#0D1424; border:1px solid rgba(56,189,248,0.3); border-radius:16px; width:100%; max-width:700px; max-height:90vh; overflow-y:auto; padding:2rem; box-shadow:0 20px 40px rgba(0,0,0,0.6); color:#F8FAFC;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:1rem;">
+                <div>
+                    <h3 style="color:#38BDF8; margin:0;"><i class="fas fa-award"></i> Asignación & Aval de Especialidades</h3>
+                    <p style="color:#94A3B8; font-size:0.85rem; margin:0.25rem 0 0 0;">Docente / Formador: <strong>${teacherName}</strong> (#${teacherId})</p>
+                </div>
+                <button onclick="document.getElementById('teacher-specialties-modal').style.display='none'" style="background:transparent; border:none; color:#94A3B8; font-size:1.5rem; cursor:pointer;"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="modal-specialties-body">
+                <p style="color:#94A3B8;"><i class="fas fa-spinner fa-spin"></i> Cargando especialidades asignadas...</p>
+            </div>
+        </div>
+    `;
+
+    const token = localStorage.getItem('sga_token') || sessionStorage.getItem('sga_token') || '';
+    const baseUrl = typeof config !== 'undefined' ? config.apiBaseUrl : '';
+
+    async function loadModalData() {
+        const bodyEl = document.getElementById('modal-specialties-body');
+        try {
+            const [teacherSpecsRes, companySpecsRes] = await Promise.all([
+                fetch(`${baseUrl}/api/v1/catalogo/teachers/${teacherId}/specialties`, { headers: { 'Authorization': `Bearer ${token}` } }),
+                fetch(`${baseUrl}/api/v1/catalogo/my-specialties`, { headers: { 'Authorization': `Bearer ${token}` } })
+            ]);
+
+            const teacherSpecs = teacherSpecsRes.ok ? await teacherSpecsRes.json() : [];
+            const companySpecs = companySpecsRes.ok ? await companySpecsRes.json() : [];
+
+            let listHtml = '';
+            if (teacherSpecs.length === 0) {
+                listHtml = '<p style="color:#94A3B8; font-style:italic;">El docente no tiene especialidades asignadas actualmente.</p>';
+            } else {
+                listHtml = `
+                    <table class="data-table" style="margin-bottom:1.5rem;">
+                        <thead>
+                            <tr><th>Especialidad</th><th>Nivel Académico</th><th>Estado Aval</th><th>Acciones</th></tr>
+                        </thead>
+                        <tbody>
+                            ${teacherSpecs.map(s => `
+                                <tr>
+                                    <td><strong>${s.nombre}</strong> <small style="color:#94A3B8;">(${s.vertical})</small></td>
+                                    <td>${s.nivel_academico || 'Licenciatura'}</td>
+                                    <td>
+                                        <span class="badge" style="background:${s.certificacion_avalada ? 'rgba(34,197,94,0.15)' : 'rgba(245,158,11,0.15)'}; color:${s.certificacion_avalada ? '#22C55E' : '#F59E0B'};">
+                                            <i class="fas ${s.certificacion_avalada ? 'fa-check-circle' : 'fa-clock'}"></i> ${s.estado_aval}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button class="btn-secondary" style="min-height:32px; padding:0.2rem 0.5rem; font-size:0.8rem;" onclick="window.sgaToggleTeacherAval(${teacherId}, ${s.profesor_especialidad_id}, ${!s.certificacion_avalada}, '${teacherName}')">
+                                            ${s.certificacion_avalada ? '<i class="fas fa-ban"></i> Retirar Aval' : '<i class="fas fa-check"></i> Conceder Aval'}
+                                        </button>
+                                        <button class="btn-danger" style="min-height:32px; padding:0.2rem 0.5rem; font-size:0.8rem; margin-left:0.25rem;" onclick="window.sgaRemoveTeacherSpecialty(${teacherId}, ${s.profesor_especialidad_id}, '${teacherName}')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+            }
+
+            // Options for assigning new adopted specialty
+            const assignedEmpIds = new Set(teacherSpecs.map(ts => ts.empresa_especialidad_id));
+            const availableOptions = companySpecs.filter(cs => !assignedEmpIds.has(cs.empresa_especialidad_id));
+
+            let assignFormHtml = '';
+            if (availableOptions.length === 0) {
+                assignFormHtml = '<p style="color:#94A3B8; font-size:0.85rem;">Todas las especialidades adoptadas por la entidad ya están asignadas a este docente.</p>';
+            } else {
+                assignFormHtml = `
+                    <div style="background:rgba(15,23,42,0.6); border:1px solid rgba(56,189,248,0.2); border-radius:12px; padding:1.25rem; margin-top:1rem;">
+                        <h4 style="color:#38BDF8; margin:0 0 0.75rem 0; font-size:0.95rem;"><i class="fas fa-plus-circle"></i> Asignar Nueva Especialidad Institucional</h4>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin-bottom:0.75rem;">
+                            <div>
+                                <label style="display:block; color:#94A3B8; font-size:0.8rem; margin-bottom:0.25rem;">Especialidad Adoptada</label>
+                                <select id="modal-select-emp-spec" style="width:100%; background:#070B14; border:1px solid rgba(255,255,255,0.2); border-radius:8px; padding:0.5rem; color:#F8FAFC;">
+                                    ${availableOptions.map(o => `<option value="${o.empresa_especialidad_id}">${o.nombre} (${o.vertical})</option>`).join('')}
+                                </select>
+                            </div>
+                            <div>
+                                <label style="display:block; color:#94A3B8; font-size:0.8rem; margin-bottom:0.25rem;">Nivel Académico / Título</label>
+                                <input type="text" id="modal-input-nivel" placeholder="Ej. Licenciado, Magíster, Entrenador" style="width:100%; background:#070B14; border:1px solid rgba(255,255,255,0.2); border-radius:8px; padding:0.5rem; color:#F8FAFC;">
+                            </div>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <label style="color:#F8FAFC; font-size:0.85rem; cursor:pointer; display:flex; align-items:center; gap:0.5rem;">
+                                <input type="checkbox" id="modal-check-aval" checked> Otorgar Aval Institucional Inmediato
+                            </label>
+                            <button class="btn-primary" style="min-height:38px; padding:0 1rem;" onclick="window.sgaSubmitTeacherSpecialtyAssignment(${teacherId}, '${teacherName}')">
+                                <i class="fas fa-check"></i> Asignar Especialidad
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            bodyEl.innerHTML = listHtml + assignFormHtml;
+
+        } catch (err) {
+            bodyEl.innerHTML = `<p style="color:#EF4444;"><i class="fas fa-exclamation-triangle"></i> Error al cargar especialidades: ${err.message}</p>`;
+        }
+    }
+
+    await loadModalData();
+};
+
+window.sgaToggleTeacherAval = async function(teacherId, assocId, newAvalStatus, teacherName) {
+    const token = localStorage.getItem('sga_token') || sessionStorage.getItem('sga_token') || '';
+    const baseUrl = typeof config !== 'undefined' ? config.apiBaseUrl : '';
+    try {
+        const res = await fetch(`${baseUrl}/api/v1/catalogo/teachers/${teacherId}/specialties/${assocId}/aval`, {
+            method: 'PATCH',
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ certificacion_avalada: newAvalStatus })
+        });
+        if (res.ok) {
+            await window.sgaOpenTeacherSpecialtiesModal(teacherId, teacherName);
+        } else {
+            const err = await res.json();
+            alert(`Error al actualizar aval: ${err.detail || 'Operación fallida'}`);
+        }
+    } catch (e) {
+        alert(`Error de red: ${e.message}`);
+    }
+};
+
+window.sgaRemoveTeacherSpecialty = async function(teacherId, assocId, teacherName) {
+    if (!confirm('¿Está seguro de remover esta asignación de especialidad al docente?')) return;
+    const token = localStorage.getItem('sga_token') || sessionStorage.getItem('sga_token') || '';
+    const baseUrl = typeof config !== 'undefined' ? config.apiBaseUrl : '';
+    try {
+        const res = await fetch(`${baseUrl}/api/v1/catalogo/teachers/${teacherId}/specialties/${assocId}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+            await window.sgaOpenTeacherSpecialtiesModal(teacherId, teacherName);
+        } else {
+            const err = await res.json();
+            alert(`Error al remover especialidad: ${err.detail || 'Operación fallida'}`);
+        }
+    } catch (e) {
+        alert(`Error de red: ${e.message}`);
+    }
+};
+
+window.sgaSubmitTeacherSpecialtyAssignment = async function(teacherId, teacherName) {
+    const selectEl = document.getElementById('modal-select-emp-spec');
+    const inputNivel = document.getElementById('modal-input-nivel');
+    const checkAval = document.getElementById('modal-check-aval');
+
+    if (!selectEl || !selectEl.value) return;
+
+    const token = localStorage.getItem('sga_token') || sessionStorage.getItem('sga_token') || '';
+    const baseUrl = typeof config !== 'undefined' ? config.apiBaseUrl : '';
+
+    try {
+        const res = await fetch(`${baseUrl}/api/v1/catalogo/teachers/${teacherId}/specialties`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                empresa_especialidad_id: parseInt(selectEl.value, 10),
+                nivel_academico: inputNivel ? inputNivel.value : '',
+                certificacion_avalada: checkAval ? checkAval.checked : false
+            })
+        });
+        if (res.ok) {
+            await window.sgaOpenTeacherSpecialtiesModal(teacherId, teacherName);
+        } else {
+            const err = await res.json();
+            alert(`Error al asignar especialidad: ${err.detail || 'Operación fallida'}`);
+        }
+    } catch (e) {
+        alert(`Error de red: ${e.message}`);
+    }
+};
 
 if (typeof registerView === 'function') {
     registerView('admin_empresa', 'panel-empresa', renderAdminEmpresaView);

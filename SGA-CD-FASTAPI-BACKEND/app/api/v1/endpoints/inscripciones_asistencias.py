@@ -5,6 +5,8 @@ from sqlalchemy.orm import Session
 from app import crud, schemas
 from app.api import deps
 from app.models import user as user_model
+from app.models.academic import Clase
+from app.models.catalog import EmpresaEspecialidad, ProfesorEspecialidad
 
 router = APIRouter()
 
@@ -34,10 +36,47 @@ def create_inscripcion(
     current_user: user_model.Usuario = Depends(deps.get_current_active_user),
 ) -> Any:
     """
-    Create a new enrollment with tenant validation.
+    Create a new enrollment with tenant validation and teacher coverage enforcement.
+    Rule: Enrollment is blocked if the class has no instructor assigned or if the assigned instructor
+    does not have an active, institutionally avalado specialty for this organization.
     """
     if getattr(inscripcion_in, "inquilino_id", current_user.inquilino_id) != current_user.inquilino_id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Cannot create enrollment for another tenant.")
+
+    # Teacher coverage check
+    if inscripcion_in.clase_id:
+        clase = db.query(Clase).filter(
+            Clase.id == inscripcion_in.clase_id,
+            Clase.inquilino_id == current_user.inquilino_id
+        ).first()
+
+        if not clase:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="La clase especificada no existe en su organización.")
+
+        if not clase.instructor_id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="No se permite la matrícula: La especialidad o clase no tiene un instructor o formador asignado."
+            )
+
+        # Check if instructor has an avalado specialty for this tenant
+        has_aval = (
+            db.query(ProfesorEspecialidad)
+            .join(EmpresaEspecialidad, ProfesorEspecialidad.empresa_especialidad_id == EmpresaEspecialidad.id)
+            .filter(
+                ProfesorEspecialidad.usuario_id == clase.instructor_id,
+                EmpresaEspecialidad.inquilino_id == current_user.inquilino_id,
+                ProfesorEspecialidad.certificacion_avalada == True,
+                EmpresaEspecialidad.activa == True
+            )
+            .first()
+        )
+
+        if not has_aval:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="No se permite la matrícula: El instructor asignado no cuenta con el aval institucional habilitado para esta especialidad."
+            )
 
     inscripcion = crud.inscripcion_asistencia.create_inscripcion(db=db, obj_in=inscripcion_in)
     return inscripcion

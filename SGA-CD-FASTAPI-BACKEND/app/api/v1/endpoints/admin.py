@@ -32,11 +32,10 @@ def get_users_by_empresa(
 ):
     """
     Get all users belonging to the current user's empresa (inquilino).
-    Accessible by roles that manage users within a company, like admin_empresa or jefe_area.
+    Accessible by roles that manage users within a company: admin_empresa, jefe_area, profesional_area, tecnico_area.
     """
-    # Check for appropriate roles manually since we need the user object
-    allowed_roles = {"admin_empresa", "jefe_area", "admin_general"}
-    user_roles = set(getattr(current_user, "role_codes", []))
+    allowed_roles = {"admin_empresa", "jefe_area", "profesional_area", "tecnico_area", "admin_general"}
+    user_roles = set(getattr(current_user, "role_codes", getattr(current_user, "role_list", [])))
     if not user_roles.intersection(allowed_roles):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -47,7 +46,6 @@ def get_users_by_empresa(
         user_model.Usuario.inquilino_id == current_user.inquilino_id
     ).all()
 
-    # Manually attach role_list to each user for response
     for user in users:
         role_query = text("""
             SELECT r.nombre
@@ -62,6 +60,75 @@ def get_users_by_empresa(
         user.role_list = role_names
 
     return users
+
+
+@router.post("/users/by-empresa", response_model=schemas.User, summary="Create user in company hierarchy")
+def create_user_by_empresa(
+    *,
+    db: Session = Depends(deps.get_db),
+    user_in: schemas.UserCreate,
+    current_user: user_model.Usuario = Depends(deps.get_current_active_user)
+):
+    """
+    Enforces registration authority levels for company user creation:
+    - Level 1 (admin_empresa): Can create jefe_area, profesional_area, tecnico_area.
+    - Level 2 (jefe_area): Can create coordinador, profesor, almacenista, jefe_escenarios (responsable de espacios).
+    - Level 3 (profesional_area, tecnico_area): Can prepare/create operativs (profesor, coordinador) within scope.
+    No role can create a role with higher authority than itself.
+    """
+    if user_in.inquilino_id != current_user.inquilino_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Cannot create user for another tenant."
+        )
+
+    user_roles = set(getattr(current_user, "role_codes", getattr(current_user, "role_list", [])))
+
+    # Authority definitions
+    level_1_roles = {"admin_empresa", "admin_general"}
+    level_2_roles = {"jefe_area"}
+    level_3_roles = {"profesional_area", "tecnico_area"}
+
+    target_role = user_in.rol.strip()
+
+    if user_roles.intersection(level_1_roles):
+        allowed_target_roles = {
+            "jefe_area", "profesional_area", "tecnico_area",
+            "coordinador", "profesor", "almacenista", "jefe_escenarios", "alumno", "padre_acudiente"
+        }
+    elif user_roles.intersection(level_2_roles):
+        allowed_target_roles = {
+            "coordinador", "profesor", "almacenista", "jefe_escenarios", "alumno", "padre_acudiente"
+        }
+    elif user_roles.intersection(level_3_roles):
+        allowed_target_roles = {"profesor", "coordinador", "alumno"}
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="User role does not have authority to create new personnel."
+        )
+
+    if target_role not in allowed_target_roles:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Role '{target_role}' cannot be created by your authority level."
+        )
+
+    # Check for existing user username or email
+    existing_by_username = db.query(user_model.Usuario).filter(
+        user_model.Usuario.nombre_usuario == user_in.nombre_usuario
+    ).first()
+    if existing_by_username:
+        raise HTTPException(status_code=400, detail="Username already registered.")
+
+    existing_by_email = db.query(user_model.Usuario).filter(
+        user_model.Usuario.correo == user_in.email
+    ).first()
+    if existing_by_email:
+        raise HTTPException(status_code=400, detail="Email address already registered.")
+
+    new_user = crud.user.create_user(db=db, user=user_in)
+    return new_user
 
 
 @router.get("/areas", response_model=List[schemas.area.Area], summary="List areas by company")
@@ -83,3 +150,72 @@ def get_areas_by_empresa(
 
     areas = crud.area.get_areas_by_tenant(db=db, inquilino_id=current_user.inquilino_id)
     return areas
+
+
+@router.get("/indicadores", summary="Get base institutional indicators for analytics dashboard")
+def get_indicadores_institucionales(
+    db: Session = Depends(deps.get_db),
+    current_user: user_model.Usuario = Depends(deps.get_current_active_user)
+):
+    """
+    Returns unified base institutional indicators for the user's tenant:
+    1. cantidad_instructores: Active teachers/instructors
+    2. cantidad_alumnos_inscritos: Active enrolled students
+    3. cantidad_alumnos_retirados: Inactive or withdrawn students
+    4. alumnos_por_especialidad: Breakdown of active students per sport/cultural specialty
+    """
+    tenant_id = current_user.inquilino_id
+
+    # 1. Active teachers count
+    from app.models.user import Profesor, Alumno
+    from app.models.academic import Inscripcion
+    from app.models.catalog import CatalogoEspecialidad, EmpresaEspecialidad
+
+    total_teachers = db.query(Profesor).filter(Profesor.inquilino_id == tenant_id).count()
+
+    # 2. Total active students
+    active_students_count = db.query(Alumno).join(user_model.Usuario).filter(
+        Alumno.inquilino_id == tenant_id,
+        user_model.Usuario.activo == True
+    ).count()
+
+    # 3. Total withdrawn students
+    withdrawn_students_count = db.query(Alumno).join(user_model.Usuario).filter(
+        Alumno.inquilino_id == tenant_id,
+        user_model.Usuario.activo == False
+    ).count()
+
+    # 4. Breakdown of enrolled students per specialty
+    # Query active enrollments grouped by specialty
+    specialties_breakdown = []
+    empresa_especialidades = db.query(EmpresaEspecialidad).filter(
+        EmpresaEspecialidad.inquilino_id == tenant_id,
+        EmpresaEspecialidad.activa == True
+    ).all()
+
+    for ee in empresa_especialidades:
+        spec = db.query(CatalogoEspecialidad).filter(CatalogoEspecialidad.id == ee.especialidad_id).first()
+        spec_name = spec.nombre if spec else f"Especialidad #{ee.especialidad_id}"
+        spec_category = spec.categoria if spec else "General"
+
+        # Count active enrollments for this specialty
+        student_count = db.query(Inscripcion).filter(
+            Inscripcion.inquilino_id == tenant_id,
+            Inscripcion.especialidad_id == ee.especialidad_id,
+            Inscripcion.estado == "activa"
+        ).count()
+
+        specialties_breakdown.append({
+            "especialidad_id": ee.especialidad_id,
+            "nombre": spec_name,
+            "categoria": spec_category,
+            "alumnos_inscritos": student_count
+        })
+
+    return {
+        "inquilino_id": tenant_id,
+        "cantidad_instructores": total_teachers,
+        "cantidad_alumnos_inscritos": active_students_count,
+        "cantidad_alumnos_retirados": withdrawn_students_count,
+        "alumnos_por_especialidad": specialties_breakdown
+    }
