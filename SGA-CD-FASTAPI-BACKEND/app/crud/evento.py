@@ -21,7 +21,8 @@ def get_eventos_by_tenant(
     )
 
 def create_evento(db: Session, *, obj_in: EventoCreate) -> Evento:
-    db_obj = Evento(**obj_in.model_dump())
+    data = obj_in.model_dump() if hasattr(obj_in, "model_dump") else obj_in.dict()
+    db_obj = Evento(**data)
     db.add(db_obj)
     db.commit()
     db.refresh(db_obj)
@@ -42,7 +43,8 @@ def get_eventos_by_area_ids(db: Session, *, area_ids: List[int], skip: int = 0, 
 # --- CRUD for EventoParticipante ---
 
 def add_participante_to_evento(db: Session, *, obj_in: EventoParticipanteCreate) -> EventoParticipante:
-    db_obj = EventoParticipante(**obj_in.model_dump())
+    data = obj_in.model_dump() if hasattr(obj_in, "model_dump") else obj_in.dict()
+    db_obj = EventoParticipante(**data)
     db.add(db_obj)
     db.commit()
     db.refresh(db_obj)

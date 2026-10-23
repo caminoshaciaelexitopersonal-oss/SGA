@@ -27,6 +27,15 @@ class AdoptSpecialtiesRequest(BaseModel):
 class UpdateVocacionRequest(BaseModel):
     vocacion_institucional: str = Field(..., description="'deportiva' o 'cultural'")
 
+class AssignTeacherSpecialtyRequest(BaseModel):
+    empresa_especialidad_id: int
+    nivel_academico: Optional[str] = Field(None, max_length=100)
+    certificacion_avalada: bool = False
+
+class UpdateTeacherAvalRequest(BaseModel):
+    certificacion_avalada: bool
+    nivel_academico: Optional[str] = Field(None, max_length=100)
+
 
 def seed_catalogo_if_empty(db: Session):
     """Seed the 1,000 official master specialties into catalogo_especialidades if empty."""
@@ -370,4 +379,233 @@ def update_tenant_vocacion(
         "inquilino_id": tenant.id,
         "nombre_empresa": tenant.nombre_empresa,
         "vocacion_institucional": tenant.vocacion_institucional,
+    }
+
+
+# --- Teacher Specialties & Aval Management ---
+
+@router.get("/teachers/{teacher_id}/specialties")
+def get_teacher_specialties(
+    teacher_id: int,
+    db: Session = Depends(deps.get_db),
+    current_user: models.Usuario = Depends(deps.get_current_active_user),
+):
+    """
+    Get all assigned specialties and institutional aval status for a specific teacher/instructor.
+    Validates tenant isolation.
+    """
+    if not current_user.inquilino_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Usuario sin organización asignada."
+        )
+
+    teacher = db.query(models.Usuario).filter(
+        models.Usuario.id == teacher_id,
+        models.Usuario.inquilino_id == current_user.inquilino_id
+    ).first()
+
+    if not teacher:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Docente o instructor no encontrado en su organización."
+        )
+
+    assocs = (
+        db.query(ProfesorEspecialidad)
+        .join(EmpresaEspecialidad, ProfesorEspecialidad.empresa_especialidad_id == EmpresaEspecialidad.id)
+        .join(CatalogoEspecialidad, EmpresaEspecialidad.especialidad_id == CatalogoEspecialidad.id)
+        .filter(
+            ProfesorEspecialidad.usuario_id == teacher_id,
+            EmpresaEspecialidad.inquilino_id == current_user.inquilino_id,
+            EmpresaEspecialidad.activa == True
+        )
+        .all()
+    )
+
+    return [
+        {
+            "profesor_especialidad_id": a.id,
+            "usuario_id": a.usuario_id,
+            "empresa_especialidad_id": a.empresa_especialidad_id,
+            "especialidad_id": a.empresa_especialidad.especialidad.id,
+            "nombre": a.empresa_especialidad.especialidad.nombre,
+            "vertical": a.empresa_especialidad.especialidad.vertical,
+            "categoria": a.empresa_especialidad.especialidad.categoria,
+            "certificacion_avalada": a.certificacion_avalada,
+            "nivel_academico": a.nivel_academico,
+            "estado_aval": "Avalado por la entidad" if a.certificacion_avalada else "Pendiente de revisión"
+        }
+        for a in assocs
+    ]
+
+
+@router.post("/teachers/{teacher_id}/specialties", status_code=status.HTTP_201_CREATED)
+def assign_specialty_to_teacher(
+    teacher_id: int,
+    payload: AssignTeacherSpecialtyRequest,
+    db: Session = Depends(deps.get_db),
+    current_user: models.Usuario = Depends(deps.get_current_active_user),
+):
+    """
+    Assign an adopted company specialty to a teacher/instructor with tenant isolation.
+    """
+    if not current_user.inquilino_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Usuario sin organización asignada."
+        )
+
+    # 1. Validate teacher exists and belongs to current tenant
+    teacher = db.query(models.Usuario).filter(
+        models.Usuario.id == teacher_id,
+        models.Usuario.inquilino_id == current_user.inquilino_id
+    ).first()
+
+    if not teacher:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Docente o instructor no encontrado en su organización."
+        )
+
+    # 2. Validate empresa_especialidad exists, is active, and belongs to current tenant
+    emp_spec = db.query(EmpresaEspecialidad).filter(
+        EmpresaEspecialidad.id == payload.empresa_especialidad_id,
+        EmpresaEspecialidad.inquilino_id == current_user.inquilino_id,
+        EmpresaEspecialidad.activa == True
+    ).first()
+
+    if not emp_spec:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="La especialidad seleccionada no está activa o no está adoptada por su organización."
+        )
+
+    # 3. Check for duplicate assignment
+    existing_assoc = db.query(ProfesorEspecialidad).filter(
+        ProfesorEspecialidad.usuario_id == teacher_id,
+        ProfesorEspecialidad.empresa_especialidad_id == payload.empresa_especialidad_id
+    ).first()
+
+    if existing_assoc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="El docente ya tiene asignada esta especialidad en su organización."
+        )
+
+    # 4. Create association
+    new_assoc = ProfesorEspecialidad(
+        usuario_id=teacher_id,
+        empresa_especialidad_id=payload.empresa_especialidad_id,
+        certificacion_avalada=payload.certificacion_avalada,
+        nivel_academico=sanitize_text(payload.nivel_academico) if payload.nivel_academico else "Licenciatura / Profesional"
+    )
+    db.add(new_assoc)
+    db.commit()
+    db.refresh(new_assoc)
+
+    return {
+        "profesor_especialidad_id": new_assoc.id,
+        "usuario_id": new_assoc.usuario_id,
+        "empresa_especialidad_id": new_assoc.empresa_especialidad_id,
+        "especialidad_nombre": emp_spec.especialidad.nombre,
+        "vertical": emp_spec.especialidad.vertical,
+        "certificacion_avalada": new_assoc.certificacion_avalada,
+        "nivel_academico": new_assoc.nivel_academico,
+        "estado_aval": "Avalado por la entidad" if new_assoc.certificacion_avalada else "Pendiente de revisión"
+    }
+
+
+@router.delete("/teachers/{teacher_id}/specialties/{profesor_especialidad_id}")
+def remove_specialty_from_teacher(
+    teacher_id: int,
+    profesor_especialidad_id: int,
+    db: Session = Depends(deps.get_db),
+    current_user: models.Usuario = Depends(deps.get_current_active_user),
+):
+    """
+    Remove a specialty assignment from a teacher/instructor with tenant isolation.
+    """
+    if not current_user.inquilino_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Usuario sin organización asignada."
+        )
+
+    assoc = (
+        db.query(ProfesorEspecialidad)
+        .join(EmpresaEspecialidad, ProfesorEspecialidad.empresa_especialidad_id == EmpresaEspecialidad.id)
+        .filter(
+            ProfesorEspecialidad.id == profesor_especialidad_id,
+            ProfesorEspecialidad.usuario_id == teacher_id,
+            EmpresaEspecialidad.inquilino_id == current_user.inquilino_id
+        )
+        .first()
+    )
+
+    if not assoc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Asignación de especialidad no encontrada para este docente."
+        )
+
+    db.delete(assoc)
+    db.commit()
+
+    return {"message": "Asignación de especialidad removida exitosamente."}
+
+
+@router.patch("/teachers/{teacher_id}/specialties/{profesor_especialidad_id}/aval")
+def update_teacher_specialty_aval(
+    teacher_id: int,
+    profesor_especialidad_id: int,
+    payload: UpdateTeacherAvalRequest,
+    db: Session = Depends(deps.get_db),
+    current_user: models.Usuario = Depends(deps.get_current_active_user),
+):
+    """
+    Update institutional aval status and academic level for a teacher's assigned specialty.
+    Requires admin_empresa or admin_general role.
+    """
+    allowed_roles = {"admin_empresa", "admin_general", "jefe_area"}
+    user_roles = set(getattr(current_user, "role_codes", []))
+    if not user_roles and current_user.rol:
+        role_val = current_user.rol.value if hasattr(current_user.rol, 'value') else str(current_user.rol)
+        user_roles.add(role_val)
+    if not user_roles.intersection(allowed_roles):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="No autorizado. Requiere rol de administración de empresa."
+        )
+
+    assoc = (
+        db.query(ProfesorEspecialidad)
+        .join(EmpresaEspecialidad, ProfesorEspecialidad.empresa_especialidad_id == EmpresaEspecialidad.id)
+        .filter(
+            ProfesorEspecialidad.id == profesor_especialidad_id,
+            ProfesorEspecialidad.usuario_id == teacher_id,
+            EmpresaEspecialidad.inquilino_id == current_user.inquilino_id
+        )
+        .first()
+    )
+
+    if not assoc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Asignación de especialidad no encontrada para este docente."
+        )
+
+    assoc.certificacion_avalada = payload.certificacion_avalada
+    if payload.nivel_academico is not None:
+        assoc.nivel_academico = sanitize_text(payload.nivel_academico)
+
+    db.commit()
+    db.refresh(assoc)
+
+    return {
+        "profesor_especialidad_id": assoc.id,
+        "usuario_id": assoc.usuario_id,
+        "certificacion_avalada": assoc.certificacion_avalada,
+        "nivel_academico": assoc.nivel_academico,
+        "estado_aval": "Avalado por la entidad" if assoc.certificacion_avalada else "No avalado / Pendiente"
     }
