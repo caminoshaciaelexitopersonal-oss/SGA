@@ -5,7 +5,7 @@ import logging
 from fastapi import FastAPI, Request, Response, status
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
+from starlette.staticfiles import StaticFiles
 from app.api.v1.api import api_router
 from app.core.config import settings
 from app.core.logging_config import setup_logging

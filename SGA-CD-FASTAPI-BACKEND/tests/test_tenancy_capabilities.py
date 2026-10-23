@@ -10,95 +10,25 @@ import unittest
 from unittest.mock import MagicMock
 from datetime import datetime, timezone, timedelta
 
-# Lightweight FastAPI / SQLAlchemy / Pydantic / Security module mock layer for standalone test execution
-if "fastapi" not in sys.modules or not hasattr(sys.modules.get("fastapi"), "DummyStatus"):
-    class DummyHTTPException(Exception):
-        def __init__(self, status_code: int, detail: str):
-            self.status_code = status_code
-            self.detail = detail
+try:
+    import fastapi
+except ImportError:
+    pass
 
-    class DummyStatus:
-        HTTP_400_BAD_REQUEST = 400
-        HTTP_401_UNAUTHORIZED = 401
-        HTTP_402_PAYMENT_REQUIRED = 402
-        HTTP_403_FORBIDDEN = 403
-        HTTP_404_NOT_FOUND = 404
-        HTTP_429_TOO_MANY_REQUESTS = 429
+try:
+    import sqlalchemy
+except ImportError:
+    pass
 
-    class DummyAPIRouter:
-        def post(self, *args, **kwargs):
-            return lambda f: f
-        def get(self, *args, **kwargs):
-            return lambda f: f
-        def put(self, *args, **kwargs):
-            return lambda f: f
-        def delete(self, *args, **kwargs):
-            return lambda f: f
+try:
+    import pydantic
+except ImportError:
+    pass
 
-    fastapi_mock = MagicMock()
-    fastapi_mock.HTTPException = DummyHTTPException
-    fastapi_mock.status = DummyStatus
-    fastapi_mock.APIRouter = DummyAPIRouter
-    fastapi_mock.Depends = lambda x=None: x
-    fastapi_mock.DummyStatus = DummyStatus
-    sys.modules["fastapi"] = fastapi_mock
-    sys.modules["fastapi.security"] = MagicMock()
-
-if "sqlalchemy" not in sys.modules:
-    sqla_mock = MagicMock()
-    orm_mock = MagicMock()
-    class DummyDeclarativeBase:
-        metadata = MagicMock()
-    orm_mock.DeclarativeBase = DummyDeclarativeBase
-    sys.modules["sqlalchemy"] = sqla_mock
-    sys.modules["sqlalchemy.orm"] = orm_mock
-    sys.modules["sqlalchemy.sql"] = MagicMock()
-
-if "pydantic" not in sys.modules or not hasattr(sys.modules.get("pydantic"), "DummyBaseModel"):
-    class DummyBaseModel:
-        def __init__(self, **kwargs):
-            for k, v in kwargs.items():
-                setattr(self, k, v)
-        def dict(self, *args, **kwargs):
-            res = {}
-            for k, v in self.__dict__.items():
-                if not k.startswith("_"):
-                    res[k] = v
-            return res
-
-    def dummy_field(default=None, default_factory=None, **kwargs):
-        if default_factory is not None:
-            return default_factory()
-        return default
-
-    pydantic_mock = MagicMock()
-    pydantic_mock.BaseModel = DummyBaseModel
-    pydantic_mock.EmailStr = str
-    pydantic_mock.Field = dummy_field
-    pydantic_mock.DummyBaseModel = DummyBaseModel
-    sys.modules["pydantic"] = pydantic_mock
-
-if "pydantic_settings" not in sys.modules:
-    pyd_settings_mock = MagicMock()
-    class DummyBaseSettings:
-        API_V1_STR = "/api/v1"
-        SECRET_KEY = "test-secret"
-        ALGORITHM = "HS256"
-        DATABASE_URL = "sqlite:///./test.db"
-    pyd_settings_mock.BaseSettings = DummyBaseSettings
-    sys.modules["pydantic_settings"] = pyd_settings_mock
-
-if "jose" not in sys.modules:
-    sys.modules["jose"] = MagicMock()
-
-if "passlib" not in sys.modules:
-    sys.modules["passlib"] = MagicMock()
-    sys.modules["passlib.context"] = MagicMock()
-
-if "bcrypt" not in sys.modules:
-    bcrypt_mock = MagicMock()
-    bcrypt_mock.__version__ = "4.0.0"
-    sys.modules["bcrypt"] = bcrypt_mock
+try:
+    import pydantic_settings
+except ImportError:
+    pass
 
 # Force reload of tenancy endpoint to bind decorated functions properly
 if "app.api.v1.endpoints.tenancy" in sys.modules:
