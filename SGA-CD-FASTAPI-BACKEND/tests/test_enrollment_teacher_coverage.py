@@ -113,6 +113,45 @@ class TestEnrollmentCoverage(unittest.TestCase):
         )
         self.assertEqual(res3.status_code, 200)
 
+    def test_negative_cases(self):
+        # A. Inactive instructor -> Reject HTTP 400
+        self.teacher.activo = False
+        self.db.commit()
+
+        res_inact = self.client.post(
+            "/api/v1/academic/inscripciones/",
+            json={"clase_id": self.clase_with_aval.id, "inquilino_id": self.tenant.id, "alumno_id": 1, "area": "Deportes", "fecha_inscripcion": "2025-10-23T10:00:00Z"},
+            headers={"Authorization": f"Bearer {self.token_admin}"}
+        )
+        self.assertEqual(res_inact.status_code, 400)
+
+        # Restore active teacher
+        self.teacher.activo = True
+        self.db.commit()
+
+        # B. Inactive tenant specialty adoption -> Reject HTTP 400
+        self.emp_spec.activa = False
+        self.db.commit()
+
+        res_spec_inact = self.client.post(
+            "/api/v1/academic/inscripciones/",
+            json={"clase_id": self.clase_with_aval.id, "inquilino_id": self.tenant.id, "alumno_id": 1, "area": "Deportes", "fecha_inscripcion": "2025-10-23T10:00:00Z"},
+            headers={"Authorization": f"Bearer {self.token_admin}"}
+        )
+        self.assertEqual(res_spec_inact.status_code, 400)
+
+        # Restore active specialty adoption
+        self.emp_spec.activa = True
+        self.db.commit()
+
+        # C. Cross-tenant class enrollment -> Reject HTTP 403 Forbidden
+        res_cross = self.client.post(
+            "/api/v1/academic/inscripciones/",
+            json={"clase_id": self.clase_with_aval.id, "inquilino_id": 9999, "alumno_id": 1, "area": "Deportes", "fecha_inscripcion": "2025-10-23T10:00:00Z"},
+            headers={"Authorization": f"Bearer {self.token_admin}"}
+        )
+        self.assertEqual(res_cross.status_code, 403)
+
 
 if __name__ == "__main__":
     unittest.main()

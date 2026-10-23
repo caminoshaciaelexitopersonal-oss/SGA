@@ -59,8 +59,8 @@ def create_inscripcion(
                 detail="No se permite la matrícula: La especialidad o clase no tiene un instructor o formador asignado."
             )
 
-        # Check if instructor is active and has an avalado specialty for this tenant
-        has_aval = (
+        # Check if instructor is active and has an avalado specialty for this tenant matching class specialty
+        query = (
             db.query(ProfesorEspecialidad)
             .join(EmpresaEspecialidad, ProfesorEspecialidad.empresa_especialidad_id == EmpresaEspecialidad.id)
             .join(user_model.Usuario, ProfesorEspecialidad.usuario_id == user_model.Usuario.id)
@@ -71,8 +71,17 @@ def create_inscripcion(
                 ProfesorEspecialidad.certificacion_avalada == True,
                 EmpresaEspecialidad.activa == True
             )
-            .first()
         )
+
+        clase_empresa_spec_id = getattr(clase, "empresa_especialidad_id", None)
+        clase_spec_id = getattr(clase, "especialidad_id", None)
+
+        if clase_empresa_spec_id:
+            query = query.filter(ProfesorEspecialidad.empresa_especialidad_id == clase_empresa_spec_id)
+        elif clase_spec_id:
+            query = query.filter(EmpresaEspecialidad.especialidad_id == clase_spec_id)
+
+        has_aval = query.first()
 
         if not has_aval:
             raise HTTPException(
