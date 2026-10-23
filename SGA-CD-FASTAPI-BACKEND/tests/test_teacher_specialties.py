@@ -25,12 +25,11 @@ def override_get_db():
         db.close()
 
 
-app.dependency_overrides[get_db] = override_get_db
-
-
 class TestTeacherSpecialties(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        app.dependency_overrides[get_db] = override_get_db
+        Base.metadata.drop_all(bind=engine)
         Base.metadata.create_all(bind=engine)
         cls.db = TestingSessionLocal()
 
@@ -105,6 +104,7 @@ class TestTeacherSpecialties(unittest.TestCase):
     def tearDownClass(cls):
         cls.db.close()
         Base.metadata.drop_all(bind=engine)
+        app.dependency_overrides.pop(get_db, None)
 
     def test_assign_and_list_teacher_specialties(self):
         # 1. Assign Spec A1 to Teacher A1

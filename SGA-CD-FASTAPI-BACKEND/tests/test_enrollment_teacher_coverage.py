@@ -25,12 +25,10 @@ def override_get_db():
         db.close()
 
 
-app.dependency_overrides[get_db] = override_get_db
-
-
 class TestEnrollmentCoverage(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        app.dependency_overrides[get_db] = override_get_db
         Base.metadata.drop_all(bind=engine)
         Base.metadata.create_all(bind=engine)
         cls.db = TestingSessionLocal()
@@ -82,6 +80,7 @@ class TestEnrollmentCoverage(unittest.TestCase):
     def tearDownClass(cls):
         cls.db.close()
         Base.metadata.drop_all(bind=engine)
+        app.dependency_overrides.pop(get_db, None)
 
     def test_enrollment_blocking(self):
         # 1. Attempt enrollment in class with no instructor -> Reject HTTP 400

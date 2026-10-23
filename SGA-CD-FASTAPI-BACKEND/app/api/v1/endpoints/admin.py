@@ -84,24 +84,23 @@ def create_user_by_empresa(
 
     user_roles = set(getattr(current_user, "role_codes", getattr(current_user, "role_list", [])))
 
-    # Authority definitions
+    # Business rule hierarchy:
+    # - admin_empresa / admin_general: altas de jefe_area, profesional_area y tecnico_area.
+    # - jefe_area: altas operativas de coordinador, profesor, almacenista y jefe_escenarios (responsable de espacios).
+    # - profesional_area / tecnico_area: sin facultad de creacion directa de usuarios (apoyo administrativo).
     level_1_roles = {"admin_empresa", "admin_general"}
     level_2_roles = {"jefe_area"}
-    level_3_roles = {"profesional_area", "tecnico_area"}
 
     target_role = user_in.rol.strip()
 
     if user_roles.intersection(level_1_roles):
         allowed_target_roles = {
-            "jefe_area", "profesional_area", "tecnico_area",
-            "coordinador", "profesor", "almacenista", "jefe_escenarios", "alumno", "padre_acudiente"
+            "jefe_area", "profesional_area", "tecnico_area"
         }
     elif user_roles.intersection(level_2_roles):
         allowed_target_roles = {
-            "coordinador", "profesor", "almacenista", "jefe_escenarios", "alumno", "padre_acudiente"
+            "coordinador", "profesor", "almacenista", "jefe_escenarios"
         }
-    elif user_roles.intersection(level_3_roles):
-        allowed_target_roles = {"profesor", "coordinador", "alumno"}
     else:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,

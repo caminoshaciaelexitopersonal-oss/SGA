@@ -64,30 +64,11 @@ except ImportError:
 try:
     import pydantic
 except ImportError:
-    class DummyBaseModel:
-        def __init__(self, **kwargs):
-            for k, v in kwargs.items():
-                setattr(self, k, v)
-        def dict(self, *args, **kwargs):
-            res = {}
-            for k, v in self.__dict__.items():
-                if not k.startswith("_"):
-                    res[k] = v
-            return res
+    pass
 
-    def dummy_field(default=None, default_factory=None, **kwargs):
-        if default_factory is not None:
-            return default_factory()
-        return default
-
-    pydantic_mock = MagicMock()
-    pydantic_mock.BaseModel = DummyBaseModel
-    pydantic_mock.EmailStr = str
-    pydantic_mock.Field = dummy_field
-    pydantic_mock.DummyBaseModel = DummyBaseModel
-    sys.modules["pydantic"] = pydantic_mock
-
-if "pydantic_settings" not in sys.modules:
+try:
+    import pydantic_settings
+except ImportError:
     pyd_settings_mock = MagicMock()
     class DummyBaseSettings:
         API_V1_STR = "/api/v1"
@@ -96,23 +77,6 @@ if "pydantic_settings" not in sys.modules:
         DATABASE_URL = "sqlite:///./test.db"
     pyd_settings_mock.BaseSettings = DummyBaseSettings
     sys.modules["pydantic_settings"] = pyd_settings_mock
-
-if "jose" not in sys.modules:
-    sys.modules["jose"] = MagicMock()
-
-if "passlib" not in sys.modules:
-    sys.modules["passlib"] = MagicMock()
-    sys.modules["passlib.context"] = MagicMock()
-
-if "bcrypt" not in sys.modules:
-    bcrypt_mock = MagicMock()
-    bcrypt_mock.__version__ = "4.0.0"
-    sys.modules["bcrypt"] = bcrypt_mock
-
-if "models" not in sys.modules:
-    models_mock = MagicMock()
-    sys.modules["models"] = models_mock
-    sys.modules["models.settings"] = MagicMock()
 
 # Force re-importing admin_general endpoint module
 if "app.api.v1.endpoints.admin_general" in sys.modules:

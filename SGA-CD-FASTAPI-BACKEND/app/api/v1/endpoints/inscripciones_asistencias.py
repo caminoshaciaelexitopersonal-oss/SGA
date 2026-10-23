@@ -59,12 +59,14 @@ def create_inscripcion(
                 detail="No se permite la matrícula: La especialidad o clase no tiene un instructor o formador asignado."
             )
 
-        # Check if instructor has an avalado specialty for this tenant
+        # Check if instructor is active and has an avalado specialty for this tenant
         has_aval = (
             db.query(ProfesorEspecialidad)
             .join(EmpresaEspecialidad, ProfesorEspecialidad.empresa_especialidad_id == EmpresaEspecialidad.id)
+            .join(user_model.Usuario, ProfesorEspecialidad.usuario_id == user_model.Usuario.id)
             .filter(
                 ProfesorEspecialidad.usuario_id == clase.instructor_id,
+                user_model.Usuario.activo == True,
                 EmpresaEspecialidad.inquilino_id == current_user.inquilino_id,
                 ProfesorEspecialidad.certificacion_avalada == True,
                 EmpresaEspecialidad.activa == True

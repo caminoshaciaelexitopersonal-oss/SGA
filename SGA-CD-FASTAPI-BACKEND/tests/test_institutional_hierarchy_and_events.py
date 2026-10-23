@@ -23,40 +23,55 @@ class TestInstitutionalHierarchyAndEvents(unittest.TestCase):
 
         # Seed roles
         for r_enum in RolesEnum:
-            role_obj = Role(id=len(self.db.query(Role).all()) + 1, nombre=r_enum.value, descripcion=r_enum.value)
+            role_obj = Role()
+            role_obj.nombre = r_enum.value
+            role_obj.descripcion = r_enum.value
             self.db.add(role_obj)
         self.db.commit()
 
         # Seed Tenant
-        self.tenant = Inquilino(id=100, nombre_empresa="Instituto Municipal de Deportes", vocacion_institucional="deportiva")
+        self.tenant = Inquilino()
+        self.tenant.id = 100
+        self.tenant.nombre_empresa = "Instituto Municipal de Deportes"
+        self.tenant.vocacion_institucional = "deportiva"
         self.db.add(self.tenant)
         self.db.commit()
 
         # Seed Admin Empresa (Level 1)
-        self.admin_user = Usuario(
-            id=1,
-            inquilino_id=100,
-            nombre_usuario="admin_empresa_100",
-            correo="admin@deportes.gov.co",
-            password_hash="hash",
-            rol=RolesEnum.admin_empresa,
-            activo=True
-        )
+        self.admin_user = Usuario()
+        self.admin_user.id = 1
+        self.admin_user.inquilino_id = 100
+        self.admin_user.nombre_usuario = "admin_empresa_100"
+        self.admin_user.correo = "admin@deportes.gov.co"
+        self.admin_user.password_hash = "hash"
+        self.admin_user.rol = RolesEnum.admin_empresa
+        self.admin_user.activo = True
         self.admin_user.role_list = ["admin_empresa"]
         self.db.add(self.admin_user)
 
         # Seed Jefe Area (Level 2)
-        self.jefe_user = Usuario(
-            id=2,
-            inquilino_id=100,
-            nombre_usuario="jefe_area_100",
-            correo="jefe@deportes.gov.co",
-            password_hash="hash",
-            rol=RolesEnum.jefe_area,
-            activo=True
-        )
+        self.jefe_user = Usuario()
+        self.jefe_user.id = 2
+        self.jefe_user.inquilino_id = 100
+        self.jefe_user.nombre_usuario = "jefe_area_100"
+        self.jefe_user.correo = "jefe@deportes.gov.co"
+        self.jefe_user.password_hash = "hash"
+        self.jefe_user.rol = RolesEnum.jefe_area
+        self.jefe_user.activo = True
         self.jefe_user.role_list = ["jefe_area"]
         self.db.add(self.jefe_user)
+
+        # Seed Profesional Area (Level 3 - No Direct Creation Authority)
+        self.profesional_user = Usuario()
+        self.profesional_user.id = 3
+        self.profesional_user.inquilino_id = 100
+        self.profesional_user.nombre_usuario = "profesional_100"
+        self.profesional_user.correo = "profesional@deportes.gov.co"
+        self.profesional_user.password_hash = "hash"
+        self.profesional_user.rol = RolesEnum.profesional_area
+        self.profesional_user.activo = True
+        self.profesional_user.role_list = ["profesional_area"]
+        self.db.add(self.profesional_user)
 
         self.db.commit()
 
@@ -87,6 +102,19 @@ class TestInstitutionalHierarchyAndEvents(unittest.TestCase):
         )
         with self.assertRaises(HTTPException) as ctx:
             create_user_by_empresa(db=self.db, user_in=user_in, current_user=self.jefe_user)
+        self.assertEqual(ctx.exception.status_code, 403)
+
+    def test_02b_profesional_area_cannot_create_users(self):
+        user_in = UserCreate(
+            email="profesor1@deportes.gov.co",
+            nombre_usuario="profesor_1",
+            password="Password123!",
+            rol="profesor",
+            inquilino_id=100,
+            nombre_completo="Profesor Uno"
+        )
+        with self.assertRaises(HTTPException) as ctx:
+            create_user_by_empresa(db=self.db, user_in=user_in, current_user=self.profesional_user)
         self.assertEqual(ctx.exception.status_code, 403)
 
     def test_03_create_evento_and_check_authority(self):
