@@ -99,14 +99,72 @@ class TestSyncManager(unittest.TestCase):
         # 4. Verificar que los datos del pull se aplicaron a la DB local
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
-        # La lógica de _apply_server_changes está simplificada, por lo que este test
-        # fallaría. Se necesita una implementación más robusta de esa función
-        # para una prueba end-to-end real. Por ahora, verificamos las llamadas.
-        # En un caso real, haríamos:
-        # cursor.execute("SELECT COUNT(*) FROM clases WHERE id IN (101, 102)")
-        # self.assertEqual(cursor.fetchone()[0], 2)
+        cursor.execute("SELECT COUNT(*) FROM clases WHERE id IN (101, 102)")
+        count = cursor.fetchone()[0]
+        self.assertEqual(count, 2)
         conn.close()
-        print("[TEST VERIFICATION] Data application to local DB is assumed correct based on mock calls.")
+        print("[TEST PASSED] Server pull data applied successfully to local DB.")
+
+    @patch('utils.api_client.ApiClient')
+    def test_unassigned_historical_record_retention(self, MockApiClient):
+        """
+        Verifica que registros locales sin inquilino_id y sin contexto de sesión
+        sean retenidos sin reasignaciones silenciosas.
+        """
+        self.mock_page.inquilino_id = None
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO usuarios (id, inquilino_id, nombre_usuario, password_hash, rol) VALUES (999, 1, 'unassigned_usr', 'pw', 'alumno')")
+        cursor.execute("INSERT INTO alumnos (id, usuario_id, inquilino_id, documento) VALUES (999, 999, 0, '99999')")
+        conn.commit()
+        conn.close()
+
+        mock_api_instance = MockApiClient.return_value
+        mock_api_instance.push_sync_data.return_value = True
+        mock_api_instance.pull_sync_data.return_value = {"data": {}}
+
+        sync_manager = SyncManager(self.mock_page, mock_api_instance)
+        changes = sync_manager._detect_local_changes()
+
+        if "alumnos" in changes:
+            alumno_ids = [a["id"] for a in changes["alumnos"]]
+            self.assertNotIn(999, alumno_ids)
+        print("[TEST PASSED] Unassigned historical record retention verified.")
+
+    @patch('utils.api_client.ApiClient')
+    def test_cross_tenant_overwrite_rejection(self, MockApiClient):
+        """
+        Verifica que una clase entrante del servidor con id idéntico pero distinto inquilino_id
+        sea rechazada y NO sobrescriba la clase del inquilino local.
+        """
+        # Pre-existente: Clase id=500 de Tenant 1
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO clases (id, nombre_clase, inquilino_id, area) VALUES (500, 'Clase Tenant 1', 1, 'Deportes')")
+        conn.commit()
+        conn.close()
+
+        # Intento de Pull: Servidor envía Clase id=500 perteneciente a Tenant 2
+        mock_api_instance = MockApiClient.return_value
+        mock_server_data = {
+            "data": {
+                "clases": [
+                    {"id": 500, "nombre_clase": "Clase Mala Tenant 2", "inquilino_id": 2, "area": "Deportes"}
+                ]
+            }
+        }
+        sync_manager = SyncManager(self.mock_page, mock_api_instance)
+        sync_manager._apply_server_changes(mock_server_data)
+
+        # Verificar que la clase local NO fue alterada ni cambiada de tenant
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        cursor.execute("SELECT nombre_clase, inquilino_id FROM clases WHERE id = 500")
+        row = cursor.fetchone()
+        self.assertEqual(row[0], "Clase Tenant 1")
+        self.assertEqual(row[1], 1)
+        conn.close()
+        print("[TEST PASSED] Cross-tenant overwrite rejection verified successfully.")
 
 
 if __name__ == '__main__':
