@@ -6,8 +6,14 @@ from datetime import datetime
 
 class ElementoBase(BaseModel):
     codigo: str
+    nombre: Optional[str] = None
+    categoria: Optional[str] = None
     descripcion: Optional[str] = None
     area: Optional[str] = None
+    foto_url: Optional[str] = None
+    fecha_alta: Optional[datetime] = None
+    vida_util_anos: Optional[int] = 5
+    estado_fisico: Optional[str] = "Nuevo"
 
 class ElementoCreate(ElementoBase):
     inquilino_id: int

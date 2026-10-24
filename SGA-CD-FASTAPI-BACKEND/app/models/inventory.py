@@ -11,6 +11,12 @@ class Elemento(Base):
     codigo = Column(String, nullable=False, index=True)
     descripcion = Column(Text)
     area = Column(String)
+    nombre = Column(String, nullable=True)
+    categoria = Column(String, nullable=True)
+    foto_url = Column(String, nullable=True)
+    fecha_alta = Column(DateTime(timezone=True), nullable=True)
+    vida_util_anos = Column(Integer, default=5)
+    estado_fisico = Column(String, default="Nuevo")  # Nuevo, Bueno, En Reparacion, Dado de Baja
 
 class Prestamo(Base):
     __tablename__ = "prestamos"
