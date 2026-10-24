@@ -465,10 +465,10 @@ async function renderAdminEmpresaView(token) {
                             <div>
                                 <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:0.4rem;">
                                     <span style="color:#E2E8F0; font-weight:600;"><i class="fas ${vocab.icon}" style="color:#38BDF8; width:20px;"></i> ${cs.name}</span>
-                                    <span style="color:#38BDF8; font-weight:800;">${cs.pct}% Desempeño — Ratio ${cs.ratio}</span>
+                                    <span style="color:#38BDF8; font-weight:800; font-variant-numeric:tabular-nums;">${cs.pct}% Desempeño — Ratio ${cs.ratio}</span>
                                 </div>
-                                <div style="background:#070B14; height:16px; border-radius:8px; overflow:hidden; border:1px solid rgba(56,189,248,0.2); padding:2px;">
-                                    <div class="chart-bar-fill" style="width:${cs.pct}%; height:100%; background:linear-gradient(90deg, #0284C7 0%, #38BDF8 100%); border-radius:6px; box-shadow: 0 0 10px rgba(56,189,248,0.5);"></div>
+                                <div style="background:#070B14; height:16px; border-radius:9999px; overflow:hidden; border:1px solid rgba(56,189,248,0.25); padding:2px;">
+                                    <div class="chart-bar-fill" style="width:${cs.pct}%; height:100%; background:linear-gradient(90deg, rgba(56, 189, 248, 0.5) 0%, #38BDF8 100%); border-radius:9999px; box-shadow: 0 0 10px rgba(56, 189, 248, 0.25);"></div>
                                 </div>
                             </div>
                         `).join('')}
@@ -481,10 +481,10 @@ async function renderAdminEmpresaView(token) {
                             <i class="fas fa-chart-pie" style="margin-right:0.5rem;"></i> Distribución de Roles
                         </h4>
                         <div style="display:flex; justify-content:center; align-items:center; margin:1rem 0; position:relative;">
-                            <div style="width:110px; height:110px; border-radius:50%; background:conic-gradient(#38BDF8 0% 78%, #0284C7 78% 92%, #94A3B8 92% 100%); display:flex; align-items:center; justify-content:center; box-shadow:0 0 15px rgba(56,189,248,0.3);">
-                                <div style="width:75px; height:75px; border-radius:50%; background:#0D1424; display:flex; flex-direction:column; align-items:center; justify-content:center;">
-                                    <span style="font-size:0.75rem; color:#94A3B8;">TOTAL</span>
-                                    <strong style="font-size:0.95rem; color:#38BDF8;">100%</strong>
+                            <div style="width:120px; height:120px; border-radius:50%; background:conic-gradient(#38BDF8 0% 78%, #0284C7 78% 92%, #0369A1 92% 100%); display:flex; align-items:center; justify-content:center; box-shadow:0 0 20px rgba(56,189,248,0.25);">
+                                <div style="width:85px; height:85px; border-radius:50%; background:#0D1424; border:1px solid rgba(56,189,248,0.2); display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                                    <span style="font-size:0.7rem; color:#94A3B8; font-weight:700; tracking:0.05em;">TOTAL</span>
+                                    <strong style="font-size:1.5rem; font-weight:800; color:#F8FAFC;">100%</strong>
                                 </div>
                             </div>
                         </div>

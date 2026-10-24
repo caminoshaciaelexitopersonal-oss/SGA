@@ -110,59 +110,268 @@ const navLinks = {
             ]
         }
     ],
-    // Rol 3: Jefe de Área
+    // Rol 3: Jefe de Área (Estructura Categorizada de 5 Bloques)
     jefe_area: [
-        { text: 'Panel de Área', view: 'panel-area', icon: 'fa-tachometer-alt' },
-        { text: 'Reportes', view: 'reportes-area', icon: 'fa-chart-pie' },
-        { text: 'Configuración', view: 'config-area', icon: 'fa-cog' }
+        {
+            text: 'PANEL PRINCIPAL',
+            icon: 'fa-chart-pie',
+            submenu: [
+                { text: 'Dashboard de Área', view: 'panel-area', icon: 'fa-tachometer-alt' },
+                { text: 'Indicadores Operativos', view: 'panel-area', icon: 'fa-chart-line' }
+            ]
+        },
+        {
+            text: 'GESTIÓN OPERATIVA',
+            icon: 'fa-tasks',
+            submenu: [
+                { text: 'Disciplinas / Talleres Activos', view: 'panel-area', icon: 'fa-running' },
+                { text: 'Supervisión de Clases', view: 'panel-area', icon: 'fa-clipboard-list' }
+            ]
+        },
+        {
+            text: 'TALENTO Y EQUIPO',
+            icon: 'fa-users-cog',
+            submenu: [
+                { text: 'Gestionar Personal de Área', view: 'panel-area', icon: 'fa-user-plus' }
+            ]
+        },
+        {
+            text: 'LOGÍSTICA Y RECURSOS',
+            icon: 'fa-boxes',
+            submenu: [
+                { text: 'Escenarios y Espacios', view: 'panel-area', icon: 'fa-map-marked-alt' },
+                { text: 'Inventario de Área', view: 'panel-area', icon: 'fa-dolly-flatbed' }
+            ]
+        },
+        {
+            text: 'CONTROL Y AUDITORÍA',
+            icon: 'fa-shield-alt',
+            submenu: [
+                { text: 'Trazabilidad de Operaciones', view: 'panel-area', icon: 'fa-history' }
+            ]
+        }
     ],
-    // Rol 4: Profesional de Área
+    // Rol 4: Profesional de Área (Estructura Categorizada de 5 Bloques)
     profesional_area: [
-        { text: 'Dashboard', view: 'dashboard', icon: 'fa-tachometer-alt' },
-        { text: 'Supervisar Actividades', view: 'supervisar-actividades', icon: 'fa-tasks' },
-        { text: 'Gestionar Eventos', view: 'gestionar-eventos', icon: 'fa-calendar-plus' },
-        { text: 'Gestionar Disciplinas Deportivas y Modalidades', view: 'gestionar-disciplinas', icon: 'fa-edit' },
-        { text: 'Reportes', view: 'reportes-operativos', icon: 'fa-chart-line' }
+        {
+            text: 'PANEL PRINCIPAL',
+            icon: 'fa-chart-pie',
+            submenu: [
+                { text: 'Dashboard Profesional', view: 'dashboard', icon: 'fa-tachometer-alt' },
+                { text: 'Indicadores Técnicos', view: 'dashboard', icon: 'fa-chart-bar' }
+            ]
+        },
+        {
+            text: 'GESTIÓN OPERATIVA',
+            icon: 'fa-tasks',
+            submenu: [
+                { text: 'Supervisar Actividades', view: 'supervisar-actividades', icon: 'fa-tasks' },
+                { text: 'Gestionar Eventos', view: 'gestionar-eventos', icon: 'fa-calendar-plus' },
+                { text: 'Disciplinas y Modalidades', view: 'gestionar-disciplinas', icon: 'fa-edit' }
+            ]
+        },
+        {
+            text: 'TALENTO Y EQUIPO',
+            icon: 'fa-users-cog',
+            submenu: [
+                { text: 'Personal Operativo', view: 'dashboard', icon: 'fa-user-check' }
+            ]
+        },
+        {
+            text: 'LOGÍSTICA Y RECURSOS',
+            icon: 'fa-boxes',
+            submenu: [
+                { text: 'Sedes y Espacios', view: 'supervisar-actividades', icon: 'fa-map-marker-alt' }
+            ]
+        },
+        {
+            text: 'CONTROL Y AUDITORÍA',
+            icon: 'fa-shield-alt',
+            submenu: [
+                { text: 'Reportes Operativos', view: 'reportes-operativos', icon: 'fa-chart-line' }
+            ]
+        }
     ],
-    // Rol 5: Técnico o Asistente de Área
+    // Rol 5: Técnico de Área (Estructura Categorizada de 5 Bloques)
     tecnico_area: [
-        { text: 'Dashboard', view: 'dashboard', icon: 'fa-tachometer-alt' },
-        { text: 'Ver Actividades', view: 'asistir-gestion-usuarios', icon: 'fa-eye' },
-        { text: 'Gestionar Eventos', view: 'gestionar-eventos', icon: 'fa-calendar-check' },
-        { text: 'Ver Disciplinas Deportivas y Modalidades', view: 'gestionar-disciplinas', icon: 'fa-search' },
-        { text: 'Reportes', view: 'reportes-operativos', icon: 'fa-file-alt' }
+        {
+            text: 'PANEL PRINCIPAL',
+            icon: 'fa-chart-pie',
+            submenu: [
+                { text: 'Dashboard Técnico', view: 'dashboard', icon: 'fa-tachometer-alt' },
+                { text: 'Estado Operativo', view: 'dashboard', icon: 'fa-wrench' }
+            ]
+        },
+        {
+            text: 'GESTIÓN OPERATIVA',
+            icon: 'fa-tasks',
+            submenu: [
+                { text: 'Ver Actividades', view: 'asistir-gestion-usuarios', icon: 'fa-eye' },
+                { text: 'Gestionar Eventos', view: 'gestionar-eventos', icon: 'fa-calendar-check' },
+                { text: 'Ver Disciplinas y Modalidades', view: 'gestionar-disciplinas', icon: 'fa-search' }
+            ]
+        },
+        {
+            text: 'TALENTO Y EQUIPO',
+            icon: 'fa-users-cog',
+            submenu: [
+                { text: 'Apoyo a Personal', view: 'asistir-gestion-usuarios', icon: 'fa-users-cog' }
+            ]
+        },
+        {
+            text: 'LOGÍSTICA Y RECURSOS',
+            icon: 'fa-boxes',
+            submenu: [
+                { text: 'Mantenimiento de Escenarios', view: 'gestionar-eventos', icon: 'fa-tools' }
+            ]
+        },
+        {
+            text: 'CONTROL Y AUDITORÍA',
+            icon: 'fa-shield-alt',
+            submenu: [
+                { text: 'Reportes Operativos', view: 'reportes-operativos', icon: 'fa-file-alt' }
+            ]
+        }
     ],
-    // Rol 6: Coordinador
+    // Rol 6: Coordinador (Estructura Categorizada de 5 Bloques)
     coordinador: [
-        { text: 'Planificación', view: 'planificacion', icon: 'fa-calendar-day' },
-        { text: 'Verificar Programación', view: 'verificar-programacion', icon: 'fa-clipboard-check' },
-        { text: 'Aprobaciones', view: 'aprobaciones', icon: 'fa-check-double' },
-        { text: 'Gestionar Misiones', view: 'misiones', icon: 'fa-tasks' }
+        {
+            text: 'PANEL PRINCIPAL',
+            icon: 'fa-chart-pie',
+            submenu: [
+                { text: 'Dashboard de Coordinación', view: 'planificacion', icon: 'fa-tachometer-alt' },
+                { text: 'Telemetría Power BI', view: 'planificacion', icon: 'fa-chart-bar' }
+            ]
+        },
+        {
+            text: 'SUPERVISIÓN EN CAMPO',
+            icon: 'fa-eye',
+            submenu: [
+                { text: 'Verificación Docentes en Cancha', view: 'verificar-programacion', icon: 'fa-check-circle' },
+                { text: 'Control de Escenarios & Custodia', view: 'verificar-programacion', icon: 'fa-map-marker-alt' }
+            ]
+        },
+        {
+            text: 'GESTIÓN CURRICULAR',
+            icon: 'fa-clipboard-check',
+            submenu: [
+                { text: 'Aprobación 52 Semanas', view: 'aprobaciones', icon: 'fa-calendar-week' }
+            ]
+        },
+        {
+            text: 'EQUIPO Y TAREAS',
+            icon: 'fa-users-cog',
+            submenu: [
+                { text: 'Distribución Tareas Extraordinarias', view: 'planificacion', icon: 'fa-tasks' },
+                { text: 'Roster de Profesores', view: 'planificacion', icon: 'fa-chalkboard-teacher' }
+            ]
+        },
+        {
+            text: 'CONTROL Y REPORTES',
+            icon: 'fa-shield-alt',
+            submenu: [
+                { text: 'Libro de Novedades', view: 'planificacion', icon: 'fa-book' },
+                { text: 'Informes de Supervisión', view: 'planificacion', icon: 'fa-file-alt' }
+            ]
+        }
     ],
-    // Rol 7: Profesor
+    // Rol 7: Profesor (Estructura Categorizada)
     profesor: [
-        { text: 'Gestionar Cursos', view: 'gestionar-cursos', icon: 'fa-chalkboard-teacher' },
-        { text: 'Gestionar Alumnos', view: 'gestionar-alumnos', icon: 'fa-user-graduate' },
-        { text: 'Calificaciones', view: 'calificaciones', icon: 'fa-marker' },
-        { text: 'Gamificación', view: 'gamificacion', icon: 'fa-trophy' },
-        { text: 'Suscripción y Plan', view: 'suscripcion', icon: 'fa-credit-card' }
+        {
+            text: 'MI GESTIÓN FORMATIVA',
+            icon: 'fa-chalkboard-teacher',
+            submenu: [
+                { text: 'Panel Docente', view: 'gestionar-cursos', icon: 'fa-tachometer-alt' },
+                { text: 'Mis Cursos y Roster', view: 'gestionar-cursos', icon: 'fa-book' }
+            ]
+        },
+        {
+            text: 'PLANIFICACIÓN ANUAL',
+            icon: 'fa-calendar-alt',
+            submenu: [
+                { text: 'Plan Curricular 52 Semanas', view: 'gestionar-cursos', icon: 'fa-calendar-week' }
+            ]
+        },
+        {
+            text: 'CUSTODIA Y LOGÍSTICA',
+            icon: 'fa-boxes',
+            submenu: [
+                { text: 'Elementos en Custodia', view: 'gestionar-cursos', icon: 'fa-box-open' },
+                { text: 'Solicitud de Escenarios', view: 'gestionar-cursos', icon: 'fa-map-marker-alt' }
+            ]
+        },
+        {
+            text: 'TELEMETRÍA Y ALUMNOS',
+            icon: 'fa-chart-line',
+            submenu: [
+                { text: 'Asistencia & Alertas Deserción', view: 'gestionar-cursos', icon: 'fa-user-check' },
+                { text: 'Suscripción y Plan', view: 'suscripcion', icon: 'fa-credit-card' }
+            ]
+        }
     ],
-    // Rol 8: Alumno
+    // Rol 8: Alumno (Estructura Categorizada)
     alumno: [
-        { text: 'Mis Cursos', view: 'mis-cursos', icon: 'fa-book-reader' },
-        { text: 'Mi Horario', view: 'mi-horario', icon: 'fa-clock' },
-        { text: 'Mis Calificaciones', view: 'mis-calificaciones', icon: 'fa-star' },
-        { text: 'Asistencia PWA', view: 'mi-asistencia', icon: 'fa-check-circle' },
-        { text: 'Mi Progreso', view: 'mi-progreso', icon: 'fa-gamepad' },
-        { text: 'Misiones', view: 'misiones', icon: 'fa-tasks' },
-        { text: 'Mercado de Puntos', view: 'mercado', icon: 'fa-store' }
+        {
+            text: 'MI ACTIVIDAD',
+            icon: 'fa-user-graduate',
+            submenu: [
+                { text: 'Mis Disciplinas / Cursos', view: 'mis-cursos', icon: 'fa-book-reader' },
+                { text: 'Mi Horario', view: 'mi-horario', icon: 'fa-clock' }
+            ]
+        },
+        {
+            text: 'OFERTA Y POSTULACIONES',
+            icon: 'fa-store',
+            submenu: [
+                { text: 'Vitrina de Oferta', view: 'mis-cursos', icon: 'fa-graduation-cap' }
+            ]
+        },
+        {
+            text: 'MI ASISTENCIA Y NOTAS',
+            icon: 'fa-check-circle',
+            submenu: [
+                { text: 'Check-In Asistencia PWA', view: 'mi-asistencia', icon: 'fa-fingerprint' },
+                { text: 'Mis Calificaciones', view: 'mis-calificaciones', icon: 'fa-star' }
+            ]
+        },
+        {
+            text: 'CARNET DIGITAL',
+            icon: 'fa-id-card',
+            submenu: [
+                { text: 'Credencial e Insignias', view: 'mi-progreso', icon: 'fa-qrcode' }
+            ]
+        }
     ],
-    // Rol 9: Padre o Acudiente
+    // Rol 9: Padre o Acudiente (Estructura Categorizada)
     padre_acudiente: [
-        { text: 'Mis Alumnos', view: 'mis-alumnos', icon: 'fa-child' },
-        { text: 'Inscripciones', view: 'mis-alumnos', icon: 'fa-file-signature' },
-        { text: 'Autorizaciones', view: 'mis-alumnos', icon: 'fa-user-edit' },
-        { text: 'Reportes de Progreso', view: 'mis-alumnos', icon: 'fa-chart-bar' }
+        {
+            text: 'MIS ESTUDIANTES',
+            icon: 'fa-child',
+            submenu: [
+                { text: 'Mis Hijos / Pupilos', view: 'mis-alumnos', icon: 'fa-users' }
+            ]
+        },
+        {
+            text: 'POSTULAR BENEFICIARIOS',
+            icon: 'fa-user-plus',
+            submenu: [
+                { text: 'Postular a Disciplina', view: 'mis-alumnos', icon: 'fa-file-signature' }
+            ]
+        },
+        {
+            text: 'SEGUIMIENTO FORMATIVO',
+            icon: 'fa-chart-line',
+            submenu: [
+                { text: 'Asistencia y Progreso', view: 'mis-alumnos', icon: 'fa-chart-bar' }
+            ]
+        },
+        {
+            text: 'AUTORIZACIONES',
+            icon: 'fa-file-contract',
+            submenu: [
+                { text: 'Permisos Legales y Médicos', view: 'mis-alumnos', icon: 'fa-user-edit' }
+            ]
+        }
     ],
     // Rol 10: Jefe de Almacén
     jefe_almacen: [
