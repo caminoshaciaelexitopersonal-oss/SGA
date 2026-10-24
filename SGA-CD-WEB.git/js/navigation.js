@@ -233,12 +233,47 @@ const navLinks = {
             ]
         }
     ],
-    // Rol 6: Coordinador
+    // Rol 6: Coordinador (Estructura Categorizada de 5 Bloques)
     coordinador: [
-        { text: 'Planificación', view: 'planificacion', icon: 'fa-calendar-day' },
-        { text: 'Verificar Programación', view: 'verificar-programacion', icon: 'fa-clipboard-check' },
-        { text: 'Aprobaciones', view: 'aprobaciones', icon: 'fa-check-double' },
-        { text: 'Gestionar Misiones', view: 'misiones', icon: 'fa-tasks' }
+        {
+            text: 'PANEL PRINCIPAL',
+            icon: 'fa-chart-pie',
+            submenu: [
+                { text: 'Dashboard de Coordinación', view: 'planificacion', icon: 'fa-tachometer-alt' },
+                { text: 'Telemetría Power BI', view: 'planificacion', icon: 'fa-chart-bar' }
+            ]
+        },
+        {
+            text: 'SUPERVISIÓN EN CAMPO',
+            icon: 'fa-eye',
+            submenu: [
+                { text: 'Verificación Docentes en Cancha', view: 'verificar-programacion', icon: 'fa-check-circle' },
+                { text: 'Control de Escenarios & Custodia', view: 'verificar-programacion', icon: 'fa-map-marker-alt' }
+            ]
+        },
+        {
+            text: 'GESTIÓN CURRICULAR',
+            icon: 'fa-clipboard-check',
+            submenu: [
+                { text: 'Aprobación 52 Semanas', view: 'aprobaciones', icon: 'fa-calendar-week' }
+            ]
+        },
+        {
+            text: 'EQUIPO Y TAREAS',
+            icon: 'fa-users-cog',
+            submenu: [
+                { text: 'Distribución Tareas Extraordinarias', view: 'planificacion', icon: 'fa-tasks' },
+                { text: 'Roster de Profesores', view: 'planificacion', icon: 'fa-chalkboard-teacher' }
+            ]
+        },
+        {
+            text: 'CONTROL Y REPORTES',
+            icon: 'fa-shield-alt',
+            submenu: [
+                { text: 'Libro de Novedades', view: 'planificacion', icon: 'fa-book' },
+                { text: 'Informes de Supervisión', view: 'planificacion', icon: 'fa-file-alt' }
+            ]
+        }
     ],
     // Rol 7: Profesor (Estructura Categorizada)
     profesor: [

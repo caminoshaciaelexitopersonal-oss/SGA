@@ -100,7 +100,15 @@ def create_user_by_empresa(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail=f"Role '{target_role}' cannot be created by your authority level."
             )
-    elif user_roles.intersection(operational_triad_roles):
+    elif "jefe_area" in user_roles:
+        # jefe_area es Primer Jefe de Área y puede crear a su Segundo en Jefe (coordinador) y a la whitelist operativa
+        allowed_jefe_targets = WHITELIST_OPERATIVA_AREA | {"coordinador"}
+        if target_role not in allowed_jefe_targets:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Su rol como Jefe de Área solo tiene autorización para dar de alta a: coordinador, profesor, jefe_escenarios y almacenista."
+            )
+    elif user_roles.intersection({"profesional_area", "tecnico_area"}):
         if target_role not in WHITELIST_OPERATIVA_AREA:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
@@ -127,6 +135,52 @@ def create_user_by_empresa(
 
     new_user = crud.user.create_user(db=db, user=user_in)
     return new_user
+
+
+@router.patch("/users/{user_id}/status", response_model=schemas.User, summary="Toggle user active status (Baja/Reactivacion)")
+def toggle_user_status(
+    user_id: int,
+    active: bool,
+    db: Session = Depends(deps.get_db),
+    current_user: user_model.Usuario = Depends(deps.get_current_active_user)
+):
+    """
+    Toggle user active status.
+    - admin_empresa / admin_general can toggle any user in tenant.
+    - jefe_area can suspend / deactivate coordinadores and staff in their tenant.
+    """
+    user = db.query(user_model.Usuario).filter(
+        user_model.Usuario.id == user_id,
+        user_model.Usuario.inquilino_id == current_user.inquilino_id
+    ).first()
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found in tenant.")
+
+    user_roles = set(getattr(current_user, "role_codes", getattr(current_user, "role_list", [])))
+    allowed_roles = {"admin_empresa", "admin_general", "jefe_area"}
+
+    if not user_roles.intersection(allowed_roles):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to deactivate personnel.")
+
+    user.activo = active
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    role_query = text("""
+        SELECT r.nombre
+        FROM roles r
+        JOIN user_roles ur ON r.id = ur.role_id
+        WHERE ur.user_id = :user_id
+    """)
+    roles_result = db.execute(role_query, {"user_id": user.id}).fetchall()
+    role_names = [row[0] for row in roles_result]
+    if not role_names and user.rol:
+        role_names = [user.rol.value if hasattr(user.rol, 'value') else str(user.rol)]
+    user.role_list = role_names
+
+    return user
 
 
 @router.get("/areas", response_model=List[schemas.area.Area], summary="List areas by company")

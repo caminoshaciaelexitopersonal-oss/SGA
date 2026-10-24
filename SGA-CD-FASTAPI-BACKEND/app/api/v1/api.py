@@ -28,6 +28,7 @@ from .endpoints import (
     meta,
     google,
     catalogo,
+    coordinador,
 )
 
 api_router = APIRouter()
@@ -44,6 +45,7 @@ api_router.include_router(catalogo.router, prefix="/catalogo", tags=["Catálogo 
 api_router.include_router(padre.router, prefix="/padre", tags=["Padre Acudiente"])
 api_router.include_router(profesor.router, prefix="/profesor", tags=["Profesor"])
 api_router.include_router(jefe_area.router, prefix="/jefe_area", tags=["Jefe de Área"])
+api_router.include_router(coordinador.router, prefix="/coordinador", tags=["Coordinador"])
 api_router.include_router(admin.router, prefix="/admin", tags=["Admin"])
 api_router.include_router(agent.router, prefix="/agent", tags=["AI Agent"])
 api_router.include_router(alumnos.router, prefix="/alumnos", tags=["Alumnos"])

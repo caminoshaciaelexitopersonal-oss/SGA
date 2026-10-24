@@ -88,10 +88,11 @@ class TestOperationalTriadUserCreation(unittest.TestCase):
                 self.assertIsNotNone(result)
 
     def test_operational_triad_cannot_create_forbidden_roles(self):
-        triad_roles = [["jefe_area"], ["profesional_area"], ["tecnico_area"]]
+        # profesional_area y tecnico_area no pueden crear coordinadores ni superiores
+        strict_triad_roles = [["profesional_area"], ["tecnico_area"]]
         forbidden_targets = ["coordinador", "admin_empresa", "jefe_area", "profesional_area", "tecnico_area", "admin_general"]
 
-        for role_code in triad_roles:
+        for role_code in strict_triad_roles:
             self.mock_current_user.role_codes = role_code
             for forbidden_target in forbidden_targets:
                 user_in = UserCreate(
