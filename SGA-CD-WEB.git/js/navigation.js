@@ -110,27 +110,128 @@ const navLinks = {
             ]
         }
     ],
-    // Rol 3: Jefe de Área
+    // Rol 3: Jefe de Área (Estructura Categorizada de 5 Bloques)
     jefe_area: [
-        { text: 'Panel de Área', view: 'panel-area', icon: 'fa-tachometer-alt' },
-        { text: 'Reportes', view: 'reportes-area', icon: 'fa-chart-pie' },
-        { text: 'Configuración', view: 'config-area', icon: 'fa-cog' }
+        {
+            text: 'PANEL PRINCIPAL',
+            icon: 'fa-chart-pie',
+            submenu: [
+                { text: 'Dashboard de Área', view: 'panel-area', icon: 'fa-tachometer-alt' },
+                { text: 'Indicadores Operativos', view: 'panel-area', icon: 'fa-chart-line' }
+            ]
+        },
+        {
+            text: 'GESTIÓN OPERATIVA',
+            icon: 'fa-tasks',
+            submenu: [
+                { text: 'Disciplinas / Talleres Activos', view: 'panel-area', icon: 'fa-running' },
+                { text: 'Supervisión de Clases', view: 'panel-area', icon: 'fa-clipboard-list' }
+            ]
+        },
+        {
+            text: 'TALENTO Y EQUIPO',
+            icon: 'fa-users-cog',
+            submenu: [
+                { text: 'Gestionar Personal de Área', view: 'panel-area', icon: 'fa-user-plus' }
+            ]
+        },
+        {
+            text: 'LOGÍSTICA Y RECURSOS',
+            icon: 'fa-boxes',
+            submenu: [
+                { text: 'Escenarios y Espacios', view: 'panel-area', icon: 'fa-map-marked-alt' },
+                { text: 'Inventario de Área', view: 'panel-area', icon: 'fa-dolly-flatbed' }
+            ]
+        },
+        {
+            text: 'CONTROL Y AUDITORÍA',
+            icon: 'fa-shield-alt',
+            submenu: [
+                { text: 'Trazabilidad de Operaciones', view: 'panel-area', icon: 'fa-history' }
+            ]
+        }
     ],
-    // Rol 4: Profesional de Área
+    // Rol 4: Profesional de Área (Estructura Categorizada de 5 Bloques)
     profesional_area: [
-        { text: 'Dashboard', view: 'dashboard', icon: 'fa-tachometer-alt' },
-        { text: 'Supervisar Actividades', view: 'supervisar-actividades', icon: 'fa-tasks' },
-        { text: 'Gestionar Eventos', view: 'gestionar-eventos', icon: 'fa-calendar-plus' },
-        { text: 'Gestionar Disciplinas Deportivas y Modalidades', view: 'gestionar-disciplinas', icon: 'fa-edit' },
-        { text: 'Reportes', view: 'reportes-operativos', icon: 'fa-chart-line' }
+        {
+            text: 'PANEL PRINCIPAL',
+            icon: 'fa-chart-pie',
+            submenu: [
+                { text: 'Dashboard Profesional', view: 'dashboard', icon: 'fa-tachometer-alt' },
+                { text: 'Indicadores Técnicos', view: 'dashboard', icon: 'fa-chart-bar' }
+            ]
+        },
+        {
+            text: 'GESTIÓN OPERATIVA',
+            icon: 'fa-tasks',
+            submenu: [
+                { text: 'Supervisar Actividades', view: 'supervisar-actividades', icon: 'fa-tasks' },
+                { text: 'Gestionar Eventos', view: 'gestionar-eventos', icon: 'fa-calendar-plus' },
+                { text: 'Disciplinas y Modalidades', view: 'gestionar-disciplinas', icon: 'fa-edit' }
+            ]
+        },
+        {
+            text: 'TALENTO Y EQUIPO',
+            icon: 'fa-users-cog',
+            submenu: [
+                { text: 'Personal Operativo', view: 'dashboard', icon: 'fa-user-check' }
+            ]
+        },
+        {
+            text: 'LOGÍSTICA Y RECURSOS',
+            icon: 'fa-boxes',
+            submenu: [
+                { text: 'Sedes y Espacios', view: 'supervisar-actividades', icon: 'fa-map-marker-alt' }
+            ]
+        },
+        {
+            text: 'CONTROL Y AUDITORÍA',
+            icon: 'fa-shield-alt',
+            submenu: [
+                { text: 'Reportes Operativos', view: 'reportes-operativos', icon: 'fa-chart-line' }
+            ]
+        }
     ],
-    // Rol 5: Técnico o Asistente de Área
+    // Rol 5: Técnico de Área (Estructura Categorizada de 5 Bloques)
     tecnico_area: [
-        { text: 'Dashboard', view: 'dashboard', icon: 'fa-tachometer-alt' },
-        { text: 'Ver Actividades', view: 'asistir-gestion-usuarios', icon: 'fa-eye' },
-        { text: 'Gestionar Eventos', view: 'gestionar-eventos', icon: 'fa-calendar-check' },
-        { text: 'Ver Disciplinas Deportivas y Modalidades', view: 'gestionar-disciplinas', icon: 'fa-search' },
-        { text: 'Reportes', view: 'reportes-operativos', icon: 'fa-file-alt' }
+        {
+            text: 'PANEL PRINCIPAL',
+            icon: 'fa-chart-pie',
+            submenu: [
+                { text: 'Dashboard Técnico', view: 'dashboard', icon: 'fa-tachometer-alt' },
+                { text: 'Estado Operativo', view: 'dashboard', icon: 'fa-wrench' }
+            ]
+        },
+        {
+            text: 'GESTIÓN OPERATIVA',
+            icon: 'fa-tasks',
+            submenu: [
+                { text: 'Ver Actividades', view: 'asistir-gestion-usuarios', icon: 'fa-eye' },
+                { text: 'Gestionar Eventos', view: 'gestionar-eventos', icon: 'fa-calendar-check' },
+                { text: 'Ver Disciplinas y Modalidades', view: 'gestionar-disciplinas', icon: 'fa-search' }
+            ]
+        },
+        {
+            text: 'TALENTO Y EQUIPO',
+            icon: 'fa-users-cog',
+            submenu: [
+                { text: 'Apoyo a Personal', view: 'asistir-gestion-usuarios', icon: 'fa-users-cog' }
+            ]
+        },
+        {
+            text: 'LOGÍSTICA Y RECURSOS',
+            icon: 'fa-boxes',
+            submenu: [
+                { text: 'Mantenimiento de Escenarios', view: 'gestionar-eventos', icon: 'fa-tools' }
+            ]
+        },
+        {
+            text: 'CONTROL Y AUDITORÍA',
+            icon: 'fa-shield-alt',
+            submenu: [
+                { text: 'Reportes Operativos', view: 'reportes-operativos', icon: 'fa-file-alt' }
+            ]
+        }
     ],
     // Rol 6: Coordinador
     coordinador: [

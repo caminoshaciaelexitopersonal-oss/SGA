@@ -84,12 +84,10 @@ def create_user_by_empresa(
 
     user_roles = set(getattr(current_user, "role_codes", getattr(current_user, "role_list", [])))
 
-    # Business rule hierarchy:
-    # - admin_empresa / admin_general: altas de jefe_area, profesional_area y tecnico_area.
-    # - jefe_area: altas operativas de coordinador, profesor, almacenista y jefe_escenarios (responsable de espacios).
-    # - profesional_area / tecnico_area: sin facultad de creacion directa de usuarios (apoyo administrativo).
+    # Whitelist estricta para la tríada operativa de área (jefe_area, profesional_area, tecnico_area)
+    WHITELIST_OPERATIVA_AREA = {"profesor", "jefe_escenarios", "almacenista"}
     level_1_roles = {"admin_empresa", "admin_general"}
-    level_2_roles = {"jefe_area"}
+    operational_triad_roles = {"jefe_area", "profesional_area", "tecnico_area"}
 
     target_role = user_in.rol.strip()
 
@@ -97,20 +95,21 @@ def create_user_by_empresa(
         allowed_target_roles = {
             "jefe_area", "profesional_area", "tecnico_area"
         }
-    elif user_roles.intersection(level_2_roles):
-        allowed_target_roles = {
-            "coordinador", "profesor", "almacenista", "jefe_escenarios"
-        }
+        if target_role not in allowed_target_roles:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Role '{target_role}' cannot be created by your authority level."
+            )
+    elif user_roles.intersection(operational_triad_roles):
+        if target_role not in WHITELIST_OPERATIVA_AREA:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Su rol operativo solo tiene autorización para dar de alta a: profesor, jefe_escenarios y almacenista."
+            )
     else:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="User role does not have authority to create new personnel."
-        )
-
-    if target_role not in allowed_target_roles:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail=f"Role '{target_role}' cannot be created by your authority level."
         )
 
     # Check for existing user username or email
