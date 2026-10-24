@@ -48,15 +48,45 @@ class SyncManager:
         self.page.update()
 
     def _detect_local_changes(self) -> dict:
-        """Detecta los registros que han sido creados o modificados localmente."""
+        """Detecta los registros de alumnos y clases creados o modificados localmente."""
         print("Detectando cambios locales para el 'push'...")
         conn = get_db_connection(self.page)
         alumnos = conn.execute("SELECT * FROM alumnos ORDER BY id DESC LIMIT 5").fetchall()
-        conn.close()
+        clases = conn.execute("SELECT * FROM clases ORDER BY id DESC LIMIT 5").fetchall()
+
+        session_tenant_id = getattr(self.page, 'inquilino_id', None) if self.page else None
+        changes = {}
 
         if alumnos:
-            return {"alumnos": [dict(row) for row in alumnos]}
-        return {}
+            valid_alumnos = []
+            for row in alumnos:
+                row_dict = dict(row)
+                if not row_dict.get('inquilino_id'):
+                    if session_tenant_id:
+                        row_dict['inquilino_id'] = session_tenant_id
+                    else:
+                        print(f"Retenido: Registro de alumno id={row_dict.get('id')} sin inquilino_id y sin sesión autenticada.")
+                        continue
+                valid_alumnos.append(row_dict)
+            if valid_alumnos:
+                changes["alumnos"] = valid_alumnos
+
+        if clases:
+            valid_clases = []
+            for row in clases:
+                row_dict = dict(row)
+                if not row_dict.get('inquilino_id'):
+                    if session_tenant_id:
+                        row_dict['inquilino_id'] = session_tenant_id
+                    else:
+                        print(f"Retenido: Registro de clase id={row_dict.get('id')} sin inquilino_id y sin sesión autenticada.")
+                        continue
+                valid_clases.append(row_dict)
+            if valid_clases:
+                changes["clases"] = valid_clases
+
+        conn.close()
+        return changes
 
     def _apply_server_changes(self, server_data: dict):
         """Aplica los datos recibidos del servidor a la base de datos local."""
@@ -68,9 +98,25 @@ class SyncManager:
         try:
             if 'clases' in data:
                 for clase in data['clases']:
+                    clase_id = clase.get('id')
                     clean_nombre = sanitize_input_for_flet(clase.get('nombre_clase', ''))
-                    cursor.execute("INSERT OR REPLACE INTO clases (id, nombre_clase) VALUES (?, ?)",
-                                   (clase['id'], clean_nombre))
+                    inquilino_id = clase.get('inquilino_id')
+                    area = clase.get('area', 'Deportes')
+                    if inquilino_id is None:
+                        print(f"Advertencia: Registro de clase id={clase_id} omitido por falta de 'inquilino_id' en servidor.")
+                        continue
+
+                    # Protección Multiinquilino: Verificar si la fila local existente pertenece a otro inquilino
+                    cursor.execute("SELECT inquilino_id FROM clases WHERE id = ?", (clase_id,))
+                    existing = cursor.fetchone()
+                    if existing and existing['inquilino_id'] is not None and existing['inquilino_id'] != inquilino_id:
+                        print(f"Rechazado: Intento de sobreescritura cross-tenant en clase id={clase_id} (Existente tenant={existing['inquilino_id']}, Entrante tenant={inquilino_id})")
+                        continue
+
+                    cursor.execute(
+                        "INSERT OR REPLACE INTO clases (id, nombre_clase, inquilino_id, area) VALUES (?, ?, ?, ?)",
+                        (clase_id, clean_nombre, inquilino_id, area)
+                    )
 
             conn.commit()
             print("Cambios del servidor aplicados con éxito.")
@@ -87,13 +133,19 @@ class SyncManager:
         # 1. Push: Enviar cambios locales al servidor
         local_changes = self._detect_local_changes()
         if local_changes:
-            push_res = self.api_client._make_request("POST", "/api/sync/push", json=local_changes)
+            push_res = self.api_client.push_sync_data(local_changes)
             if isinstance(push_res, dict) and push_res.get("error"):
                 masked_code = push_res.get("code", "STD-ERR-500-INTERNAL-ERROR")
                 self._show_security_error_banner(
                     masked_code,
                     "Error de autorización o red durante la sincronización de salida. "
                     "Se ha activado el refresco silencioso o la protección de sesión."
+                )
+                return False
+            elif push_res is False:
+                self._show_security_error_banner(
+                    "STD-ERR-400-PUSH-FAILED",
+                    "Fallo durante la sincronización de salida."
                 )
                 return False
             print("Push completado con éxito.")
