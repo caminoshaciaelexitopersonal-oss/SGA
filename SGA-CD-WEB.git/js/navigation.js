@@ -240,30 +240,103 @@ const navLinks = {
         { text: 'Aprobaciones', view: 'aprobaciones', icon: 'fa-check-double' },
         { text: 'Gestionar Misiones', view: 'misiones', icon: 'fa-tasks' }
     ],
-    // Rol 7: Profesor
+    // Rol 7: Profesor (Estructura Categorizada)
     profesor: [
-        { text: 'Gestionar Cursos', view: 'gestionar-cursos', icon: 'fa-chalkboard-teacher' },
-        { text: 'Gestionar Alumnos', view: 'gestionar-alumnos', icon: 'fa-user-graduate' },
-        { text: 'Calificaciones', view: 'calificaciones', icon: 'fa-marker' },
-        { text: 'Gamificación', view: 'gamificacion', icon: 'fa-trophy' },
-        { text: 'Suscripción y Plan', view: 'suscripcion', icon: 'fa-credit-card' }
+        {
+            text: 'MI GESTIÓN FORMATIVA',
+            icon: 'fa-chalkboard-teacher',
+            submenu: [
+                { text: 'Panel Docente', view: 'gestionar-cursos', icon: 'fa-tachometer-alt' },
+                { text: 'Mis Cursos y Roster', view: 'gestionar-cursos', icon: 'fa-book' }
+            ]
+        },
+        {
+            text: 'PLANIFICACIÓN ANUAL',
+            icon: 'fa-calendar-alt',
+            submenu: [
+                { text: 'Plan Curricular 52 Semanas', view: 'gestionar-cursos', icon: 'fa-calendar-week' }
+            ]
+        },
+        {
+            text: 'CUSTODIA Y LOGÍSTICA',
+            icon: 'fa-boxes',
+            submenu: [
+                { text: 'Elementos en Custodia', view: 'gestionar-cursos', icon: 'fa-box-open' },
+                { text: 'Solicitud de Escenarios', view: 'gestionar-cursos', icon: 'fa-map-marker-alt' }
+            ]
+        },
+        {
+            text: 'TELEMETRÍA Y ALUMNOS',
+            icon: 'fa-chart-line',
+            submenu: [
+                { text: 'Asistencia & Alertas Deserción', view: 'gestionar-cursos', icon: 'fa-user-check' },
+                { text: 'Suscripción y Plan', view: 'suscripcion', icon: 'fa-credit-card' }
+            ]
+        }
     ],
-    // Rol 8: Alumno
+    // Rol 8: Alumno (Estructura Categorizada)
     alumno: [
-        { text: 'Mis Cursos', view: 'mis-cursos', icon: 'fa-book-reader' },
-        { text: 'Mi Horario', view: 'mi-horario', icon: 'fa-clock' },
-        { text: 'Mis Calificaciones', view: 'mis-calificaciones', icon: 'fa-star' },
-        { text: 'Asistencia PWA', view: 'mi-asistencia', icon: 'fa-check-circle' },
-        { text: 'Mi Progreso', view: 'mi-progreso', icon: 'fa-gamepad' },
-        { text: 'Misiones', view: 'misiones', icon: 'fa-tasks' },
-        { text: 'Mercado de Puntos', view: 'mercado', icon: 'fa-store' }
+        {
+            text: 'MI ACTIVIDAD',
+            icon: 'fa-user-graduate',
+            submenu: [
+                { text: 'Mis Disciplinas / Cursos', view: 'mis-cursos', icon: 'fa-book-reader' },
+                { text: 'Mi Horario', view: 'mi-horario', icon: 'fa-clock' }
+            ]
+        },
+        {
+            text: 'OFERTA Y POSTULACIONES',
+            icon: 'fa-store',
+            submenu: [
+                { text: 'Vitrina de Oferta', view: 'mis-cursos', icon: 'fa-graduation-cap' }
+            ]
+        },
+        {
+            text: 'MI ASISTENCIA Y NOTAS',
+            icon: 'fa-check-circle',
+            submenu: [
+                { text: 'Check-In Asistencia PWA', view: 'mi-asistencia', icon: 'fa-fingerprint' },
+                { text: 'Mis Calificaciones', view: 'mis-calificaciones', icon: 'fa-star' }
+            ]
+        },
+        {
+            text: 'CARNET DIGITAL',
+            icon: 'fa-id-card',
+            submenu: [
+                { text: 'Credencial e Insignias', view: 'mi-progreso', icon: 'fa-qrcode' }
+            ]
+        }
     ],
-    // Rol 9: Padre o Acudiente
+    // Rol 9: Padre o Acudiente (Estructura Categorizada)
     padre_acudiente: [
-        { text: 'Mis Alumnos', view: 'mis-alumnos', icon: 'fa-child' },
-        { text: 'Inscripciones', view: 'mis-alumnos', icon: 'fa-file-signature' },
-        { text: 'Autorizaciones', view: 'mis-alumnos', icon: 'fa-user-edit' },
-        { text: 'Reportes de Progreso', view: 'mis-alumnos', icon: 'fa-chart-bar' }
+        {
+            text: 'MIS ESTUDIANTES',
+            icon: 'fa-child',
+            submenu: [
+                { text: 'Mis Hijos / Pupilos', view: 'mis-alumnos', icon: 'fa-users' }
+            ]
+        },
+        {
+            text: 'POSTULAR BENEFICIARIOS',
+            icon: 'fa-user-plus',
+            submenu: [
+                { text: 'Postular a Disciplina', view: 'mis-alumnos', icon: 'fa-file-signature' }
+            ]
+        },
+        {
+            text: 'SEGUIMIENTO FORMATIVO',
+            icon: 'fa-chart-line',
+            submenu: [
+                { text: 'Asistencia y Progreso', view: 'mis-alumnos', icon: 'fa-chart-bar' }
+            ]
+        },
+        {
+            text: 'AUTORIZACIONES',
+            icon: 'fa-file-contract',
+            submenu: [
+                { text: 'Permisos Legales y Médicos', view: 'mis-alumnos', icon: 'fa-user-edit' }
+            ]
+        }
     ],
     // Rol 10: Jefe de Almacén
     jefe_almacen: [
