@@ -104,7 +104,7 @@ class TestInstitutionalHierarchyAndEvents(unittest.TestCase):
             create_user_by_empresa(db=self.db, user_in=user_in, current_user=self.jefe_user)
         self.assertEqual(ctx.exception.status_code, 403)
 
-    def test_02b_profesional_area_cannot_create_users(self):
+    def test_02b_profesional_area_can_create_whitelisted_users(self):
         user_in = UserCreate(
             email="profesor1@deportes.gov.co",
             nombre_usuario="profesor_1",
@@ -112,6 +112,19 @@ class TestInstitutionalHierarchyAndEvents(unittest.TestCase):
             rol="profesor",
             inquilino_id=100,
             nombre_completo="Profesor Uno"
+        )
+        new_user = create_user_by_empresa(db=self.db, user_in=user_in, current_user=self.profesional_user)
+        self.assertIsNotNone(new_user.id)
+        self.assertEqual(new_user.rol, RolesEnum.profesor)
+
+    def test_02c_profesional_area_cannot_create_forbidden_users(self):
+        user_in = UserCreate(
+            email="coord1@deportes.gov.co",
+            nombre_usuario="coordinador_1",
+            password="Password123!",
+            rol="coordinador",
+            inquilino_id=100,
+            nombre_completo="Coordinador Uno"
         )
         with self.assertRaises(HTTPException) as ctx:
             create_user_by_empresa(db=self.db, user_in=user_in, current_user=self.profesional_user)

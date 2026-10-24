@@ -14,7 +14,18 @@ class PlanCurricular(Base):
     proceso_id = Column(Integer, ForeignKey("procesos_formacion.id"))
     area = Column(String, nullable=False)
 
-    creador = relationship("Usuario")
+    # Ciclo de vida de aprobación de 52 semanas: 'borrador', 'en_revision', 'devuelto', 'vobo_tecnico', 'aprobado_definitivo'
+    estado_aprobacion = Column(String, default="borrador", nullable=False)
+    observaciones_revision = Column(Text, nullable=True)
+    vobo_coordinador_id = Column(Integer, ForeignKey("usuarios.id"), nullable=True)
+    fecha_vobo = Column(DateTime(timezone=True), nullable=True)
+    ratificacion_jefe_id = Column(Integer, ForeignKey("usuarios.id"), nullable=True)
+    fecha_ratificacion = Column(DateTime(timezone=True), nullable=True)
+    version = Column(Integer, default=1, nullable=False)
+
+    creador = relationship("Usuario", foreign_keys=[creado_por_usuario_id])
+    coordinador_vobo = relationship("Usuario", foreign_keys=[vobo_coordinador_id])
+    jefe_ratificacion = relationship("Usuario", foreign_keys=[ratificacion_jefe_id])
     proceso = relationship("ProcesoFormacion")
     temas = relationship("PlanCurricularTema", back_populates="plan", cascade="all, delete-orphan")
 
