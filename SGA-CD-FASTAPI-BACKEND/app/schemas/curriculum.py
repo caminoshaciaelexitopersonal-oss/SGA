@@ -4,11 +4,20 @@ from datetime import date
 
 # --- PlanCurricular Schemas ---
 
+from datetime import datetime
+
 class PlanCurricularBase(BaseModel):
     nombre_plan: str
     descripcion: Optional[str] = None
     proceso_id: Optional[int] = None
     area: str
+    estado_aprobacion: Optional[str] = "borrador"
+    observaciones_revision: Optional[str] = None
+    vobo_coordinador_id: Optional[int] = None
+    fecha_vobo: Optional[datetime] = None
+    ratificacion_jefe_id: Optional[int] = None
+    fecha_ratificacion: Optional[datetime] = None
+    version: Optional[int] = 1
 
 class PlanCurricularCreate(PlanCurricularBase):
     inquilino_id: int
@@ -16,6 +25,9 @@ class PlanCurricularCreate(PlanCurricularBase):
 
 class PlanCurricularUpdate(PlanCurricularBase):
     pass
+
+class PlanCurricularReviewAction(BaseModel):
+    observaciones: Optional[str] = None
 
 class PlanCurricularInDBBase(PlanCurricularBase):
     id: int

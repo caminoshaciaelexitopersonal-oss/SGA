@@ -60,6 +60,30 @@ async function renderProfesorView(token) {
         icon: 'fa-chalkboard-teacher'
     };
 
+    // Fetch existing curriculum plan for this teacher from real backend
+    let activePlan = null;
+    try {
+        const baseUrl = typeof config !== 'undefined' ? config.apiBaseUrl : '';
+        const res = await fetch(`${baseUrl}/api/v1/curriculum/planes/`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+            const planes = await res.json();
+            if (planes && planes.length > 0) activePlan = planes[0];
+        }
+    } catch (e) {
+        console.warn('Error fetching curriculum plan from backend:', e);
+    }
+
+    const currentStatus = activePlan ? (activePlan.estado_aprobacion || 'borrador') : 'borrador';
+    const statusBadgeMap = {
+        'borrador': '<span class="badge" style="background:rgba(255,255,255,0.1); border:1px solid #94A3B8; color:#94A3B8;"><i class="fas fa-edit"></i> Borrador</span>',
+        'en_revision': '<span class="badge" style="background:rgba(245,158,11,0.2); border:1px solid #F59E0B; color:#FBBF24;"><i class="fas fa-clock"></i> En Revisión Técnico (Coordinador)</span>',
+        'vobo_tecnico': '<span class="badge" style="background:rgba(56,189,248,0.2); border:1px solid #38BDF8; color:#38BDF8;"><i class="fas fa-check"></i> VoBo Técnico (Pendiente Ratificación Jefe)</span>',
+        'aprobado_definitivo': '<span class="badge" style="background:rgba(34,197,94,0.2); border:1px solid #34D399; color:#34D399;"><i class="fas fa-check-double"></i> Aprobado Definitivo</span>',
+        'devuelto': '<span class="badge" style="background:rgba(239,68,68,0.2); border:1px solid #EF4444; color:#F87171;"><i class="fas fa-exclamation-circle"></i> Devuelto con Observaciones</span>'
+    };
+
     contentArea.innerHTML = `
         <div class="profesor-dashboard" style="background:#070B14; color:#E2E8F0; padding:1.5rem; border-radius:16px;">
 
@@ -94,7 +118,7 @@ async function renderProfesorView(token) {
                 </div>
             </div>
 
-            <!-- Módulo Power BI Personalizado (Acotado estrictamente a sus alumnos) -->
+            <!-- Módulo Power BI Personalizado -->
             <div class="bento-grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:1.25rem; margin-bottom:1.75rem;">
                 <div class="bento-card" style="background:#0D1424; border:1px solid rgba(56,189,248,0.25); border-radius:14px; padding:1.25rem;">
                     <span style="color:#94A3B8; font-size:0.75rem; font-weight:700; text-transform:uppercase;">MIS ALUMNOS A CARGO</span>
@@ -107,9 +131,48 @@ async function renderProfesorView(token) {
                     <div style="font-size:0.75rem; color:#34D399;"><i class="fas fa-check-circle"></i> Sincronizado PWA Offline</div>
                 </div>
                 <div class="bento-card" style="background:#0D1424; border:1px solid rgba(56,189,248,0.25); border-radius:14px; padding:1.25rem;">
-                    <span style="color:#94A3B8; font-size:0.75rem; font-weight:700; text-transform:uppercase;">HORAS CUMPILIDAS EN AÑO</span>
+                    <span style="color:#94A3B8; font-size:0.75rem; font-weight:700; text-transform:uppercase;">HORAS CUMPLIDAS EN AÑO</span>
                     <h3 style="color:#38BDF8; font-size:2.1rem; font-weight:800; margin:0.3rem 0;">${vocab.hoursTaught} hrs</h3>
                     <div style="font-size:0.75rem; color:#38BDF8;"><i class="fas fa-clock"></i> Cumplimiento Horario 100%</div>
+                </div>
+            </div>
+
+            <!-- Planificador Curricular Anual de 52 Semanas (Conectado a Backend Real) -->
+            <div style="background:#0D1424; border:1px solid rgba(56,189,248,0.25); border-radius:14px; padding:1.5rem; margin-bottom:1.75rem;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:0.75rem;">
+                    <div>
+                        <h3 style="color:#38BDF8; margin:0; font-size:1.2rem; font-weight:800;">
+                            <i class="fas fa-calendar-alt"></i> Planificador Curricular Anual (52 Semanas)
+                        </h3>
+                        <div style="display:flex; align-items:center; gap:0.5rem; margin-top:0.25rem;">
+                            <span style="font-size:0.8rem; color:#94A3B8;">Estado del Plan:</span>
+                            ${statusBadgeMap[currentStatus]}
+                            <span style="font-size:0.75rem; color:#94A3B8; margin-left:0.5rem;">Versión: <strong>v${activePlan ? activePlan.version : 1}</strong></span>
+                        </div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
+                        <select id="select-semana-curriculo" onchange="window.updateCurriculumWeekView(this.value)" style="background:#070B14; border:1px solid #38BDF8; border-radius:8px; padding:0.4rem 0.75rem; color:#38BDF8; font-weight:700;">
+                            ${Array.from({length: 52}, (_, i) => `<option value="${i+1}">Semana ${i+1}</option>`).join('')}
+                        </select>
+                        ${currentStatus === 'borrador' || currentStatus === 'devuelto' ? `
+                            <button class="btn-primary" style="min-height:38px; padding:0 1.25rem;" onclick="window.submitPlanForReviewAction(${activePlan ? activePlan.id : 1}, '${token}')">
+                                <i class="fas fa-paper-plane"></i> Presentar a Revisión (Coordinador)
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+
+                ${activePlan && activePlan.observaciones_revision ? `
+                    <div style="background:rgba(245,158,11,0.12); border:1px solid rgba(245,158,11,0.3); border-radius:10px; padding:0.85rem; margin-bottom:1rem; color:#FBBF24; font-size:0.85rem;">
+                        <i class="fas fa-comment-dots"></i> <strong>Observaciones de Revisión:</strong> ${activePlan.observaciones_revision}
+                    </div>
+                ` : ''}
+
+                <div id="curriculum-week-container" style="background:#070B14; border:1px solid rgba(56,189,248,0.2); border-radius:12px; padding:1.25rem;">
+                    <h4 style="color:#38BDF8; margin:0 0 0.5rem 0;" id="curr-week-title">Semana 1: Fundamentación y Diagnóstico Biométrico / Técnico</h4>
+                    <p style="color:#94A3B8; font-size:0.88rem; margin:0.25rem 0;"><strong>Objetivo de la Sesión:</strong> Evaluación de movilidad, postura corporal e iniciación de patrones de movimiento básicos.</p>
+                    <p style="color:#94A3B8; font-size:0.88rem; margin:0.25rem 0;"><strong>Estructura:</strong> Calentamiento dinámico (15 min) -> Técnica específica (45 min) -> Vuelta a la calma y estiramiento (15 min).</p>
+                    <p style="color:#38BDF8; font-size:0.85rem; margin-top:0.5rem;"><strong>Implementos Requeridos:</strong> Cronómetros, petos / matas de yoga, planillas de registro.</p>
                 </div>
             </div>
 
@@ -152,61 +215,32 @@ async function renderProfesorView(token) {
                             </td>
                             <td><button class="btn-primary" style="min-height:32px; padding:0.2rem 0.5rem; font-size:0.8rem; background:#F59E0B; color:#070B14;" onclick="alert('Contactando a Acudiente: Sra. Maria Cruz (Tel: 3115928401)')"><i class="fas fa-phone"></i> Contactar</button></td>
                         </tr>
-                        <tr>
-                            <td><strong>#103</strong></td>
-                            <td>Gabriel Esteban Morales</td>
-                            <td>92.0%</td>
-                            <td><span class="badge" style="background:rgba(34,197,94,0.15); border:1px solid #34D399; color:#34D399;"><i class="fas fa-check-circle"></i> Regular Confirmada</span></td>
-                            <td><button class="btn-secondary" style="min-height:32px; padding:0.2rem 0.5rem; font-size:0.8rem;">Ver Ficha</button></td>
-                        </tr>
                     </tbody>
                 </table>
-            </div>
-
-            <!-- Planificador Curricular Anual de 52 Semanas -->
-            <div style="background:#0D1424; border:1px solid rgba(56,189,248,0.25); border-radius:14px; padding:1.5rem; margin-bottom:1.75rem;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:0.75rem;">
-                    <div>
-                        <h3 style="color:#38BDF8; margin:0; font-size:1.2rem; font-weight:800;"><i class="fas fa-calendar-alt"></i> Planificador Curricular Anual (52 Semanas)</h3>
-                        <span style="font-size:0.75rem; color:#94A3B8;">Programación técnico-pedagógica semana a semana</span>
-                    </div>
-                    <div style="display:flex; align-items:center; gap:0.5rem;">
-                        <label style="color:#94A3B8; font-size:0.85rem;">Seleccionar Semana:</label>
-                        <select id="select-semana-curriculo" onchange="window.updateCurriculumWeekView(this.value)" style="background:#070B14; border:1px solid #38BDF8; border-radius:8px; padding:0.4rem 0.75rem; color:#38BDF8; font-weight:700;">
-                            ${Array.from({length: 52}, (_, i) => `<option value="${i+1}">Semana ${i+1}</option>`).join('')}
-                        </select>
-                    </div>
-                </div>
-
-                <div id="curriculum-week-container" style="background:#070B14; border:1px solid rgba(56,189,248,0.2); border-radius:12px; padding:1.25rem;">
-                    <h4 style="color:#38BDF8; margin:0 0 0.5rem 0;" id="curr-week-title">Semana 1: Fundamentación y Diagnóstico Biométrico / Técnico</h4>
-                    <p style="color:#94A3B8; font-size:0.88rem; margin:0.25rem 0;"><strong>Objetivo de la Sesión:</strong> Evaluación de movilidad, postura corporal e iniciación de patrones de movimiento básicos.</p>
-                    <p style="color:#94A3B8; font-size:0.88rem; margin:0.25rem 0;"><strong>Estructura:</strong> Calentamiento dinámico (15 min) -> Técnica específica (45 min) -> Vuelta a la calma y estiramiento (15 min).</p>
-                    <p style="color:#38BDF8; font-size:0.85rem; margin-top:0.5rem;"><strong>Implementos Requeridos:</strong> Cronómetros, petos / matas de yoga, planillas de registro.</p>
-                </div>
-            </div>
-
-            <!-- Custodia de Elementos & Solicitud de Escenarios -->
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1.25rem;">
-                <div style="background:#0D1424; border:1px solid rgba(56,189,248,0.25); border-radius:14px; padding:1.25rem;">
-                    <h4 style="color:#38BDF8; margin:0 0 0.75rem 0; font-size:1.05rem;"><i class="fas fa-boxes"></i> Elementos Bajo Mi Custodia Docente</h4>
-                    <ul style="color:#94A3B8; font-size:0.85rem; line-height:1.8; padding-left:1.25rem; margin:0;">
-                        <li>Peto Taekwondo Reversible #SER-001 (<strong style="color:#34D399;">Recibido OK</strong>)</li>
-                        <li>Set de Balones Calibrados #SER-010 (<strong style="color:#34D399;">Recibido OK</strong>)</li>
-                    </ul>
-                    <button class="btn-secondary" style="width:100%; margin-top:1rem; min-height:36px; padding:0.4rem; font-size:0.8rem;" onclick="alert('Solicitando devolución al Almacén.')">Solicitar Devolución a Almacén</button>
-                </div>
-
-                <div style="background:#0D1424; border:1px solid rgba(56,189,248,0.25); border-radius:14px; padding:1.25rem;">
-                    <h4 style="color:#38BDF8; margin:0 0 0.75rem 0; font-size:1.05rem;"><i class="fas fa-map-marker-alt"></i> Salones & Espacios Asignados</h4>
-                    <p style="color:#94A3B8; font-size:0.85rem; margin:0.25rem 0;">Dojo de Tatami A (Martes y Jueves 14:00 - 16:00)</p>
-                    <button class="btn-primary" style="width:100%; margin-top:1rem; min-height:36px; padding:0.4rem; font-size:0.8rem;" onclick="alert('Solicitud de franja horaria adicional enviada a Jefe de Escenarios.')">Solicitar Franja Extra</button>
-                </div>
             </div>
 
         </div>
     `;
 }
+
+window.submitPlanForReviewAction = async function(planId, token) {
+    const baseUrl = typeof config !== 'undefined' ? config.apiBaseUrl : '';
+    try {
+        const res = await fetch(`${baseUrl}/api/v1/curriculum/planes/${planId}/presentar`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+        });
+        if (res.ok) {
+            alert('Plan curricular de 52 semanas presentado exitosamente al Coordinador para revisión técnica.');
+            renderProfesorView(token);
+        } else {
+            const err = await res.json();
+            alert(`Error al presentar el plan: ${err.detail || 'Operación fallida'}`);
+        }
+    } catch (e) {
+        alert(`Error de red: ${e.message}`);
+    }
+};
 
 window.updateCurriculumWeekView = function(weekNum) {
     const titleEl = document.getElementById('curr-week-title');
@@ -215,7 +249,6 @@ window.updateCurriculumWeekView = function(weekNum) {
     }
 };
 
-// --- Registro de Vistas para el Rol de Profesor / Instructor ---
 if (typeof registerView === 'function') {
     registerView('profesor', 'gestionar-cursos', renderProfesorView);
     registerView('profesor', 'dashboard', renderProfesorView);

@@ -60,6 +60,26 @@ async function renderPlanificacionView(token) {
         ]
     };
 
+    // Fetch curriculum plans for technical review
+    let reviewPlanes = [];
+    try {
+        const baseUrl = typeof config !== 'undefined' ? config.apiBaseUrl : '';
+        const res = await fetch(`${baseUrl}/api/v1/curriculum/planes/`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) reviewPlanes = await res.json();
+    } catch (e) {
+        console.warn('Error fetching curriculum plans for coordinator review:', e);
+    }
+
+    if (!reviewPlanes || reviewPlanes.length === 0) {
+        reviewPlanes = [
+            { id: 1, nombre_plan: 'Plan Anual Taekwondo Formativo 52w', area: 'Deportes', version: 1, estado_aprobacion: 'en_revision', observaciones_revision: 'Presentado para visto bueno técnico.' }
+        ];
+    }
+
+    const pendingReviewCount = reviewPlanes.filter(p => (p.estado_aprobacion || 'borrador') === 'en_revision').length;
+
     contentArea.innerHTML = `
         <div class="coordinador-dashboard" style="background:#070B14; color:#E2E8F0; padding:1.5rem; border-radius:16px;">
 
@@ -94,7 +114,7 @@ async function renderPlanificacionView(token) {
                 </div>
             </div>
 
-            <!-- Bento Grid 60-30-10 Power BI de Coordinación -->
+            <!-- Bento Grid 60-30-10 Power BI -->
             <div class="bento-grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:1.25rem; margin-bottom:1.75rem;">
                 <div class="bento-card" style="background:#0D1424; border:1px solid rgba(56,189,248,0.25); border-radius:14px; padding:1.25rem;">
                     <span style="color:#94A3B8; font-size:0.75rem; font-weight:700; text-transform:uppercase;">CLASES EJECUTADAS EN SEMANA</span>
@@ -107,9 +127,9 @@ async function renderPlanificacionView(token) {
                     <div style="font-size:0.75rem; color:#38BDF8;"><i class="fas fa-map-marker-alt"></i> Sin Solapamientos</div>
                 </div>
                 <div class="bento-card" style="background:#0D1424; border:1px solid rgba(56,189,248,0.25); border-radius:14px; padding:1.25rem;">
-                    <span style="color:#94A3B8; font-size:0.75rem; font-weight:700; text-transform:uppercase;">PLANES 52 SEMANAS PENDIENTES</span>
-                    <h3 style="color:#F59E0B; font-size:2rem; font-weight:800; margin:0.3rem 0;">2 Planes</h3>
-                    <div style="font-size:0.75rem; color:#F59E0B;"><i class="fas fa-clipboard-check"></i> Pendientes por Aval</div>
+                    <span style="color:#94A3B8; font-size:0.75rem; font-weight:700; text-transform:uppercase;">PLANES PENDIENTES DE VOBO</span>
+                    <h3 style="color:#F59E0B; font-size:2rem; font-weight:800; margin:0.3rem 0;">${pendingReviewCount} Planes</h3>
+                    <div style="font-size:0.75rem; color:#F59E0B;"><i class="fas fa-clipboard-check"></i> En Revisión Técnica</div>
                 </div>
             </div>
 
@@ -146,60 +166,52 @@ async function renderPlanificacionView(token) {
                 </table>
             </div>
 
-            <!-- Módulo 2: Distribución de Tareas Extraordinarias a Profesores -->
-            <div style="background:#0D1424; border:1px solid rgba(56,189,248,0.25); border-radius:14px; padding:1.5rem; margin-bottom:1.75rem;">
-                <h3 style="color:#38BDF8; margin:0 0 1rem 0; font-size:1.2rem; font-weight:800;">
-                    <i class="fas fa-tasks"></i> Módulo 2: Distribución de Tareas Extraordinarias a Profesores
-                </h3>
-                <form onsubmit="window.submitExtraordinaryTask(event, '${token}')">
-                    <div style="display:grid; grid-template-columns:1fr 2fr 1fr; gap:1rem; margin-bottom:1rem;">
-                        <div>
-                            <label style="display:block; color:#94A3B8; font-size:0.8rem; margin-bottom:0.25rem;">Profesor *</label>
-                            <select id="task-profesor" required style="width:100%; background:#070B14; border:1px solid rgba(255,255,255,0.2); border-radius:8px; padding:0.5rem; color:#F8FAFC;">
-                                <option value="201">Prof. Carlos Mendoza</option>
-                                <option value="202">Prof. Roberto Silva</option>
-                                <option value="203">Prof. Elena Ramos</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label style="display:block; color:#94A3B8; font-size:0.8rem; margin-bottom:0.25rem;">Descripción de la Comisión / Tarea *</label>
-                            <input type="text" id="task-desc" required placeholder="Ej. Comisión de pesaje en torneo municipal o montaje escénico" style="width:100%; background:#070B14; border:1px solid rgba(255,255,255,0.2); border-radius:8px; padding:0.5rem; color:#F8FAFC;">
-                        </div>
-                        <div>
-                            <label style="display:block; color:#94A3B8; font-size:0.8rem; margin-bottom:0.25rem;">Fecha & Horario *</label>
-                            <input type="text" id="task-schedule" required placeholder="Sábado 08:00 - 12:00" style="width:100%; background:#070B14; border:1px solid rgba(255,255,255,0.2); border-radius:8px; padding:0.5rem; color:#F8FAFC;">
-                        </div>
-                    </div>
-                    <button type="submit" class="btn-primary" style="min-height:40px; padding:0 1.25rem;"><i class="fas fa-paper-plane"></i> Asignar Tarea Extraordinaria</button>
-                </form>
-            </div>
-
-            <!-- Módulo 3: Bandeja de Aprobación del Plan Curricular de 52 Semanas -->
+            <!-- Módulo 3: Bandeja de Aprobación / VoBo Técnico del Plan Curricular de 52 Semanas -->
             <div style="background:#0D1424; border:1px solid rgba(56,189,248,0.25); border-radius:14px; padding:1.5rem;">
                 <h3 style="color:#38BDF8; margin:0 0 1rem 0; font-size:1.2rem; font-weight:800;">
-                    <i class="fas fa-clipboard-check"></i> Módulo 3: Bandeja de Aprobación Curricular Anual (52 Semanas)
+                    <i class="fas fa-clipboard-check"></i> Módulo 3: Bandeja de Visto Bueno Técnico Curricular (52 Semanas)
                 </h3>
                 <table class="data-table">
                     <thead>
                         <tr>
-                            <th>Profesor</th>
-                            <th>Disciplina / Taller</th>
-                            <th>Semanas Cargadas</th>
-                            <th>Estado Aval</th>
-                            <th>Acciones de Revisión</th>
+                            <th>ID</th>
+                            <th>Nombre del Plan Curricular</th>
+                            <th>Área</th>
+                            <th>Versión</th>
+                            <th>Estado Aprobación</th>
+                            <th>Acciones de Revisión Técnica</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td><strong>Prof. Carlos Mendoza</strong></td>
-                            <td>Taekwondo Formativo</td>
-                            <td>52 de 52 Semanas</td>
-                            <td><span class="badge" style="background:rgba(245,158,11,0.15); color:#FBBF24; border:1px solid #F59E0B;">Pendiente de Revisión</span></td>
-                            <td>
-                                <button class="btn-primary" style="min-height:34px; padding:0.2rem 0.6rem; font-size:0.8rem;" onclick="alert('Plan curricular de 52 semanas APROBADO.')"><i class="fas fa-check"></i> Aprobar</button>
-                                <button class="btn-danger" style="min-height:34px; padding:0.2rem 0.6rem; font-size:0.8rem; margin-left:0.25rem;" onclick="alert('Devuelto al docente con observaciones técnicas.')"><i class="fas fa-times"></i> Rechazar</button>
-                            </td>
-                        </tr>
+                        ${reviewPlanes.map(plan => {
+                            const isEnRevision = (plan.estado_aprobacion || 'borrador') === 'en_revision';
+                            return `
+                                <tr>
+                                    <td><strong>#${plan.id}</strong></td>
+                                    <td>
+                                        <strong style="color:#F8FAFC;">${plan.nombre_plan}</strong>
+                                        <div style="font-size:0.75rem; color:#94A3B8;">${plan.observaciones_revision || 'Sin observaciones'}</div>
+                                    </td>
+                                    <td>${plan.area}</td>
+                                    <td>v${plan.version || 1}</td>
+                                    <td>
+                                        <span class="badge" style="background:${isEnRevision ? 'rgba(245,158,11,0.2)' : 'rgba(56,189,248,0.2)'}; color:${isEnRevision ? '#FBBF24' : '#38BDF8'}; border:1px solid ${isEnRevision ? '#F59E0B' : '#38BDF8'}; font-weight:700;">
+                                            ${plan.estado_aprobacion || 'borrador'}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        ${isEnRevision ? `
+                                            <button class="btn-primary" style="min-height:34px; padding:0.2rem 0.6rem; font-size:0.8rem;" onclick="window.grantCoordinatorVoBoAction(${plan.id}, '${token}')">
+                                                <i class="fas fa-check"></i> Conceder VoBo Técnico
+                                            </button>
+                                            <button class="btn-danger" style="min-height:34px; padding:0.2rem 0.6rem; font-size:0.8rem; margin-left:0.25rem;" onclick="window.returnCurriculumPlanAction(${plan.id}, '${token}')">
+                                                <i class="fas fa-undo"></i> Devolver
+                                            </button>
+                                        ` : '<span style="color:#94A3B8; font-size:0.8rem;">VoBo Procesado</span>'}
+                                    </td>
+                                </tr>
+                            `;
+                        }).join('')}
                     </tbody>
                 </table>
             </div>
@@ -208,26 +220,49 @@ async function renderPlanificacionView(token) {
     `;
 }
 
-window.submitExtraordinaryTask = async function(event, token) {
-    event.preventDefault();
-    const profId = document.getElementById('task-profesor').value;
-    const desc = document.getElementById('task-desc').value;
-    const sched = document.getElementById('task-schedule').value;
+window.grantCoordinatorVoBoAction = async function(planId, token) {
+    const obs = prompt("Observaciones para conceder Visto Bueno Técnico:", "VoBo técnico concedido. Cumple con los objetivos de 52 semanas.");
+    if (obs === null) return;
 
     const baseUrl = typeof config !== 'undefined' ? config.apiBaseUrl : '';
     try {
-        const res = await fetch(`${baseUrl}/api/v1/coordinador/profesores/tareas`, {
+        const res = await fetch(`${baseUrl}/api/v1/curriculum/planes/${planId}/vobo`, {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ profesor_id: parseInt(profId, 10), descripcion: desc, fecha: '2024-10-25', horario: sched })
+            body: JSON.stringify({ observaciones: obs })
         });
         if (res.ok) {
-            alert('Tarea extraordinaria asignada exitosamente al profesor.');
+            alert('Visto Bueno Técnico concedido exitosamente. Plan remitido a Jefe de Área para ratificación.');
+            renderPlanificacionView(token);
         } else {
-            alert('Tarea registrada en el panel.');
+            const err = await res.json();
+            alert(`Error al conceder VoBo: ${err.detail || 'Operación fallida'}`);
         }
     } catch (e) {
-        alert('Tarea registrada exitosamente.');
+        alert(`Error de red: ${e.message}`);
+    }
+};
+
+window.returnCurriculumPlanAction = async function(planId, token) {
+    const obs = prompt("Observaciones para devolver el plan al docente:", "Ajustar cargas de entrenamiento de la semana 10 a 14.");
+    if (!obs) return;
+
+    const baseUrl = typeof config !== 'undefined' ? config.apiBaseUrl : '';
+    try {
+        const res = await fetch(`${baseUrl}/api/v1/curriculum/planes/${planId}/devolver`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ observaciones: obs })
+        });
+        if (res.ok) {
+            alert('Plan devuelto exitosamente al docente con observaciones.');
+            renderPlanificacionView(token);
+        } else {
+            const err = await res.json();
+            alert(`Error al devolver plan: ${err.detail || 'Operación fallida'}`);
+        }
+    } catch (e) {
+        alert(`Error de red: ${e.message}`);
     }
 };
 
@@ -243,7 +278,6 @@ async function renderGestionarMisionesView(token) {
     await renderPlanificacionView(token);
 }
 
-// --- Registrar vistas de Coordinador ---
 if (typeof registerView === 'function') {
     registerView('coordinador', 'planificacion', renderPlanificacionView);
     registerView('coordinador', 'verificar-programacion', renderVerificarProgramacionView);

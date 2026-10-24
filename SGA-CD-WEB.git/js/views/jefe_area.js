@@ -1,4 +1,4 @@
-// js/views/jefe_area.js — Dashboard Operativo de Jefe de Área con Cabecera B2B, Vocación Bloqueada, Bento Grid y Gestión de Coordinadores
+// js/views/jefe_area.js — Dashboard Operativo de Jefe de Área con Cabecera B2B, Ratificación Definitiva y Gobierno de Coordinadores
 
 async function fetchJefeAreaTenantCaps(token) {
     const fallback = {
@@ -69,18 +69,21 @@ async function renderJefeAreaView(token) {
     let staff = [];
     let events = [];
     let users = [];
+    let ratificacionPlanes = [];
 
     try {
         const baseUrl = typeof config !== 'undefined' ? config.apiBaseUrl : '';
-        const [staffRes, eventsRes, usersRes] = await Promise.all([
+        const [staffRes, eventsRes, usersRes, planesRes] = await Promise.all([
             fetch(`${baseUrl}/api/v1/jefe_area/staff`, { headers: { 'Authorization': `Bearer ${token}` } }),
             fetch(`${baseUrl}/api/v1/jefe_area/events`, { headers: { 'Authorization': `Bearer ${token}` } }),
-            fetch(`${baseUrl}/api/v1/admin/users/by-empresa`, { headers: { 'Authorization': `Bearer ${token}` } })
+            fetch(`${baseUrl}/api/v1/admin/users/by-empresa`, { headers: { 'Authorization': `Bearer ${token}` } }),
+            fetch(`${baseUrl}/api/v1/curriculum/planes/`, { headers: { 'Authorization': `Bearer ${token}` } })
         ]);
 
         if (staffRes.ok) staff = await staffRes.json();
         if (eventsRes.ok) events = await eventsRes.json();
         if (usersRes.ok) users = await usersRes.json();
+        if (planesRes.ok) ratificacionPlanes = await planesRes.json();
     } catch (e) {
         console.warn('Error fetching jefe_area data:', e);
     }
@@ -93,19 +96,16 @@ async function renderJefeAreaView(token) {
         ];
     }
 
-    // Filter coordinadores for Governance Section
     let coordinadores = users.filter(u => Array.isArray(u.role_list) && u.role_list.includes('coordinador'));
     if (!coordinadores || coordinadores.length === 0) {
         coordinadores = [
-            { id: 301, nombre_completo: 'Dra. Patricia Suárez', correo: 'patricia.suarez@sga-cd.org', activo: true, ambito: 'Coordinadora Sede Norte' },
-            { id: 302, nombre_completo: 'Lic. Andrés Villalba', correo: 'andres.villalba@sga-cd.org', activo: true, ambito: 'Coordinador Deportes Combate' }
+            { id: 301, nombre_completo: 'Dra. Patricia Suárez', correo: 'patricia.suarez@sga-cd.org', activo: true, ambito: 'Coordinadora Sede Norte' }
         ];
     }
 
-    if (!events || events.length === 0) {
-        events = [
-            { id: 501, nombre: isCultural ? 'Festival Institucional de Danza' : 'Campeonato Interescuelas de Judo', tipo: 'Competencia', fecha: new Date().toISOString() },
-            { id: 502, nombre: isCultural ? 'Taller Abierto de Pintura y Letras' : 'Jornada Biométrica y Fitness', tipo: 'Taller', fecha: new Date(Date.now() + 86400000 * 3).toISOString() }
+    if (!ratificacionPlanes || ratificacionPlanes.length === 0) {
+        ratificacionPlanes = [
+            { id: 1, nombre_plan: 'Plan Anual Taekwondo Formativo 52w', area: 'Deportes', version: 1, estado_aprobacion: 'vobo_tecnico', observaciones_revision: 'VoBo técnico concedido por Coordinador.' }
         ];
     }
 
@@ -140,7 +140,7 @@ async function renderJefeAreaView(token) {
                         <i class="fas ${vocab.icon}"></i> ${vocab.vocationLabel}
                         <i class="fas fa-lock" style="color:#F59E0B;" title="Vocación fijada por Administración de Empresa"></i>
                     </div>
-                    <span style="font-size:0.72rem; color:#94A3B8;">Gobierno de Alta/Baja de Coordinadores</span>
+                    <span style="font-size:0.72rem; color:#94A3B8;">Ratificación Administrativa Curricular</span>
                 </div>
             </div>
 
@@ -157,14 +157,63 @@ async function renderJefeAreaView(token) {
                     <div style="font-size:0.75rem; color:#34D399;"><i class="fa-solid fa-arrow-trend-up"></i> +8.5% este mes</div>
                 </div>
                 <div class="bento-kpi-card" style="background:#0D1424; border:1px solid rgba(56,189,248,0.25); border-radius:14px; padding:1.25rem;">
-                    <span style="color:#94A3B8; font-size:0.75rem; font-weight:700; text-transform:uppercase;">${vocab.kpiTeachers}</span>
-                    <h3 style="color:#38BDF8; font-size:2rem; font-weight:800; margin:0.3rem 0;">16</h3>
-                    <div style="font-size:0.75rem; color:#38BDF8;"><i class="fa-solid fa-user-check"></i> Whitelist RBAC Activa</div>
+                    <span style="color:#94A3B8; font-size:0.75rem; font-weight:700; text-transform:uppercase;">PLANES PENDIENTES DE RATIFICACIÓN</span>
+                    <h3 style="color:#38BDF8; font-size:2rem; font-weight:800; margin:0.3rem 0;">${ratificacionPlanes.filter(p => p.estado_aprobacion === 'vobo_tecnico').length}</h3>
+                    <div style="font-size:0.75rem; color:#38BDF8;"><i class="fas fa-check-double"></i> Con VoBo Técnico</div>
                 </div>
             </div>
 
-            <!-- Zona 2: Módulo de Gobierno de Coordinadores (Segundo en Jefe) -->
+            <!-- Módulo de Bandeja de Ratificación Administrativa de 52 Semanas -->
             <div style="background:#0D1424; border:1px solid rgba(56,189,248,0.3); border-radius:14px; padding:1.5rem; margin-bottom:1.75rem; box-shadow:0 8px 30px rgba(0,0,0,0.3);">
+                <h3 style="color:#38BDF8; margin:0 0 1rem 0; font-size:1.25rem; font-weight:800;">
+                    <i class="fas fa-check-double"></i> Bandeja de Ratificación Administrativa de Planes Curriculares (52 Semanas)
+                </h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID Plan</th>
+                            <th>Nombre del Plan Curricular</th>
+                            <th>Área</th>
+                            <th>Estado Aprobación</th>
+                            <th>Acción de Ratificación Definitiva</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${ratificacionPlanes.map(p => {
+                            const isVoBo = (p.estado_aprobacion || 'borrador') === 'vobo_tecnico';
+                            const isAprobado = (p.estado_aprobacion || 'borrador') === 'aprobado_definitivo';
+                            return `
+                                <tr>
+                                    <td><strong>#${p.id}</strong></td>
+                                    <td>
+                                        <strong style="color:#F8FAFC;">${p.nombre_plan}</strong>
+                                        <div style="font-size:0.75rem; color:#94A3B8;">${p.observaciones_revision || 'Sin observaciones'}</div>
+                                    </td>
+                                    <td>${p.area}</td>
+                                    <td>
+                                        <span class="badge" style="background:${isAprobado ? 'rgba(34,197,94,0.15)' : (isVoBo ? 'rgba(56,189,248,0.15)' : 'rgba(255,255,255,0.1)')}; color:${isAprobado ? '#34D399' : (isVoBo ? '#38BDF8' : '#94A3B8')}; border:1px solid ${isAprobado ? '#34D399' : (isVoBo ? '#38BDF8' : '#94A3B8')}; font-weight:700;">
+                                            ${p.estado_aprobacion || 'borrador'}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        ${isVoBo ? `
+                                            <button class="btn-primary" style="min-height:34px; padding:0.2rem 0.6rem; font-size:0.8rem; background:#34D399; color:#070B14;" onclick="window.ratifyCurriculumPlanAction(${p.id}, '${token}')">
+                                                <i class="fas fa-check-double"></i> Ratificar Definitivamente
+                                            </button>
+                                            <button class="btn-danger" style="min-height:34px; padding:0.2rem 0.6rem; font-size:0.8rem; margin-left:0.25rem;" onclick="window.returnCurriculumPlanAction(${p.id}, '${token}')">
+                                                <i class="fas fa-undo"></i> Devolver
+                                            </button>
+                                        ` : (isAprobado ? '<span style="color:#34D399; font-weight:700; font-size:0.8rem;"><i class="fas fa-shield-check"></i> Ratificado</span>' : '<span style="color:#94A3B8; font-size:0.8rem;">En espera de VoBo Técnico</span>')}
+                                    </td>
+                                </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Módulo de Gobierno de Coordinadores -->
+            <div style="background:#0D1424; border:1px solid rgba(56,189,248,0.3); border-radius:14px; padding:1.5rem; margin-bottom:1.75rem;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:0.75rem;">
                     <div>
                         <h3 style="color:#38BDF8; margin:0; font-size:1.25rem; font-weight:800;">
@@ -212,8 +261,8 @@ async function renderJefeAreaView(token) {
                 </table>
             </div>
 
-            <!-- Zona 3: Tabla de Personal Operativo (Whitelist 3 Roles) -->
-            <div class="admin-section" style="background:#0D1424; border:1px solid rgba(56,189,248,0.25); border-radius:14px; padding:1.5rem; margin-bottom:1.75rem;">
+            <!-- Tabla de Personal Operativo -->
+            <div class="admin-section" style="background:#0D1424; border:1px solid rgba(56,189,248,0.25); border-radius:14px; padding:1.5rem;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:0.75rem;">
                     <div>
                         <h3 style="color:#38BDF8; margin:0; font-size:1.25rem; font-weight:800;">
@@ -261,6 +310,29 @@ function renderStaffRows(staff) {
         </tr>
     `).join('');
 }
+
+window.ratifyCurriculumPlanAction = async function(planId, token) {
+    const obs = prompt("Observaciones para Ratificación Administrativa Definitiva:", "Plan Curricular de 52 Semanas ratificado administrativamente para ejecución.");
+    if (obs === null) return;
+
+    const baseUrl = typeof config !== 'undefined' ? config.apiBaseUrl : '';
+    try {
+        const res = await fetch(`${baseUrl}/api/v1/curriculum/planes/${planId}/ratificar`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ observaciones: obs })
+        });
+        if (res.ok) {
+            alert('Plan Curricular de 52 semanas ratificado administrativamente en forma definitiva.');
+            renderJefeAreaView(token);
+        } else {
+            const err = await res.json();
+            alert(`Error al ratificar plan: ${err.detail || 'Operación fallida'}`);
+        }
+    } catch (e) {
+        alert(`Error de red: ${e.message}`);
+    }
+};
 
 window.openWhitelistedStaffCreationModal = async function(token, vocacion) {
     let modal = document.getElementById('whitelisted-staff-modal');
@@ -489,7 +561,6 @@ window.toggleCoordinatorStatus = async function(userId, newActiveStatus, token) 
     }
 };
 
-// --- Registro de Vistas ---
 if (typeof registerView === 'function') {
     registerView('jefe_area', 'panel-area', renderJefeAreaView);
     registerView('jefe_area', 'dashboard', renderJefeAreaView);
