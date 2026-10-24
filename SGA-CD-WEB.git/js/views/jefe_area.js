@@ -262,6 +262,129 @@ function renderStaffRows(staff) {
     `).join('');
 }
 
+window.openWhitelistedStaffCreationModal = async function(token, vocacion) {
+    let modal = document.getElementById('whitelisted-staff-modal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'whitelisted-staff-modal';
+        modal.style.cssText = 'position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(7,11,20,0.88); backdrop-filter:blur(8px); z-index:99999; display:flex; justify-content:center; align-items:center; padding:1.5rem;';
+        document.body.appendChild(modal);
+    }
+    modal.style.display = 'flex';
+
+    const isCultural = vocacion === 'cultural';
+    const specLabel = isCultural ? 'Modalidades Culturales Adoptadas' : 'Disciplinas Deportivas Adoptadas';
+
+    let activeSpecs = [];
+    try {
+        const baseUrl = typeof config !== 'undefined' ? config.apiBaseUrl : '';
+        const res = await fetch(`${baseUrl}/api/v1/catalogo/my-specialties`, { headers: { 'Authorization': `Bearer ${token}` } });
+        if (res.ok) activeSpecs = await res.json();
+    } catch (e) {
+        console.warn('Error loading company specialties for modal:', e);
+    }
+
+    const filteredSpecs = activeSpecs.filter(s => s.vertical === (isCultural ? 'cultura' : 'deporte'));
+
+    modal.innerHTML = `
+        <div style="background:#0D1424; border:1px solid rgba(56,189,248,0.35); border-radius:16px; width:100%; max-width:620px; padding:2rem; box-shadow:0 20px 40px rgba(0,0,0,0.6); color:#F8FAFC;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:0.75rem;">
+                <div>
+                    <h3 style="color:#38BDF8; margin:0; font-size:1.25rem;"><i class="fas fa-user-plus"></i> Dar de Alta Personal de Área</h3>
+                    <p style="color:#94A3B8; font-size:0.8rem; margin:0.25rem 0 0 0;">Control de Registro Whitelisted (Whitelist: Profesor, Jefe de Escenarios, Almacenista)</p>
+                </div>
+                <button onclick="document.getElementById('whitelisted-staff-modal').style.display='none'" style="background:transparent; border:none; color:#94A3B8; font-size:1.5rem; cursor:pointer;"><i class="fas fa-times"></i></button>
+            </div>
+
+            <form id="whitelisted-staff-form" onsubmit="window.submitWhitelistedStaffForm(event, '${token}')">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem;">
+                    <div>
+                        <label style="display:block; color:#94A3B8; font-size:0.8rem; margin-bottom:0.25rem;">Nombre Completo *</label>
+                        <input type="text" id="staff-name" required placeholder="Ej. Prof. Roberto Silva" style="width:100%; background:#070B14; border:1px solid rgba(255,255,255,0.2); border-radius:8px; padding:0.5rem 0.75rem; color:#F8FAFC; font-size:0.88rem;">
+                    </div>
+                    <div>
+                        <label style="display:block; color:#94A3B8; font-size:0.8rem; margin-bottom:0.25rem;">Correo Electrónico *</label>
+                        <input type="email" id="staff-email" required placeholder="roberto.silva@sga-cd.org" style="width:100%; background:#070B14; border:1px solid rgba(255,255,255,0.2); border-radius:8px; padding:0.5rem 0.75rem; color:#F8FAFC; font-size:0.88rem;">
+                    </div>
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem;">
+                    <div>
+                        <label style="display:block; color:#94A3B8; font-size:0.8rem; margin-bottom:0.25rem;">Nombre de Usuario *</label>
+                        <input type="text" id="staff-username" required placeholder="roberto_silva" style="width:100%; background:#070B14; border:1px solid rgba(255,255,255,0.2); border-radius:8px; padding:0.5rem 0.75rem; color:#F8FAFC; font-size:0.88rem;">
+                    </div>
+                    <div>
+                        <label style="display:block; color:#94A3B8; font-size:0.8rem; margin-bottom:0.25rem;">Rol Permitido (Whitelist) *</label>
+                        <select id="staff-role" required style="width:100%; background:#070B14; border:1px solid #38BDF8; border-radius:8px; padding:0.5rem 0.75rem; color:#38BDF8; font-weight:700; font-size:0.88rem;">
+                            <option value="profesor">${isCultural ? 'profesor (Formador / Tallerista)' : 'profesor (Instructor Deportivo / Entrenador)'}</option>
+                            <option value="jefe_escenarios">jefe_escenarios (Encargado de Escenarios / Espacios)</option>
+                            <option value="almacenista">almacenista (Encargado de Inventario y Dotaciones)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="margin-bottom:1.25rem;">
+                    <label style="display:block; color:#94A3B8; font-size:0.8rem; margin-bottom:0.25rem;">${specLabel} (Para rol Profesor)</label>
+                    <select id="staff-specialty" style="width:100%; background:#070B14; border:1px solid rgba(255,255,255,0.2); border-radius:8px; padding:0.5rem 0.75rem; color:#F8FAFC; font-size:0.88rem;">
+                        ${filteredSpecs.length > 0 ? filteredSpecs.map(s => `<option value="${s.empresa_especialidad_id}">${s.nombre} (${s.categoria})</option>`).join('') : '<option value="">No hay especialidades adoptadas actualmente</option>'}
+                    </select>
+                    <small style="color:#94A3B8; font-size:0.72rem; display:block; margin-top:0.25rem;">* La creación de especialidades personalizadas On-The-Fly está restringida a admin_empresa.</small>
+                </div>
+
+                <div style="display:flex; justify-content:flex-end; gap:0.75rem; margin-top:1.5rem;">
+                    <button type="button" onclick="document.getElementById('whitelisted-staff-modal').style.display='none'" class="btn-secondary" style="min-height:40px; padding:0 1.25rem;">Cancelar</button>
+                    <button type="submit" class="btn-primary" style="min-height:40px; padding:0 1.5rem;"><i class="fas fa-check-circle"></i> Registrar Personal</button>
+                </div>
+            </form>
+        </div>
+    `;
+};
+
+window.submitWhitelistedStaffForm = async function(event, token) {
+    event.preventDefault();
+    const name = document.getElementById('staff-name').value;
+    const email = document.getElementById('staff-email').value;
+    const username = document.getElementById('staff-username').value;
+    const role = document.getElementById('staff-role').value;
+
+    const baseUrl = typeof config !== 'undefined' ? config.apiBaseUrl : '';
+
+    try {
+        const capsRes = await fetch(`${baseUrl}/api/v1/tenants/my-plan-capabilities`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const caps = capsRes.ok ? await capsRes.json() : { inquilino_id: 100 };
+
+        const payload = {
+            nombre_completo: name,
+            correo: email,
+            email: email,
+            nombre_usuario: username,
+            rol: role,
+            password: 'TempPassword123!',
+            inquilino_id: caps.inquilino_id
+        };
+
+        const res = await fetch(`${baseUrl}/api/v1/admin/users/by-empresa`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+            alert(`Personal registrado con éxito (${role}).`);
+            document.getElementById('whitelisted-staff-modal').style.display = 'none';
+            renderJefeAreaView(token);
+        } else {
+            const err = await res.json();
+            alert(`Error: ${err.detail || 'No se pudo crear el usuario.'}`);
+        }
+    } catch (e) {
+        alert(`Error de conexión: ${e.message}`);
+    }
+};
+
 window.openCoordinatorCreationModal = function(token) {
     let modal = document.getElementById('coordinator-creation-modal');
     if (!modal) {
