@@ -110,7 +110,7 @@ const navLinks = {
             ]
         }
     ],
-    // Rol 3: Jefe de Área (Estructura Categorizada de 5 Bloques)
+    // Rol 3: Jefe de Área (Estructura Categorizada de 5 Bloques + Marketing/CRM)
     jefe_area: [
         {
             text: 'PANEL PRINCIPAL',
@@ -129,10 +129,11 @@ const navLinks = {
             ]
         },
         {
-            text: 'TALENTO Y EQUIPO',
-            icon: 'fa-users-cog',
+            text: 'MARKETING Y CRM',
+            icon: 'fa-bullhorn',
             submenu: [
-                { text: 'Gestionar Personal de Área', view: 'panel-area', icon: 'fa-user-plus' }
+                { text: 'Campañas y Captación', view: 'crm-empresa', icon: 'fa-bullhorn' },
+                { text: 'Generador Multimedia IA', view: 'media-ia-empresa', icon: 'fa-photo-video' }
             ]
         },
         {
@@ -151,7 +152,7 @@ const navLinks = {
             ]
         }
     ],
-    // Rol 4: Profesional de Área (Estructura Categorizada de 5 Bloques)
+    // Rol 4: Profesional de Área (Estructura Categorizada de 5 Bloques + Marketing/CRM)
     profesional_area: [
         {
             text: 'PANEL PRINCIPAL',
@@ -171,10 +172,11 @@ const navLinks = {
             ]
         },
         {
-            text: 'TALENTO Y EQUIPO',
-            icon: 'fa-users-cog',
+            text: 'MARKETING Y CRM',
+            icon: 'fa-bullhorn',
             submenu: [
-                { text: 'Personal Operativo', view: 'dashboard', icon: 'fa-user-check' }
+                { text: 'Campañas y Captación', view: 'crm-empresa', icon: 'fa-bullhorn' },
+                { text: 'Generador Multimedia IA', view: 'media-ia-empresa', icon: 'fa-photo-video' }
             ]
         },
         {
@@ -192,7 +194,7 @@ const navLinks = {
             ]
         }
     ],
-    // Rol 5: Técnico de Área (Estructura Categorizada de 5 Bloques)
+    // Rol 5: Técnico de Área (Estructura Categorizada de 5 Bloques + Marketing/CRM)
     tecnico_area: [
         {
             text: 'PANEL PRINCIPAL',
@@ -212,10 +214,11 @@ const navLinks = {
             ]
         },
         {
-            text: 'TALENTO Y EQUIPO',
-            icon: 'fa-users-cog',
+            text: 'MARKETING Y CRM',
+            icon: 'fa-bullhorn',
             submenu: [
-                { text: 'Apoyo a Personal', view: 'asistir-gestion-usuarios', icon: 'fa-users-cog' }
+                { text: 'Campañas y Captación', view: 'crm-empresa', icon: 'fa-bullhorn' },
+                { text: 'Generador Multimedia IA', view: 'media-ia-empresa', icon: 'fa-photo-video' }
             ]
         },
         {
@@ -233,7 +236,7 @@ const navLinks = {
             ]
         }
     ],
-    // Rol 6: Coordinador (Estructura Categorizada de 5 Bloques)
+    // Rol 6: Coordinador (Estructura Categorizada de 5 Bloques + Marketing/CRM)
     coordinador: [
         {
             text: 'PANEL PRINCIPAL',
@@ -252,10 +255,11 @@ const navLinks = {
             ]
         },
         {
-            text: 'GESTIÓN CURRICULAR',
-            icon: 'fa-clipboard-check',
+            text: 'MARKETING Y CRM',
+            icon: 'fa-bullhorn',
             submenu: [
-                { text: 'Aprobación 52 Semanas', view: 'aprobaciones', icon: 'fa-calendar-week' }
+                { text: 'Campañas y Captación', view: 'crm-empresa', icon: 'fa-bullhorn' },
+                { text: 'Generador Multimedia IA', view: 'media-ia-empresa', icon: 'fa-photo-video' }
             ]
         },
         {
@@ -379,17 +383,20 @@ const navLinks = {
         { text: 'Registrar Movimientos', view: 'registrar-movimientos', icon: 'fa-dolly-flatbed' },
         { text: 'Stock y Reposición', view: 'stock-y-reposicion', icon: 'fa-sort-amount-up' },
         { text: 'Hojas de Vida', view: 'hojas-de-vida', icon: 'fa-file-invoice' },
+        { text: 'Campañas y Captación', view: 'crm-empresa', icon: 'fa-bullhorn' },
         { text: 'Reportes de Inventario', view: 'reportes-de-inventario', icon: 'fa-file-excel' }
     ],
     // Rol 11: Almacenista (hereda de jefe_almacen, pero con menos permisos)
     almacenista: [
         { text: 'Ver Inventario', view: 'ver-inventario', icon: 'fa-boxes' },
-        { text: 'Registrar Movimientos', view: 'registrar-movimientos', icon: 'fa-dolly-flatbed' }
+        { text: 'Registrar Movimientos', view: 'registrar-movimientos', icon: 'fa-dolly-flatbed' },
+        { text: 'Campañas y Captación', view: 'crm-empresa', icon: 'fa-bullhorn' }
     ],
     // Rol 12: Jefe de Escenarios
     jefe_escenarios: [
         { text: 'Calendario de Escenarios', view: 'calendario-de-escenarios', icon: 'fa-calendar-alt' },
         { text: 'Asignar Espacios', view: 'asignar-espacios', icon: 'fa-map-marker-alt' },
+        { text: 'Campañas y Captación', view: 'crm-empresa', icon: 'fa-bullhorn' },
         { text: 'Mantenimiento', view: 'mantenimiento', icon: 'fa-tools' }
     ],
     // Rol por defecto si no se encuentra uno
