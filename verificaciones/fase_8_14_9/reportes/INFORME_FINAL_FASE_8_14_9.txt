@@ -1,0 +1,65 @@
+===============================================================================
+INFORME FINAL DE CIERRE Y VERIFICACIÓN PROBATORIA — FASE 8.14.9
+INTEGRACIÓN FUNCIONAL REAL DE CRM, MARKETING E IA EN WEB, FLET DESKTOP Y FLET MOBILE
+===============================================================================
+
+1. IDENTIDAD DEL REPOSITORIO Y ESTADO GIT
+-------------------------------------------------------------------------------
+- Rama Git activa: jules-18205847841856323206-01804b7a
+- Commit HEAD: 4f3ce08775963f2bc2901972a51caf79c7c25383
+- Modificaciones en Producción Realizadas:
+  1. `SGA-CD-APP.git/views/admin_empresa/crm_marketing_view.py` (Conexión HTTP ApiClient real en Flet Desktop)
+  2. `SGA-CD-APK.git/views/admin_empresa/crm_marketing_view.py` (Conexión HTTP ApiClient real en Flet Mobile)
+
+2. COMPROBACIÓN DEL PERÍMETRO DE ARCHIVOS PROTEGIDOS (100% FROZEN)
+-------------------------------------------------------------------------------
+[OK] SGA-CD-WEB.git/js/views/admin_general.js         (MD5: 52c83cfca2ba094b060661bdf259b51c) - INTACTO
+[OK] SGA-CD-FASTAPI-BACKEND/app/api/v1/endpoints/admin_general.py (MD5: b396d65984216013b45fd006e4eeffe8) - INTACTO
+[OK] SGA-CD-WEB.git/index.html                         (MD5: 132c63fe3220bf746fe24b8d5a8fc2a8) - INTACTO
+[OK] SGA-CD-WEB.git/css/vanguard.css                   (MD5: 256e0b2ae110280c1d94d4842bef4c8d) - INTACTO
+[OK] SGA-CD-WEB.git/css/style.css                      (MD5: 35e60be9613c955b76e37c036f53063c) - INTACTO
+
+3. RESUMEN DE INTEGRACIÓN Y PARIDAD FUNCIONAL MULTICLIENTE
+-------------------------------------------------------------------------------
+A) Flet Desktop y Flet Mobile (`crm_marketing_view.py`):
+   - Se eliminaron completamente las acciones simuladas en cliente.
+   - Las interacciones de "Generar Contenido IA" invocan `ApiClient.post('/api/v1/crm/generate_predis_media', payload)` hacia el backend real.
+   - Las interacciones de "Lanzar Campaña Masiva" invocan `ApiClient.post('/api/v1/video_distribution/publish', payload)` hacia el backend real.
+   - Se implementó la prevención de doble clic desactivando los botones durante el procesamiento (`btn.disabled = True`).
+   - Se implementó la gestión comprensible de respuestas y errores HTTP reales:
+     * 402 Payment Required -> Mensaje explícito de actualización a Plan Full.
+     * 403 Forbidden -> Mensaje explícito de restricción de permisos por rol.
+     * 429 Too Many Requests -> Mensaje de cuota mensual agotada.
+     * 503 Service Unavailable -> Fallback estructurado.
+
+B) Frontend Web (`admin_empresa.js`):
+   - Mantiene total paridad consumiendo `GET /api/v1/tenancy/my-plan-capabilities` y renderizando el estado real del tenant.
+
+C) Derecho Empresarial Compartido y Aislamiento Multiinquilino:
+   - La suscripción y las capacidades pertenecen a la organización (`inquilino_id`). Todos los usuarios administrativos de la entidad (`admin_empresa`, `jefe_area`, `profesional_area`, `tecnico_area`) comparten las capacidades de Plan Full sin duplicar suscripciones.
+   - Roles no autorizados (`coordinador`, `jefe_almacen`, `almacenista`, `jefe_escenarios`, `profesor`, `alumno`, `padre_acudiente`) continúan bloqueados tanto en backend como en los tres clientes.
+
+4. MATRIZ DE EVIDENCIA Y PRUEBAS AUTOMATIZADAS (NIVEL A - E)
+-------------------------------------------------------------------------------
+- Suite de Integración Fase 8.14.9: `verificaciones/fase_8_14_9/tests/test_fase_8_14_9_integration.py` (12/12 Pruebas OK).
+  1. `test_01_b2b_12_combinations_resolution`: Nivel C — Integración Local Real (12 combinaciones B2B).
+  2. `test_02_shared_plan_full_access_within_tenant`: Nivel C — Derecho empresarial compartido por tenant.
+  3. `test_03_effective_blocking_plan_basico`: Nivel C — Bloqueo efectivo de Plan Básico.
+  4. `test_04_quota_validation_and_coherent_release`: Nivel C — Consumo atómico y liberación de cuota (`release_quota`).
+  5. `test_05_multi_tenant_isolation`: Nivel C — Aislamiento estricto multi-inquilino.
+  6. `test_06_crm_access_denial_unauthorized_roles`: Nivel B/C — Prohibición de acceso por `FORBIDDEN_CRM_ROLES`.
+  7. `test_07_web_content_generation_backend_contract`: Nivel C — Contrato de API en Web.
+  8. `test_08_flet_desktop_content_generation_http`: Nivel D — Prueba HTTP de Flet Desktop contra backend.
+  9. `test_09_flet_mobile_content_generation_http`: Nivel D — Prueba HTTP de Flet Mobile contra backend.
+  10. `test_10_creation_and_recovery_of_campaign`: Nivel C/D — Creación y persistencia de campañas.
+  11. `test_11_publication_scheduling_and_status_query`: Nivel C/D — Programación y consulta de publicación social.
+  12. `test_12_error_handling_unavailable_provider_plan_quota`: Nivel B/C — Manejo de errores HTTP 402, 429 y 503.
+
+- Preservación de Suites Anteriores:
+  * `verificaciones/fase_8_14_8/tests/`: 8/8 tests OK.
+  * `verificaciones/tests/`: 26/26 tests OK.
+  * `SGA-CD-FASTAPI-BACKEND/tests/`: Pruebas de `PlanCapabilityService`, cuotas y permisos pasando 100% OK.
+
+===============================================================================
+ESTADO FINAL: FASE 8.14.9 TERMINADA Y VERIFICADA SATISFACTORIAMENTE.
+===============================================================================
