@@ -236,7 +236,7 @@ const navLinks = {
             ]
         }
     ],
-    // Rol 6: Coordinador (Estructura Categorizada de 5 Bloques + Marketing/CRM)
+    // Rol 6: Coordinador (Estructura Categorizada de 5 Bloques)
     coordinador: [
         {
             text: 'PANEL PRINCIPAL',
@@ -255,11 +255,10 @@ const navLinks = {
             ]
         },
         {
-            text: 'MARKETING Y CRM',
-            icon: 'fa-bullhorn',
+            text: 'GESTIÓN CURRICULAR',
+            icon: 'fa-clipboard-check',
             submenu: [
-                { text: 'Campañas y Captación', view: 'crm-empresa', icon: 'fa-bullhorn' },
-                { text: 'Generador Multimedia IA', view: 'media-ia-empresa', icon: 'fa-photo-video' }
+                { text: 'Aprobación 52 Semanas', view: 'aprobaciones', icon: 'fa-calendar-week' }
             ]
         },
         {
@@ -383,20 +382,17 @@ const navLinks = {
         { text: 'Registrar Movimientos', view: 'registrar-movimientos', icon: 'fa-dolly-flatbed' },
         { text: 'Stock y Reposición', view: 'stock-y-reposicion', icon: 'fa-sort-amount-up' },
         { text: 'Hojas de Vida', view: 'hojas-de-vida', icon: 'fa-file-invoice' },
-        { text: 'Campañas y Captación', view: 'crm-empresa', icon: 'fa-bullhorn' },
         { text: 'Reportes de Inventario', view: 'reportes-de-inventario', icon: 'fa-file-excel' }
     ],
     // Rol 11: Almacenista (hereda de jefe_almacen, pero con menos permisos)
     almacenista: [
         { text: 'Ver Inventario', view: 'ver-inventario', icon: 'fa-boxes' },
-        { text: 'Registrar Movimientos', view: 'registrar-movimientos', icon: 'fa-dolly-flatbed' },
-        { text: 'Campañas y Captación', view: 'crm-empresa', icon: 'fa-bullhorn' }
+        { text: 'Registrar Movimientos', view: 'registrar-movimientos', icon: 'fa-dolly-flatbed' }
     ],
     // Rol 12: Jefe de Escenarios
     jefe_escenarios: [
         { text: 'Calendario de Escenarios', view: 'calendario-de-escenarios', icon: 'fa-calendar-alt' },
         { text: 'Asignar Espacios', view: 'asignar-espacios', icon: 'fa-map-marker-alt' },
-        { text: 'Campañas y Captación', view: 'crm-empresa', icon: 'fa-bullhorn' },
         { text: 'Mantenimiento', view: 'mantenimiento', icon: 'fa-tools' }
     ],
     // Rol por defecto si no se encuentra uno

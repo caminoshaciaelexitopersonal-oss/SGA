@@ -5,17 +5,27 @@ Provides administrative staff with campaign management and AI multimedia generat
 import flet as ft
 from typing import Dict, Any
 
+FORBIDDEN_CRM_ROLES = [
+    "coordinador",
+    "jefe_almacen",
+    "almacenista",
+    "jefe_escenarios",
+    "profesor",
+    "alumno",
+    "padre_acudiente"
+]
+
 def crm_marketing_view(page: ft.Page, user_data: Dict[str, Any]) -> ft.Control:
     user_role = user_data.get("role", "admin_empresa")
     user_plan = user_data.get("plan", "full")
 
-    # Non-administrative roles forbidden
-    if user_role in ["profesor", "alumno", "padre_acudiente"]:
+    # Roles forbidden from CRM Suite
+    if user_role in FORBIDDEN_CRM_ROLES:
         return ft.Container(
             content=ft.Column([
                 ft.Icon(ft.Icons.LOCK, size=64, color=ft.Colors.RED_400),
                 ft.Text("Acceso Restringido", size=24, weight=ft.FontWeight.BOLD, color=ft.Colors.RED_400),
-                ft.Text("La suite CRM y Marketing está reservada exclusivamente para el personal administrativo.", color=ft.Colors.WHITE70)
+                ft.Text("La suite CRM y Marketing está reservada exclusivamente para la administración principal y líderes de área autorizados.", color=ft.Colors.WHITE70)
             ], alignment=ft.MainAxisAlignment.CENTER, horizontal_alignment=ft.CrossAxisAlignment.CENTER),
             alignment=ft.alignment.center,
             expand=True

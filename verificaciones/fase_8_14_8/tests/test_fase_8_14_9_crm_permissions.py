@@ -2,8 +2,8 @@
 Suite de Pruebas FASE 8.14.9 — Verificación Multitanante de Accesos a CRM/Marketing.
 
 Valida que:
-1. El personal administrativo (admin_empresa, jefe_area, profesional_area, tecnico_area, coordinador, jefe_almacen, almacenista, jefe_escenarios) goce de la suite CRM en Plan Full.
-2. Los roles formativos y de servicio (profesor, alumno, padre_acudiente) tengan el acceso a CRM estrictamente DENEGADO sin importar el plan.
+1. El personal de gestión directiva/área (admin_empresa, jefe_area, profesional_area, tecnico_area) goce de la suite CRM en Plan Full.
+2. Los roles operativos y formativos (coordinador, jefe_almacen, almacenista, jefe_escenarios, profesor, alumno, padre_acudiente) tengan el acceso a CRM estrictamente DENEGADO sin importar el plan.
 """
 import sys
 import os
@@ -18,24 +18,24 @@ from app.services.plan_capability_service import PlanCapabilityService, CANONICA
 class TestFase8149CrmPermissions(unittest.TestCase):
 
     def setUp(self):
-        self.admin_roles = [
+        self.allowed_crm_roles = [
             "admin_empresa",
             "jefe_area",
             "profesional_area",
-            "tecnico_area",
+            "tecnico_area"
+        ]
+        self.forbidden_crm_roles = [
             "coordinador",
             "jefe_almacen",
             "almacenista",
-            "jefe_escenarios"
-        ]
-        self.forbidden_roles = [
+            "jefe_escenarios",
             "profesor",
             "alumno",
             "padre_acudiente"
         ]
 
     def test_01_administrative_roles_full_plan_access(self):
-        """Verifica que todos los roles administrativos en Plan Full posean habilitados los módulos CRM."""
+        """Verifica que los roles de gestión autorizados en Plan Full posean habilitados los módulos CRM."""
         tenant_data = {
             "id": 1,
             "nombre_empresa": "Empresa Administradora",
@@ -52,10 +52,9 @@ class TestFase8149CrmPermissions(unittest.TestCase):
         self.assertTrue(caps.crm_analytics_enabled)
 
     def test_02_forbidden_roles_crm_gating_logic(self):
-        """Simula y verifica que los roles de enseñanza y beneficiarios no posean privilegios CRM."""
-        # Function simulating role gating check in UI and Endpoints
+        """Verifica que los roles no autorizados (incluyendo coordinador, jefes de almacén/escenarios, profesores) no posean privilegios CRM."""
         def check_role_crm_access(role: str, plan_caps) -> bool:
-            if role in ["profesor", "alumno", "padre_acudiente"]:
+            if role in self.forbidden_crm_roles:
                 return False
             return plan_caps.crm_leads_enabled and plan_caps.is_active
 
@@ -64,14 +63,14 @@ class TestFase8149CrmPermissions(unittest.TestCase):
         caps = PlanCapabilityService.resolve_capabilities(tenant_data, sub_data)
 
         # Forbidden roles return False even on Plan Full
-        for role in self.forbidden_roles:
+        for role in self.forbidden_crm_roles:
             self.assertFalse(
                 check_role_crm_access(role, caps),
                 f"El rol '{role}' debe tener acceso denegado a CRM incluso en Plan Full."
             )
 
-        # Administrative roles return True on Plan Full
-        for role in self.admin_roles:
+        # Allowed roles return True on Plan Full
+        for role in self.allowed_crm_roles:
             self.assertTrue(
                 check_role_crm_access(role, caps),
                 f"El rol administrativo '{role}' debe tener acceso habilitado a CRM en Plan Full."
