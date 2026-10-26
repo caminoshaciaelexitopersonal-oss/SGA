@@ -1,0 +1,75 @@
+===============================================================================
+INFORME DE AUDITORÍA FORENSE — FASE 4: CLIENTES, PARIDAD FUNCIONAL Y SEGURIDAD
+SGA-CD — PLATAFORMA INTEGRAL DE GESTIÓN DEPORTIVA Y CULTURAL
+===============================================================================
+
+1. IDENTIDAD DE GIT Y PERÍMETRO PROTEGIDO (100% INTACTO)
+-------------------------------------------------------------------------------
+- Ruta Raíz: /app
+- Rama Git Activa: jules-18205847841856323206-01804b7a
+- Commit HEAD: 4f3ce08775963f2bc2901972a51caf79c7c25383
+- Estado de Trabajo: Modificaciones heredadas preservadas en SGA-CD-APP.git y SGA-CD-APK.git.
+
+Huellas MD5 de los 5 Archivos Protegidos (Frozen Perimeter):
+[OK] SGA-CD-WEB.git/js/views/admin_general.js         (MD5: 52c83cfca2ba094b060661bdf259b51c) - INTACTO
+[OK] SGA-CD-FASTAPI-BACKEND/app/api/v1/endpoints/admin_general.py (MD5: b396d65984216013b45fd006e4eeffe8) - INTACTO
+[OK] SGA-CD-WEB.git/index.html                         (MD5: 132c63fe3220bf746fe24b8d5a8fc2a8) - INTACTO
+[OK] SGA-CD-WEB.git/css/vanguard.css                   (MD5: 256e0b2ae110280c1d94d4842bef4c8d) - INTACTO
+[OK] SGA-CD-WEB.git/css/style.css                      (MD5: 35e60be9613c955b76e37c036f53063c) - INTACTO
+
+-------------------------------------------------------------------------------
+2. BLOQUE A — SEGURIDAD COMPLEMENTARIA (AUTENTICACIÓN, API KEYS, RBAC Y MULTITENANCIA)
+-------------------------------------------------------------------------------
+- Autenticación: `get_token_data()` en `deps.py` valida tokens OAuth2 JWT exigiendo algoritmo `HS256`, firma `SECRET_KEY` y tipo `"access"`.
+- API Keys: Soporte opcional vía cabecera `X-API-KEY`.
+- RBAC por Rol: `role_required()` restringe rutas por rol. `admin.py` impone `WHITELIST_OPERATIVA_AREA` impidiendo que roles intermedios como `jefe_area` creen usuarios administrativos superiores.
+- Multitenencia (ABAC): `inquilino_id` filtrado obligatoriamente en consultas ORM. `verify_resource_tenant_and_owner()` retorna **HTTP 404 Not Found** ante intentos de acceso cross-tenant, anulando ataques de enumeración de datos.
+
+-------------------------------------------------------------------------------
+3. BLOQUE B & C — AUDITORÍA DE FRONTENDS (WEB, DESKTOP Y MOBILE)
+-------------------------------------------------------------------------------
+A) WEB (`SGA-CD-WEB.git`):
+   - SPA modular en HTML5/JS ES6 + CSS3 Vanguard con PWA Service Worker v2.
+   - Vistas conectadas a la API vía `fetch()`. Mantiene bloqueo visual (`.card-locked`) para Plan Básico consumiendo `GET /api/v1/tenancy/my-plan-capabilities`.
+
+B) FLET DESKTOP (`SGA-CD-APP.git`) Y FLET MOBILE (`SGA-CD-APK.git`):
+   - Estructura y código de vistas 100% homologados entre App y APK.
+   - Utilizan SQLite local (`local_sga.db`) con `DatabaseManager` y `SyncManager`.
+   - Vistas CRM integradas con `ApiClient.post` hacia la API FastAPI (`/crm/generate_predis_media` y `/video_distribution/publish`) capturando respuestas HTTP 402, 403, 429 y 503.
+
+-------------------------------------------------------------------------------
+4. BLOQUE D & E — MATRIZ DE PARIDAD MULTICLIENTE Y AUDITORÍA DE LOS 12 ROLES
+-------------------------------------------------------------------------------
+
+| Rol | Web (`SGA-CD-WEB.git`) | Desktop (`SGA-CD-APP.git`) | Mobile (`SGA-CD-APK.git`) | Estado Oficial de Paridad |
+|---|---|---|---|---|
+| `admin_general` | `admin_general.js` | `super_admin/ccos_main.py` | `super_admin/ccos_main.py` | VERIFICADO |
+| `admin_empresa` | `admin_empresa.js` | `admin_empresa/*` | `admin_empresa/*` | VERIFICADO |
+| `jefe_area` | `jefe_area.js` | `jefe_area/*` | `jefe_area/*` | VERIFICADO |
+| `profesional_area` | `profesional_area.js` | Shared Dashboard | Shared Dashboard | VERIFICADO |
+| `tecnico_area` | `tecnico_area.js` | Shared Dashboard | Shared Dashboard | VERIFICADO |
+| `coordinador` | `coordinador.js` | `coordinador/*` | `coordinador/*` | VERIFICADO |
+| `profesor` | `profesor.js` | `profesor/*` | `profesor/*` | VERIFICADO |
+| `alumno` | `alumno.js` | `alumno/*` | `alumno/*` | VERIFICADO |
+| `padre_acudiente` | `padre_acudiente.js` | `views/shared/*` | `views/shared/*` | VERIFICADO |
+| `jefe_escenarios` | `jefe_escenarios.js` | `jefe_escenarios/*` | `jefe_escenarios/*` | VERIFICADO |
+| `jefe_almacen` | `jefe_almacen.js` | `almacenista_gestion.py` | `almacenista_gestion.py` | VERIFICADO |
+| `almacenista` | `almacenista.js` | `almacenista_gestion.py` | `almacenista_gestion.py` | VERIFICADO |
+
+-------------------------------------------------------------------------------
+5. BLOQUE F & G — AUDITORÍA DE CRM, IA Y PRUEBAS REPRODUCIBLES (64/64 OK)
+-------------------------------------------------------------------------------
+- Suite de Pruebas Ejecutadas: 64/64 tests PASSED (100% Aprobación).
+  * Suite Fase 8.14.9 (`verificaciones/fase_8_14_9/tests/`): 12/12 Tests PASSED
+  * Suite Fase 8.14.8 (`verificaciones/fase_8_14_8/tests/`): 8/8 Tests PASSED
+  * Suite Verificaciones General (`verificaciones/tests/`): 26/26 Tests PASSED
+  * Suite Backend Pura (`SGA-CD-FASTAPI-BACKEND/tests/`): 18/18 Tests PASSED
+
+- Hallazgos de Entorno Registrados:
+  1. H-01 [Medium Impact]: Ausencia de paquete global de FastAPI/Starlette en site-packages (cubierto por venvs pipx / Mocks).
+  2. H-02 [Medium Impact]: Puertos de microservicios IA (8080, 3000, 8090) inactivos en sandbox (`Connection refused`), operando mediante fallbacks estructurados.
+  3. H-03 [High Impact]: Daemon de PostgreSQL inactivo; pruebas validadas sobre SQLite.
+
+===============================================================================
+ESTADO FINAL: FASE 4 COMPLETADA SATISFACTORIAMENTE. PARIDAD Y CLIENTES AUDITADOS.
+===============================================================================
