@@ -1,0 +1,8 @@
+Ollama healthcheck failed: <urlopen error [Errno 111] Connection refused>
+Colibrí healthcheck failed: <urlopen error [Errno 111] Connection refused>
+Open Generative AI healthcheck failed: <urlopen error [Errno 111] Connection refused>
+.......
+----------------------------------------------------------------------
+Ran 7 tests in 0.059s
+
+OK

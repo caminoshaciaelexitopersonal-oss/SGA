@@ -303,4 +303,7 @@ if (typeof registerView === 'function') {
     registerView('profesional_area', 'supervisar-actividades', renderSupervisarActividadesView);
     registerView('profesional_area', 'gestionar-eventos', renderGestionarEventosView);
     registerView('profesional_area', 'gestionar-disciplinas', renderGestionarDisciplinasView);
+    if (typeof renderReportesOperativosView === 'function') {
+        registerView('profesional_area', 'reportes-operativos', renderReportesOperativosView);
+    }
 }

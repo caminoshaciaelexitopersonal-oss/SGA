@@ -110,7 +110,7 @@ const navLinks = {
             ]
         }
     ],
-    // Rol 3: Jefe de Área (Estructura Categorizada de 5 Bloques)
+    // Rol 3: Jefe de Área (Estructura Categorizada de 5 Bloques + Marketing/CRM)
     jefe_area: [
         {
             text: 'PANEL PRINCIPAL',
@@ -129,10 +129,11 @@ const navLinks = {
             ]
         },
         {
-            text: 'TALENTO Y EQUIPO',
-            icon: 'fa-users-cog',
+            text: 'MARKETING Y CRM',
+            icon: 'fa-bullhorn',
             submenu: [
-                { text: 'Gestionar Personal de Área', view: 'panel-area', icon: 'fa-user-plus' }
+                { text: 'Campañas y Captación', view: 'crm-empresa', icon: 'fa-bullhorn' },
+                { text: 'Generador Multimedia IA', view: 'media-ia-empresa', icon: 'fa-photo-video' }
             ]
         },
         {
@@ -151,7 +152,7 @@ const navLinks = {
             ]
         }
     ],
-    // Rol 4: Profesional de Área (Estructura Categorizada de 5 Bloques)
+    // Rol 4: Profesional de Área (Estructura Categorizada de 5 Bloques + Marketing/CRM)
     profesional_area: [
         {
             text: 'PANEL PRINCIPAL',
@@ -171,10 +172,11 @@ const navLinks = {
             ]
         },
         {
-            text: 'TALENTO Y EQUIPO',
-            icon: 'fa-users-cog',
+            text: 'MARKETING Y CRM',
+            icon: 'fa-bullhorn',
             submenu: [
-                { text: 'Personal Operativo', view: 'dashboard', icon: 'fa-user-check' }
+                { text: 'Campañas y Captación', view: 'crm-empresa', icon: 'fa-bullhorn' },
+                { text: 'Generador Multimedia IA', view: 'media-ia-empresa', icon: 'fa-photo-video' }
             ]
         },
         {
@@ -192,7 +194,7 @@ const navLinks = {
             ]
         }
     ],
-    // Rol 5: Técnico de Área (Estructura Categorizada de 5 Bloques)
+    // Rol 5: Técnico de Área (Estructura Categorizada de 5 Bloques + Marketing/CRM)
     tecnico_area: [
         {
             text: 'PANEL PRINCIPAL',
@@ -212,10 +214,11 @@ const navLinks = {
             ]
         },
         {
-            text: 'TALENTO Y EQUIPO',
-            icon: 'fa-users-cog',
+            text: 'MARKETING Y CRM',
+            icon: 'fa-bullhorn',
             submenu: [
-                { text: 'Apoyo a Personal', view: 'asistir-gestion-usuarios', icon: 'fa-users-cog' }
+                { text: 'Campañas y Captación', view: 'crm-empresa', icon: 'fa-bullhorn' },
+                { text: 'Generador Multimedia IA', view: 'media-ia-empresa', icon: 'fa-photo-video' }
             ]
         },
         {

@@ -249,7 +249,34 @@ window.updateCurriculumWeekView = function(weekNum) {
     }
 };
 
+async function renderProfesorSuscripcionView(token) {
+    const contentArea = document.getElementById('content-area');
+    contentArea.innerHTML = `
+        <div class="view-header" style="margin-bottom:1.5rem;">
+            <h2 style="color:#38BDF8; font-size:1.5rem; display:flex; align-items:center; gap:0.5rem;">
+                <i class="fas fa-credit-card"></i> Estado de Suscripción e Indicadores del Docente
+            </h2>
+            <p style="color:#94A3B8; font-size:0.9rem;">Información sobre el plan institucional activo y capacidades asignadas.</p>
+        </div>
+        <div style="background:#0D1424; border:1px solid rgba(56,189,248,0.25); border-radius:14px; padding:1.5rem;">
+            <div style="display:flex; align-items:center; gap:1rem; margin-bottom:1rem;">
+                <div style="width:48px; height:48px; border-radius:12px; background:rgba(56,189,248,0.15); display:flex; align-items:center; justify-content:center; color:#38BDF8; font-size:1.25rem;">
+                    <i class="fas fa-id-badge"></i>
+                </div>
+                <div>
+                    <h3 style="color:#F8FAFC; margin:0; font-size:1.1rem;">Suscripción Docente — Cobertura Institucional</h3>
+                    <p style="color:#38BDF8; margin:0; font-size:0.85rem; font-weight:600;">Plan Activo Habilitado por la Organización</p>
+                </div>
+            </div>
+            <p style="color:#94A3B8; font-size:0.9rem; line-height:1.5;">
+                Como instructor docente, su cuenta dispone de acceso completo a la planificación de 52 semanas, control de asistencia, telemetría de estudiantes y gestión de elementos en custodia.
+            </p>
+        </div>
+    `;
+}
+
 if (typeof registerView === 'function') {
     registerView('profesor', 'gestionar-cursos', renderProfesorView);
     registerView('profesor', 'dashboard', renderProfesorView);
+    registerView('profesor', 'suscripcion', renderProfesorSuscripcionView);
 }
