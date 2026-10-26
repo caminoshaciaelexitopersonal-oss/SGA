@@ -1,0 +1,73 @@
+===============================================================================
+INFORME FINAL DE VALIDACIÓN TÉCNICA Y AUDITORÍA DE ORQUESTACIÓN — FASE 7D
+SGA-CD — PLATAFORMA INTEGRAL DE GESTIÓN DEPORTIVA Y CULTURAL
+===============================================================================
+
+1. IDENTIDAD DE GIT Y PERÍMETRO PROTEGIDO (100% INTACTO)
+-------------------------------------------------------------------------------
+- Ruta Raíz: /app
+- Rama Git Activa: jules-18205847841856323206-01804b7a
+- Commit HEAD: 4f3ce08775963f2bc2901972a51caf79c7c25383
+- Estado del Árbol de Trabajo:
+  * docker-compose.yml (Perfeccionado / Orquestación 5 Componentes)
+  * .env.example (Perfeccionado / Variables de Entorno)
+  * SGA-CD-FASTAPI-BACKEND/Dockerfile (Validado)
+  * SGA-CD-APP.git/Dockerfile (Validado)
+  * SGA-CD-APK.git/Dockerfile (Validado)
+  * SGA-CD-APP.git/views/admin_empresa/crm_marketing_view.py (Modificado)
+  * SGA-CD-APK.git/views/admin_empresa/crm_marketing_view.py (Modificado)
+  * verificaciones/ (Añadido)
+
+Huellas MD5 de los 5 Archivos Protegidos (Frozen Perimeter - 100% Intactos):
+[OK] SGA-CD-WEB.git/js/views/admin_general.js         (MD5: 52c83cfca2ba094b060661bdf259b51c) - INTACTO
+[OK] SGA-CD-FASTAPI-BACKEND/app/api/v1/endpoints/admin_general.py (MD5: b396d65984216013b45fd006e4eeffe8) - INTACTO
+[OK] SGA-CD-WEB.git/index.html                         (MD5: 132c63fe3220bf746fe24b8d5a8fc2a8) - INTACTO
+[OK] SGA-CD-WEB.git/css/vanguard.css                   (MD5: 256e0b2ae110280c1d94d4842bef4c8d) - INTACTO
+[OK] SGA-CD-WEB.git/css/style.css                      (MD5: 35e60be9613c955b76e37c036f53063c) - INTACTO
+
+-------------------------------------------------------------------------------
+2. RESULTADOS DE LA EVALUACIÓN DE LOS CINCO COMPONENTES
+-------------------------------------------------------------------------------
+A) Base de Datos PostgreSQL (`postgres`):
+   - Configuración: PostgreSQL 15-alpine con volumen persistente `postgres_data`, variables `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD` y comprobación `pg_isready`.
+   - Estado de Validación: Validado estáticamente a nivel de manifiesto. Pendiente de arranque activo en vivo debido a indisponibilidad de demonio PostgreSQL en sandbox.
+
+B) Backend RESTful FastAPI (`fastapi-backend`):
+   - Configuración: Contexto de build `./SGA-CD-FASTAPI-BACKEND`, inyección de `DATABASE_URL` y variables JWT, dependiente de `postgres` (`service_healthy`). Healthcheck sobre `/api/v1/catalogo/especialidades`.
+   - Estado de Validación: Validado estáticamente y por pruebas automatizadas de estructura.
+
+C) Frontend Web (`web-client`):
+   - Configuración: Nginx servirá estáticamente la SPA `SGA-CD-WEB.git` en puerto 8080.
+   - Estado de Validación: Validado estáticamente.
+
+D) Cliente Escritorio Flet (`flet-desktop-client`):
+   - Configuración: `SGA-CD-APP.git/Dockerfile` con inyección de `API_BASE_URL`.
+   - Clarificación Técnica: Se ejecuta en contenedor para verificación Headless/API, pero la renderización de la GUI en escritorio requiere la invocación nativa en SO huésped o X11/Wayland forwarding.
+
+E) Cliente Móvil Flet (`flet-mobile-client`):
+   - Configuración: `SGA-CD-APK.git/Dockerfile` con inyección de `API_BASE_URL`.
+   - Clarificación Técnica: Un contenedor Docker Linux en el manifiesto representa el entorno de desarrollo/API client; la generación del archivo `.apk` instalable para Android requiere la ejecución de `flet build apk` mediante la herramienta Flutter/Android SDK.
+
+-------------------------------------------------------------------------------
+3. RESULTADOS DE PRUEBAS AUTOMATIZADAS (73/73 PASSED)
+-------------------------------------------------------------------------------
+- Suite Validación Fase 7D (`test_fase_7d_orchestration_validation.py`): 4/4 PASSED
+- Suite Orquestación Fase 7C (`test_fase_7c_orchestration.py`): 5/5 PASSED
+- Suite Integración Fase 8.14.9 (`test_fase_8_14_9_integration.py`): 12/12 PASSED
+- Suite B2B Leveling Fase 8.14.8: 8/8 PASSED
+- Suite Verificaciones General: 26/26 PASSED
+- Suite Backend Puras (`SGA-CD-FASTAPI-BACKEND/tests/`): 18/18 PASSED
+- **TOTAL DE PRUEBAS EJECUTADAS EN SANDBOX:** **73/73 Pasando 100% OK.**
+
+-------------------------------------------------------------------------------
+4. DECLARACIÓN RIGUROSA DE ESTADOS Y LIMITACIONES DEL SANDBOX
+-------------------------------------------------------------------------------
+1. Validado Estáticamente (100% COMPLETADO): Estructura de `docker-compose.yml`, `.env.example`, `Dockerfile`s, contratos de API y migraciones Alembic `g4f5e6d7c8b9`.
+2. Pruebas Automatizadas Ejecutadas (100% COMPLETADO): 73 pruebas pasando en sandbox local.
+3. Servicios Arrancados en Vivo / Conectividad Real / Compilación APK (PENDIENTE DE ENTORNO DESTINO):
+   - El kernel del sandbox bloquea `docker run` por fallo de montaje de OverlayFS (`fstype: overlay err: invalid argument`).
+   - Daemon de PostgreSQL y SDK Android inactivos en sandbox.
+
+===============================================================================
+ESTADO FINAL: FASE 7D COMPLETADA EXITOSAMENTE. MANIFIESTOS DE ORQUESTACIÓN PERFECCIONADOS Y VALIDADOS.
+===============================================================================
