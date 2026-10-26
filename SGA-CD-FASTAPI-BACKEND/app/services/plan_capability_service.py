@@ -80,6 +80,7 @@ except ImportError:
             nombre_empresa: str = "",
             tipo_organizacion: str = "entidad_publica",
             ambito_organizacional: str = "municipal",
+            vocacion_institucional: str = "deportiva",
             canonical_plan: str = "basico",
             subscription_status: str = "sin_suscripcion",
             is_active: bool = False,
@@ -100,7 +101,7 @@ except ImportError:
             self.nombre_empresa = nombre_empresa
             self.tipo_organizacion = tipo_organizacion
             self.ambito_organizacional = ambito_organizacional
-            self.vocacion_institucional = tenant_data.get("vocacion_institucional", "deportiva") if isinstance(tenant_data, dict) else "deportiva"
+            self.vocacion_institucional = vocacion_institucional
             self.canonical_plan = canonical_plan
             self.subscription_status = subscription_status
             self.is_active = is_active

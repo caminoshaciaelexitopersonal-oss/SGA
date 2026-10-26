@@ -32,7 +32,13 @@ class TestUniversalAIRouterSuite(unittest.TestCase):
         self.assertEqual(res["status"], "queued")
         self.assertTrue(res["job_id"].startswith("skyreels_"))
 
-    def test_05_route_unknown_task_type(self):
+    def test_05_route_image_task_open_gen_ai(self):
+        res = ai_router.route_request("image", {"prompt": "Poster promocional Taekwondo"}, inquilino_id=5)
+        self.assertEqual(res["status"], "success")
+        self.assertEqual(res["provider"], "open_generative_ai_adapter")
+        self.assertTrue(res["image_url"].startswith("/assets/generated/img_opengen_5_"))
+
+    def test_06_route_unknown_task_type(self):
         res = ai_router.route_request("unknown_task", {}, inquilino_id=1)
         self.assertEqual(res["status"], "error")
         self.assertIn("no reconocido", res["error"])

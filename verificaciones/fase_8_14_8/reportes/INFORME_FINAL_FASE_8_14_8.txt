@@ -1,0 +1,49 @@
+===============================================================================
+INFORME DE CIERRE TÉCNICO Y AUDITORÍA PROBATORIA — FASE 8.14.8
+NIVELACIÓN TRANSVERSAL DE DERECHOS COMERCIALES Y NUCLEO MULTITANANTE SGA-CD
+===============================================================================
+
+1. IDENTIDAD Y ESTADO DEL REPOSITORIO
+-------------------------------------
+- Rama activa: jules-6854761592999696182-e12c7368
+- HEAD Commit: 4d897f08d6b9e807c2598ba7a9ad1ea24239d083
+- Estado del árbol de trabajo: Limpio para submisión (Submit preparado).
+
+2. VERIFICACIÓN DE INTEGRIDAD DE ARCHIVOS PROTEGIDOS (PERÍMETRO FROZEN)
+-----------------------------------------------------------------------
+[OK] SGA-CD-WEB.git/js/views/admin_general.js         (MD5: 52c83cfca2ba094b060661bdf259b51c) - INTACTO
+[OK] SGA-CD-FASTAPI-BACKEND/app/api/v1/endpoints/admin_general.py (MD5: b396d65984216013b45fd006e4eeffe8) - INTACTO
+[OK] SGA-CD-WEB.git/index.html                         (MD5: 132c63fe3220bf746fe24b8d5a8fc2a8) - INTACTO
+[OK] SGA-CD-WEB.git/css/vanguard.css                   (MD5: 256e0b2ae110280c1d94d4842bef4c8d) - INTACTO
+[OK] SGA-CD-WEB.git/css/style.css                      (MD5: 35e60be9613c955b76e37c036f53063c) - INTACTO
+
+3. DERECHOS COMERCIALES Y EVALUACIÓN DE LAS 12 COMBINACIONES B2B
+------------------------------------------------------------------
+Se verificó el comportamiento de PlanCapabilityService frente a las 12 combinaciones B2B:
+- 4 Naturalezas Jurídicas: entidad_publica, empresa_privada, organizacion_no_lucrativa, asociacion_club.
+- 3 Alcances Territoriales: municipal, departamental, nacional.
+
+Resultados:
+- Plan Full (Activo): Habilita el 100% de capacidades avanzadas (CRM Leads, CRM Campaign, AI Images, AI Carousels, AI Video, AI Reels, Social Publishing, CRM Analytics) y cuotas cuantitativas (100 imágenes, 50 carruseles, 5 videos, 20 reels, 500 prompts, 50 publicaciones).
+- Plan Básico (Operativo / Prueba): Habilita módulos operativos base (Panel Institucional, Gestión Usuarios, Módulos Deportivos/Culturales) y bloquea el 100% de módulos e IA avanzados (Cuotas cuantitativas = 0).
+
+4. ARQUITECTURA CORE IA Y GPU DE ALTA DISPONIBILIDAD
+----------------------------------------------------
+- Router IA Universal (Universal-2.0): Despacha peticiones de texto, imagen y video de forma multitanante. Implementa soporte multi-proveedor (Colibrí, Ollama, Open Generative AI) con fallback estructurado y cacheo de healthcheck (TTL 5s).
+- SkyReelsV2Service: Motor de video IA que delega en nodos de renderizado remotos, valida existencia y tamaño físico de video en disco y garantiza aislamiento entre organizaciones.
+- GPULifecycleService: Controla la activación bajo demanda del servidor GPU, apague automático con periodo de gracia (300s) sin interrumpir tareas activas, y gestión de cuota mensual de 20 horas por inquilino en Plan Full.
+
+5. EJECUCIÓN DE PRUEBAS AUTOMATIZADAS DE NIVELACIÓN
+---------------------------------------------------
+- Archivo de prueba: verificaciones/fase_8_14_8/tests/test_fase_8_14_8_leveling.py
+- Resultado: 5/5 Casos de prueba OK (100% aprobación).
+- Casos cubiertos:
+  1. test_01_b2b_12_combinations_plan_full: Valida 100% de capacidades avanzadas en las 12 combinaciones B2B.
+  2. test_02_b2b_12_combinations_plan_basico: Valida bloqueo de módulos avanzados y cuotas en cero para Plan Básico.
+  3. test_03_gpu_lifecycle_quota_integration: Valida asignación de cuota GPU a Plan Full y rechazo a Plan Básico.
+  4. test_04_universal_ai_router_multitenant_dispatch: Valida despacho multitanante y modo fallback.
+  5. test_05_expired_subscription_blocks_capabilities: Valida que suscripciones vencidas revoquen accesos.
+
+===============================================================================
+ESTADO FINAL: FASE 8.14.8 COMPLETADA Y VALIDADA SATISFACTORIAMENTE.
+===============================================================================

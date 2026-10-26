@@ -1,0 +1,6 @@
+Open Generative AI healthcheck failed: <urlopen error [Errno 111] Connection refused>
+...
+----------------------------------------------------------------------
+Ran 3 tests in 0.054s
+
+OK
