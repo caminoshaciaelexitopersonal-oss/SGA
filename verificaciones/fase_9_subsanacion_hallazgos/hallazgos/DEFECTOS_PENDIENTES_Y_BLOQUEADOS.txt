@@ -1,0 +1,32 @@
+===============================================================================
+DEFECTOS PENDIENTES Y BLOQUEADOS POR ENTORNO O INFRAESTRUCTURA — FASE 9
+Fecha: 27 de Octubre de 2026
+Monorepositorio SGA-CD
+===============================================================================
+
+1. BLOQUEO B-01: Restricción de Montaje OverlayFS en Docker Daemon del Sandbox.
+   - Prioridad: P2 (Media)
+   - Componente: Orquestación Docker / Kernel Sandbox
+   - Estado: BLOQUEADO POR INFRAESTRUCTURA DE EVALUACIÓN
+   - Causa Demostrada: El kernel de la instancia sandbox rechaza `docker run` / `docker compose up` por incompatibilidad de OverlayFS (`fstype: overlay err: invalid argument`).
+   - Impacto: Imposibilidad de iniciar contenedores Docker vivos dentro del entorno del agente.
+   - Validación Mitigante: `docker compose config` ejecutado con éxito confirmando la validez sintáctica y estructural de los 5 servicios (postgres, backend, web, flet desktop, flet mobile).
+   - Acción Siguiente: Despliegue en servidor VM/Linux de Staging o Producción con permisos de kernel estándar.
+
+2. BLOQUEO B-02: Instancia Activa de PostgreSQL 15 en Sandbox.
+   - Prioridad: P2 (Media)
+   - Componente: Base de Datos
+   - Estado: PENDIENTE POR ENTORNO
+   - Causa Demostrada: No existe demonio de PostgreSQL ni CLI `psql` activo en la imagen del sandbox.
+   - Impacto: Pruebas automatizadas se validan 100% sobre motor SQLite in-memory y `test.db`.
+   - Validación Mitigante: Modelos SQLAlchemy y tipos de columna (UUID, JSONB, DateTime) verificados compatibles con PostgreSQL; grafo Alembic verificado lineal hasta `g4f5e6d7c8b9`.
+   - Acción Siguiente: Ejecución de `alembic upgrade head` en servidor PostgreSQL 15 externo aprovisionado.
+
+3. ADVERTENCIA A-01: Advertencias de Depreciación Pydantic V1 y `utcnow()` en Python 3.12.
+   - Prioridad: P3 (Mantenimiento No Bloqueante)
+   - Componente: Backend Schemas
+   - Estado: ABIERTO / REGISTRADO
+   - Causa: Pydantic V2 emite UserWarnings por sintaxis `@validator` heredada de Pydantic V1 y por `datetime.utcnow()`.
+   - Impacto: Logs informativos durante la ejecución de pruebas. No afecta funcionalidad ni estabilidad.
+   - Acción Siguiente: Refactorización progresiva a `@field_validator` y `datetime.now(timezone.utc)` en futuras iteraciones.
+===============================================================================

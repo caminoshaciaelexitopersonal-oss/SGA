@@ -1,53 +1,70 @@
 ===============================================================================
-SGA-CD MONOREPO COMPONENT INVENTORY
-Audit Date: 2026-10-27
-Root Directory: /app
+INVENTARIO REAL Y COMPLETO DE COMPONENTES DEL MONOREPOSITORIO SGA-CD
+Fecha: 27 de Octubre de 2026
+Evaluador: Jules (Software Engineering Agent)
+Rama Git: jules-5336486463467977840-2fb3b597
+HEAD: ff97c4ddf48bc67d6b4a1b2f55e210491b3cf2e8
 ===============================================================================
 
-1. PERSISTENCE ENGINE (SGA-CD-DB.git/)
-   - Path: /app/SGA-CD-DB.git
-   - Description: Database models, SQLAlchemy declarative Base, Alembic migration scripts.
-   - Models: Usuario, Inquilino, Role, Speciality, Curriculum, Inventory, Facility, Billing, AuditLog.
-   - Alembic Revision Head: g4f5e6d7c8b9 (Single linear revision graph).
-   - Target DB Engines: SQLite (In-Memory/Local for unit tests), PostgreSQL 15 (Production target).
+1. COMPONENTE 1: BASE DE DATOS Y CAPA DE PERSISTENCIA (SGA-CD-DB.git/)
+   - Ubicación: SGA-CD-DB.git/
+   - Modelos SQLAlchemy principales:
+     * app/models/user.py: Usuario, Rol, Permiso (12 roles oficiales)
+     * app/models/tenancy.py: Inquilino (Multi-tenant B2B, vocacion_institucional, plan)
+     * app/models/academic.py: ProcesoFormacion, Clase, CurriculumPlan, Inscripcion
+     * app/models/catalog.py: CatalogoEspecialidad, EmpresaEspecialidad, ProfesorEspecialidad
+     * app/models/inventory.py: Elemento, CategoriaInventario, CustodiaDocente
+     * app/models/escenarios.py: MacroInstalacion, ParteInstalacion, ReservaEspacio
+     * app/models/billing.py: Suscripcion, Factura, PlanCapability
+   - Sistema de Migraciones Alembic:
+     * Grafico lineal de 9 revisiones finalizando en 'g4f5e6d7c8b9'
+     * Soporte de migraciones nativas para PostgreSQL 15 y SQLite in-memory.
 
-2. API BACKEND ENGINE (SGA-CD-FASTAPI-BACKEND/)
-   - Path: /app/SGA-CD-FASTAPI-BACKEND
-   - Core Stack: FastAPI, Uvicorn, SQLAlchemy, Pydantic V2, PyJWT.
-   - Protected Perimeter File: /app/SGA-CD-FASTAPI-BACKEND/app/api/v1/endpoints/admin_general.py
-   - Endpoint Groups: Auth, Users, Tenancy, Curriculum, Inventory, Escenarios, Billing, CRM, AI Router.
+2. COMPONENTE 2: BACKEND FASTAPI (SGA-CD-FASTAPI-BACKEND/)
+   - Ubicación: SGA-CD-FASTAPI-BACKEND/
+   - Punto de entrada: app/main.py (FastAPI Application)
+   - Rutas API (/api/v1/):
+     * Auth & Users: /api/v1/auth (login, register, me, data ARCO)
+     * Catalog & Specialties: /api/v1/catalogo (especialidades, docentes, endorsements)
+     * Academic & Curriculum: /api/v1/academic, /api/v1/curriculum (52-week lifecycle)
+     * Inventory & Custody: /api/v1/inventario
+     * Venue & Spaces: /api/v1/escenarios (MacroInstalacion, ParteInstalacion, Reservas)
+     * CRM & Marketing: /api/v1/crm, /api/v1/video_distribution
+     * AI Orchestration: /api/v1/agent/invoke (AIRouterService, SkyReelsV2Service, GPULifecycleService)
+     * Billing & Plans: /api/v1/billing, /api/v1/tenants/my-plan-capabilities
+     * Admin & Governance: /api/v1/admin, /api/v1/coordinador
+     * Protegido: /api/v1/admin_general (MODO SOLO LECTURA - PERÍMETRO CONSERVADO)
 
-3. WEB CLIENT (SGA-CD-WEB.git/)
-   - Path: /app/SGA-CD-WEB.git
-   - Core Stack: HTML5, JavaScript ES6 (vanilla SPA with view-based routing), Vanguard CSS.
-   - Protected Perimeter Files:
-     - /app/SGA-CD-WEB.git/js/views/admin_general.js
-     - /app/SGA-CD-WEB.git/index.html
-     - /app/SGA-CD-WEB.git/css/vanguard.css
-     - /app/SGA-CD-WEB.git/css/style.css
-   - Role Views: admin_general, admin_empresa, jefe_area, profesional_area, tecnico_area, coordinador, profesor, alumno, padre_acudiente, jefe_escenarios, jefe_almacen, almacenista.
+3. COMPONENTE 3: CLIENTE WEB HTML5/JS (SGA-CD-WEB.git/)
+   - Ubicación: SGA-CD-WEB.git/
+   - Punto de entrada: index.html (PERÍMETRO PROTEGIDO - HASH VERIFICADO)
+   - Estilos CSS: css/vanguard.css, css/style.css (PERÍMETRO PROTEGIDO)
+   - Vistas JS (js/views/):
+     * Vistas de Roles: admin_empresa.js, jefe_area.js, profesional_area.js, tecnico_area.js, coordinador.js, profesor.js, alumno.js, padre_acudiente.js, jefe_escenarios.js, jefe_almacen.js, almacenista.js
+     * Vista Protegida: admin_general.js (PERÍMETRO PROTEGIDO)
+   - Control de Navegación: js/navigation.js (Mapeo dinámico de 53 vistas registradas)
 
-4. DESKTOP CLIENT (SGA-CD-APP.git/)
-   - Path: /app/SGA-CD-APP.git
-   - Core Stack: Flet (Python Flutter engine).
-   - Focus Mappings: CRM & Marketing View, AI Media Router, Content Distribution.
+4. COMPONENTE 4: CLIENTE ESCRITORIO FLET (SGA-CD-APP.git/)
+   - Ubicación: SGA-CD-APP.git/
+   - Punto de entrada: main.py, flet_test.py
+   - Vistas Flet UI: views/ (admin_empresa, crm_marketing_view.py)
+   - Integración API: ApiClient HTTP asíncrono con FastAPI backend.
 
-5. MOBILE CLIENT / APK (SGA-CD-APK.git/)
-   - Path: /app/SGA-CD-APK.git
-   - Core Stack: Flet Mobile (Python Flutter engine for Android/iOS).
-   - Features: Mobile responsive dashboard, teacher custody, student QR credentials.
+5. COMPONENTE 5: CLIENTE MÓVIL FLET / APK (SGA-CD-APK.git/)
+   - Ubicación: SGA-CD-APK.git/
+   - Punto de entrada: main.py
+   - Vistas Flet UI: views/ (crm_marketing_view.py, onboarding_view.py)
+   - Configuración de empaquetado Flet/Flutter APK.
 
-6. DESIGN & SECURITY STANDARDS (Skill.git/)
-   - Path: /app/Skill.git
-   - Features: Dark Metallic Blue palette (60-30-10), Bento Grid UX guidelines, security & SEO rules.
+6. COMPONENTE 6: NÚCLEO DE DISEÑO Y ESTÁNDARES (Skill.git/)
+   - Ubicación: Skill.git/
+   - Contenido: Paleta cromática Dark Metallic Blue 60-30-10, Bento Grid UI tokens, Crypto & Core utilities.
 
-7. SERVICE ORCHESTRATION (docker-compose.yml & Dockerfiles)
-   - Configuration: Monorepo Docker Compose declaring postgres (15-alpine), fastapi-backend, web-client (Nginx), flet-desktop-client, flet-mobile-client.
-
-8. AUTOMATED TEST SUITES
-   - Path: /app/SGA-CD-FASTAPI-BACKEND/tests/ & /app/verificaciones/
-   - Active Test Files: 23 modules covering unit, integration, RBAC, curriculum, multitenancy, and AI router capabilities.
-
-9. UTILITY & INTEGRATION SUBSYSTEMS
-   - Agents & Speech: /app/SGA-CD-FASTAPI-BACKEND/app/agents/, OpenJarvis, Soup, fish-speech.
-   - Monorepo Utilities: audittor/ (ECC, agent-thermos, anti-slop, graphify).
+7. COMPONENTE 7: CONTENEDORES Y ORQUESTACIÓN DOCKER
+   - Arquitectura docker-compose.yml:
+     * postgres (PostgreSQL 15-alpine, puerto 5432)
+     * fastapi-backend (FastAPI ASGI, puerto 8000)
+     * web-client (Nginx alpine, puerto 8080)
+     * flet-desktop-client (Desktop runner)
+     * flet-mobile-client (Mobile runner)
+===============================================================================

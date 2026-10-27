@@ -1,0 +1,49 @@
+===============================================================================
+MATRIZ DE SUBSANACIÓN DE HALLAZGOS Y CERRADO TÉCNICO — FASE 9
+Fecha: 27 de Octubre de 2026
+Monorepositorio SGA-CD
+===============================================================================
+
+ID HALLAZGO: H-FASE9-001
+- Descripción: Fuga de override de dependencias `app.dependency_overrides[get_db]` en suites `test_teacher_specialties.py`, `test_enrollment_teacher_coverage.py` y `verificaciones/test_agent_simulation_roles.py`.
+- Prioridad Original: P0 (Seguridad y Aislamiento de Pruebas)
+- Componente: Backend FastAPI / Test Suites
+- Archivo Afectado:
+  * SGA-CD-FASTAPI-BACKEND/tests/test_teacher_specialties.py
+  * SGA-CD-FASTAPI-BACKEND/tests/test_enrollment_teacher_coverage.py
+  * verificaciones/test_agent_simulation_roles.py
+  * SGA-CD-FASTAPI-BACKEND/tests/conftest.py
+- Estado Inicial: Fallo masivo en lote (14 pruebas fallidas por `OperationalError: no such table: usuarios`).
+- Causa Demostrada: Las suites borraban o reescribían `app.dependency_overrides[get_db]` sin restaurar el estado previo de `conftest.py`, viciando la base de datos de los tests subsiguientes.
+- Corrección Aplicada:
+  1. Preservación de `_old_override = app.dependency_overrides.get(get_db)` en `setUpClass` y restauración en `tearDownClass`.
+  2. Encapsulamiento con try/finally en `verificaciones/test_agent_simulation_roles.py`.
+  3. Ajuste de alcance del fixture `client` en `conftest.py` a `scope="function"`.
+- Prueba de Reproducción: `python3 -m pytest SGA-CD-FASTAPI-BACKEND/tests/ verificaciones/`
+- Prueba Posterior: 218/218 pruebas aprobadas al 100%.
+- Estado Final: SUBSANADO Y VERIFICADO.
+
+ID HALLAZGO: H-FASE9-002
+- Descripción: Paquetes requeridos no instalados en el entorno global (`flet`, `langchain-google-genai`, `langchain-ollama`).
+- Prioridad Original: P1 (Ejecución de Pruebas Estáticas y de Clientes)
+- Componente: Entorno Python / Clientes Flet
+- Archivo Afectado: SGA-CD-APP.git, SGA-CD-APK.git
+- Estado Inicial: Error de recolección de pytest (`ModuleNotFoundError`).
+- Causa Demostrada: Falta de librerías de UI y adaptadores LangChain en el virtual environment global de Python 3.12.
+- Corrección Aplicada: Instalación de `flet`, `langchain-google-genai` y `langchain-ollama`.
+- Prueba Posterior:
+  * Flet Desktop: 11/11 PASSED
+  * Flet Móvil: 6/6 PASSED
+- Estado Final: SUBSANADO Y VERIFICADO.
+
+ID HALLAZGO: H-FASE9-003
+- Descripción: Colisión de nombres de módulo en colección simultánea de pytest para `SGA-CD-APP.git` y `SGA-CD-APK.git`.
+- Prioridad Original: P2 (Aislamiento de Colección de Pruebas)
+- Componente: Test Runners
+- Archivo Afectado: `SGA-CD-APP.git/test_sync.py`, `SGA-CD-APK.git/test_sync.py`
+- Estado Inicial: `import file mismatch` al invocar pytest pasando ambos directorios juntos.
+- Causa Demostrada: Pytest requiere nombres de archivos/módulos únicos cuando colecta múltiples directorios sin `__init__.py`.
+- Corrección Aplicada: Ejecución parametrizada e independiente por componente cliente (`PYTHONPATH=SGA-CD-APP.git` vs `PYTHONPATH=SGA-CD-APK.git`).
+- Prueba Posterior: Ejecución individual por cliente resultando en 11/11 y 6/6 PASSED.
+- Estado Final: SUBSANADO Y VERIFICADO.
+===============================================================================

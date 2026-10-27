@@ -1,0 +1,28 @@
+===============================================================================
+DEFECTOS PENDIENTES Y BLOQUEOS DE INFRAESTRUCTURA DE ENTORNO — FASE 10
+Fecha: 27 de Octubre de 2026
+Monorepositorio SGA-CD
+===============================================================================
+
+1. BLOQUEO B-10-01: Restricción de Montaje OverlayFS en Contenedor Sandbox de Evaluación.
+   - Componente: Docker Orquestación
+   - Severidad: P2 (Limitación de Infraestructura Sandbox)
+   - Causa Raíz: El kernel Linux del sandbox rechaza la creación de capas OverlayFS durante `docker run` (`fstype: overlay err: invalid argument`).
+   - Evidencia: Invocación de `docker run` produce fallo de montaje a nivel de kernel.
+   - Mitigación Comprobada: `docker compose config` ejecutado con éxito, validando sintaxis, volumenes, redes y puertos de los 5 servicios (postgres, backend, web, flet desktop, flet mobile).
+   - Clasificación: PENDIENTE POR ENTORNO / BLOQUEO DOCUMENTADO.
+
+2. BLOQUEO B-10-02: Instancia Viva de PostgreSQL 15 en Sandbox Efímero.
+   - Componente: Base de Datos de Producción
+   - Severidad: P2 (Limitación de Servicio Externo)
+   - Causa Raíz: Ausencia de binario `psql` y servicio demonio de PostgreSQL corriendo en la imagen local del sandbox.
+   - Evidencia: Las pruebas automatizadas locales se ejecutan 100% sobre motor SQLite (`:memory:` y `test.db`).
+   - Mitigación Comprobada: Grafo de Alembic verificado lineal hasta el Head `g4f5e6d7c8b9`. Modelos SQLAlchemy compatibles con PostgreSQL (UUID, JSONB, DateTime).
+   - Clasificación: PENDIENTE POR ENTORNO / ACCIÓN SUGERIDA PARA STAGING.
+
+3. RECOMENDACIÓN A-10-01: Advertencias Deprecadas en Pydantic V2 / Python 3.12.
+   - Componente: Backend Schemas
+   - Severidad: P3 (Mantenimiento No Bloqueante)
+   - Observación: Presencia de deprecation warnings en logs por uso de `@validator` V1 y `datetime.utcnow()`.
+   - Clasificación: RECOMENDACIÓN DE MANTENIMIENTO FUTURO (No afecta dictamen de aceptación).
+===============================================================================

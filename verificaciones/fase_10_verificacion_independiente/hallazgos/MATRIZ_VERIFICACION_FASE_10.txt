@@ -1,0 +1,43 @@
+===============================================================================
+MATRIZ DE VERIFICACIÓN TÉCNICA INDEPENDIENTE — FASE 10
+Fecha: 27 de Octubre de 2026
+Monorepositorio SGA-CD
+Evaluador: Jules (Software Engineering Agent)
+===============================================================================
+
+1. VERIFICACIÓN DE HALLAZGOS Y REMEDIACIÓN
+-------------------------------------------------------------------------------
+[VERIFICADO - P0] HALLAZGO H-10-01: Fuga de overrides de dependencias `app.dependency_overrides[get_db]`.
+- Componente: Backend FastAPI / Suites de Pruebas
+- Archivos Afectados:
+  * SGA-CD-FASTAPI-BACKEND/tests/test_teacher_specialties.py
+  * SGA-CD-FASTAPI-BACKEND/tests/test_enrollment_teacher_coverage.py
+  * verificaciones/test_agent_simulation_roles.py
+  * SGA-CD-FASTAPI-BACKEND/tests/conftest.py
+- Auditoría de Código: Se constató la adición del atributo `cls._old_override = app.dependency_overrides.get(get_db)` en `setUpClass` y su restauración simétrica y segura en `tearDownClass`. Se verificó que `verificaciones/test_agent_simulation_roles.py` aísla su override en un bloque `try...finally` dentro de la función de prueba, evitando la contaminación global al importar el módulo.
+- Resultado Observado: La re-ejecución masiva de las 218 pruebas de backend y verificaciones pasa al 100% (218/218 PASSED) sin errores `OperationalError: no such table: usuarios`.
+- Dictamen Técnico: VERIFICADO Y SUBSANADO.
+
+[VERIFICADO - P1] HALLAZGO H-10-02: Alcance del Fixture `client` de HTTP TestClient.
+- Componente: Backend FastAPI Test Fixtures
+- Archivo Afectado: SGA-CD-FASTAPI-BACKEND/tests/conftest.py
+- Auditoría de Código: Se confirmó la modificación de `@pytest.fixture(scope="module")` a `@pytest.fixture(scope="function")` para el fixture `client`.
+- Resultado Observado: Cada prueba HTTP recibe un TestClient limpio e independiente, evitando estados de transporte viciados.
+- Dictamen Técnico: VERIFICADO Y SUBSANADO.
+
+[VERIFICADO - P1] HALLAZGO H-10-03: Instalación de Dependencias del Entorno de Pruebas.
+- Componente: Entorno de Ejecución Python 3.12
+- Paquetes Auditados: `flet`, `langchain-google-genai`, `langchain-ollama`.
+- Resultado Observado: Las suites de Flet Desktop (11 tests) y Flet Mobile (6 tests) se colectan y ejecutan sin `ModuleNotFoundError`.
+- Dictamen Técnico: VERIFICADO Y SUBSANADO.
+
+[VERIFICADO - P0] HALLAZGO H-10-04: Integridad del Perímetro Protegido (5 Archivos Frozen).
+- Archivos Auditados:
+  1. SGA-CD-WEB.git/js/views/admin_general.js (52c83cfca2ba094b060661bdf259b51c)
+  2. SGA-CD-FASTAPI-BACKEND/app/api/v1/endpoints/admin_general.py (b396d65984216013b45fd006e4eeffe8)
+  3. SGA-CD-WEB.git/index.html (132c63fe3220bf746fe24b8d5a8fc2a8)
+  4. SGA-CD-WEB.git/css/vanguard.css (256e0b2ae110280c1d94d4842bef4c8d)
+  5. SGA-CD-WEB.git/css/style.css (35e60be9613c955b76e37c036f53063c)
+- Auditoría MD5: Sumas calculadas de 32 caracteres hexadecimales verificadas con 100% de coincidencia exacta.
+- Dictamen Técnico: VERIFICADO Y MANTENIDO 100% INTACTO.
+===============================================================================

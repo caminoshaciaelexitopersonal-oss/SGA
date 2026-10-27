@@ -1,0 +1,26 @@
+===============================================================================
+REGISTRO DE DIFF Y ARCHIVOS MODIFICADOS — FASE 9
+Fecha: 27 de Octubre de 2026
+Monorepositorio SGA-CD
+===============================================================================
+
+ARCHIVOS MODIFICADOS Y PROPÓSITO:
+
+1. SGA-CD-FASTAPI-BACKEND/tests/conftest.py
+   - Propósito: Ajustar el alcance del fixture `client` a `scope="function"` para asegurar que los TestClients no reutilicen sockets o contextos viciados entre ejecuciones de prueba.
+
+2. SGA-CD-FASTAPI-BACKEND/tests/test_teacher_specialties.py
+   - Propósito: Preservar `_old_override = app.dependency_overrides.get(get_db)` en `setUpClass` y restaurarlo en `tearDownClass` para evitar que la finalización de la suite borre la dependencia global de `conftest.py`.
+
+3. SGA-CD-FASTAPI-BACKEND/tests/test_enrollment_teacher_coverage.py
+   - Propósito: Preservar `_old_override = app.dependency_overrides.get(get_db)` en `setUpClass` y restaurarlo en `tearDownClass` para garantizar aislamiento.
+
+4. verificaciones/test_agent_simulation_roles.py
+   - Propósito: Mover `override_get_db` fuera del ámbito de importación de módulo hacia la función de prueba con un bloque try/finally, asegurando que la carga estática de pytest no reescriba las dependencias de backend de otras suites. Inclusión de `AppBase` metadata.
+
+5. verificaciones/auditoria_integral_sga_cd/ (reportes y evidencias)
+   - Propósito: Actualización de reportes de auditoría integral y evidencias de prueba.
+
+6. verificaciones/fase_9_subsanacion_hallazgos/ (reportes y evidencias de Fase 9)
+   - Propósito: Creación de la estructura formal de evidencia para el cierre técnico independiente de la Fase 9.
+===============================================================================
