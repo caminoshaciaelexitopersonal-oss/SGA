@@ -16,3 +16,8 @@ tools/*
 # Database
 *.db
 *.sqlite3
+
+# AI Models & Local Weights
+**/weights/
+*.onnx
+*.onnx.data

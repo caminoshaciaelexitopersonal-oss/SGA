@@ -13,3 +13,8 @@ __pycache__/
 # Virtual environment
 venv/
 .venv/
+
+# Local AI Lab Weights
+/ai-lab/phi-3-mini/weights/
+*.onnx
+*.onnx.data
