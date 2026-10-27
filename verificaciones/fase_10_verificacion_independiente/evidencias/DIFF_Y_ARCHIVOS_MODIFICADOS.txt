@@ -1,0 +1,30 @@
+===============================================================================
+EVIDENCIA PROBATORIA DE DIFF Y ARCHIVOS MODIFICADOS — FASE 10
+Fecha: 27 de Octubre de 2026
+Monorepositorio SGA-CD
+===============================================================================
+
+1. AUDITORÍA DE CAMBIOS EN SUITES DE PRUEBAS
+-------------------------------------------------------------------------------
+A. SGA-CD-FASTAPI-BACKEND/tests/conftest.py
+   - Cambio: Inclusión de `@pytest.fixture(scope="function")` para `client`.
+   - Efecto: Evita estado viciado en transporte HTTP entre pruebas.
+
+B. SGA-CD-FASTAPI-BACKEND/tests/test_teacher_specialties.py
+   - Cambio: Captura de `cls._old_override` en `setUpClass` y restauración simétrica en `tearDownClass`.
+   - Efecto: Impide que la finalización de la suite borre el override de base de datos de `conftest.py`.
+
+C. SGA-CD-FASTAPI-BACKEND/tests/test_enrollment_teacher_coverage.py
+   - Cambio: Captura de `cls._old_override` en `setUpClass` y restauración simétrica en `tearDownClass`.
+   - Efecto: Mantiene la simetría y evita fugas de dependencias entre suites.
+
+D. verificaciones/test_agent_simulation_roles.py
+   - Cambio: Encapsulamiento de `override_get_db` dentro de `test_agent_troop_interaction_simulation` en un bloque `try...finally` e inclusión de `AppBase` metadata.
+   - Efecto: Garantiza que la recolección o importación de la simulación de agentes no reescriba la base de datos de otras pruebas del backend.
+
+2. ARTEFACTOS Y REPORTES CREADOS
+-------------------------------------------------------------------------------
+- verificaciones/auditoria_integral_sga_cd/ (actualizado con métricas de 235 tests).
+- verificaciones/fase_9_subsanacion_hallazgos/ (documentación de cierre de Fase 9).
+- verificaciones/fase_10_verificacion_independiente/ (documentación y dictamen oficial de Fase 10).
+===============================================================================

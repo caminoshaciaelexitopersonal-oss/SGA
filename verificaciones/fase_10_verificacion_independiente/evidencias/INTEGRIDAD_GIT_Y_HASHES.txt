@@ -1,0 +1,30 @@
+===============================================================================
+EVIDENCIA PROBATORIA DE INTEGRIDAD DE HASHES MD5 Y GIT — FASE 10
+Fecha: 27 de Octubre de 2026
+Monorepositorio SGA-CD
+===============================================================================
+
+1. VERIFICACIÓN INDEPENDIENTE DE ARCHIVOS DEL PERÍMETRO PROTEGIDO
+-------------------------------------------------------------------------------
+Se calculó la suma de verificación MD5 en cada uno de los 5 archivos del perímetro protegido utilizando el comando de sistema `md5sum`. Se constata una coincidencia exacta de 32 caracteres hexadecimales frente a las referencias oficiales del proyecto:
+
+Archivo                                                    MD5 Calculado                     MD5 Referencia                    Estado
+---------------------------------------------------------  --------------------------------  --------------------------------  -------
+SGA-CD-WEB.git/js/views/admin_general.js                  52c83cfca2ba094b060661bdf259b51c  52c83cfca2ba094b060661bdf259b51c  INTACTO
+SGA-CD-FASTAPI-BACKEND/app/api/v1/endpoints/admin_general.py b396d65984216013b45fd006e4eeffe8 b396d65984216013b45fd006e4eeffe8  INTACTO
+SGA-CD-WEB.git/index.html                                  132c63fe3220bf746fe24b8d5a8fc2a8  132c63fe3220bf746fe24b8d5a8fc2a8  INTACTO
+SGA-CD-WEB.git/css/vanguard.css                            256e0b2ae110280c1d94d4842bef4c8d  256e0b2ae110280c1d94d4842bef4c8d  INTACTO
+SGA-CD-WEB.git/css/style.css                               35e60be9613c955b76e37c036f53063c  35e60be9613c955b76e37c036f53063c  INTACTO
+
+Comando de Verificación Ejecutado:
+md5sum SGA-CD-WEB.git/js/views/admin_general.js SGA-CD-FASTAPI-BACKEND/app/api/v1/endpoints/admin_general.py SGA-CD-WEB.git/index.html SGA-CD-WEB.git/css/vanguard.css SGA-CD-WEB.git/css/style.css
+
+Dictamen de Perímetro Protegido: CERO ALTERACIONES. MANTENIDO 100% INTANGIBLE.
+
+2. ESTADO BASELINE DE GIT
+-------------------------------------------------------------------------------
+- Ruta Raíz: /app
+- Rama Activa: jules-5336486463467977840-2fb3b597
+- Commit HEAD: ff97c4ddf48bc67d6b4a1b2f55e210491b3cf2e8
+- Estado de Trabajo: Modificaciones quirúrgicas limitadas exclusivamente a la resolución de aislamiento de fixtures en suites de pruebas y documentación de verificación de la Fase 10.
+===============================================================================

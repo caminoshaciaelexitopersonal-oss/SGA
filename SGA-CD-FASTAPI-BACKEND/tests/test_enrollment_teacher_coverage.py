@@ -81,10 +81,12 @@ class TestEnrollmentCoverage(unittest.TestCase):
     def tearDownClass(cls):
         cls.db.close()
         Base.metadata.drop_all(bind=engine)
-        app.dependency_overrides.pop(get_db, None)
-        from app.api import deps
-        from tests.conftest import override_get_db as conf_override
-        app.dependency_overrides[deps.get_db] = conf_override
+        if getattr(cls, "_old_override", None) is not None:
+            app.dependency_overrides[get_db] = cls._old_override
+        else:
+            from app.api.deps import get_db as deps_get_db
+            from tests.conftest import override_get_db as conf_override
+            app.dependency_overrides[deps_get_db] = conf_override
 
     def test_enrollment_blocking(self):
         # 1. Attempt enrollment in class with no instructor -> Reject HTTP 400
