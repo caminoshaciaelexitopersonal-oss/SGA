@@ -74,7 +74,7 @@ def db() -> Generator:
         AppBase.metadata.drop_all(bind=engine)
         Base.metadata.drop_all(bind=engine)
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def client() -> Generator:
     """
     A fixture that provides a TestClient for making requests to the API.

@@ -1,28 +1,32 @@
 ===============================================================================
-SGA-CD GIT INTEGRITY AND PROTECTED FILE HASHES
-Audit Date: 2026-10-27
+EVIDENCIA DE INTEGRIDAD DE GIT Y VERIFICACIÓN DE HASHES
+Fecha: 27 de Octubre de 2026
+Monorepositorio SGA-CD
 ===============================================================================
 
-1. PROTECTED PERIMETER MD5 CHECKSUMS:
-52c83cfca2ba094b060661bdf259b51c  SGA-CD-WEB.git/js/views/admin_general.js
-b396d65984216013b45fd006e4eeffe8  SGA-CD-FASTAPI-BACKEND/app/api/v1/endpoints/admin_general.py
-132c63fe3220bf746fe24b8d5a8fc2a8  SGA-CD-WEB.git/index.html
-256e0b2ae110280c1d94d4842bef4c8d  SGA-CD-WEB.git/css/vanguard.css
-35e60be9613c955b76e37c036f53063c  SGA-CD-WEB.git/css/style.css
+1. ESTADO BASELINE DE GIT
+-------------------------------------------------------------------------------
+- Directorio Raíz: /app
+- Rama Activa: jules-5336486463467977840-2fb3b597
+- Hash HEAD: ff97c4ddf48bc67d6b4a1b2f55e210491b3cf2e8
+- Remotos Configurados:
+  origin  https://github.com/caminoshaciaelexitopersonal-oss/SGA (fetch)
+  origin  https://github.com/caminoshaciaelexitopersonal-oss/SGA (push)
+- Estado de Trabajo: Modificaciones estrictamente enfocadas en solucionar fugas de overrides en pruebas automatizadas y actualización de reportes de auditoría.
 
-REFERENCE HASH TABLE (EXPECTED):
-52c83cfca2ba094b060661bdf259b51c  SGA-CD-WEB.git/js/views/admin_general.js
-b396d65984216013b45fd006e4eeffe8  SGA-CD-FASTAPI-BACKEND/app/api/v1/endpoints/admin_general.py
-132c63fe3220bf746fe24b8d5a8fc2a8  SGA-CD-WEB.git/index.html
-256e0b2ae110280c1d94d4842bef4c8d  SGA-CD-WEB.git/css/vanguard.css
-35e60be9613c955b76e37c036f53063c  SGA-CD-WEB.git/css/style.css
+2. VERIFICACIÓN DE INTEGRIDAD DE PERÍMETRO PROTEGIDO (5 ARCHIVOS CONGELADOS)
+-------------------------------------------------------------------------------
+Todos los archivos del perímetro protegido mantienen exactamente sus hashes MD5 de referencia oficiales de 32 caracteres hexadecimales, garantizando CERO alteraciones no autorizadas:
 
-STATUS: 100% INTACT AND UNMODIFIED
+Archivo                                                    MD5 Calculado                     MD5 Referencia                    Estado
+---------------------------------------------------------  --------------------------------  --------------------------------  -------
+SGA-CD-WEB.git/js/views/admin_general.js                  52c83cfca2ba094b060661bdf259b51c  52c83cfca2ba094b060661bdf259b51c  INTACTO
+SGA-CD-FASTAPI-BACKEND/app/api/v1/endpoints/admin_general.py b396d65984216013b45fd006e4eeffe8 b396d65984216013b45fd006e4eeffe8  INTACTO
+SGA-CD-WEB.git/index.html                                  132c63fe3220bf746fe24b8d5a8fc2a8  132c63fe3220bf746fe24b8d5a8fc2a8  INTACTO
+SGA-CD-WEB.git/css/vanguard.css                            256e0b2ae110280c1d94d4842bef4c8d  256e0b2ae110280c1d94d4842bef4c8d  INTACTO
+SGA-CD-WEB.git/css/style.css                               35e60be9613c955b76e37c036f53063c  35e60be9613c955b76e37c036f53063c  INTACTO
 
-2. GIT STATUS SUMMARY:
-M  SGA-CD-FASTAPI-BACKEND/tests/conftest.py
-M  SGA-CD-FASTAPI-BACKEND/tests/test_modulo_16_suite.py
-?? verificaciones/auditoria_integral_sga_cd/evidencias/
-?? verificaciones/auditoria_integral_sga_cd/hallazgos/
-?? verificaciones/auditoria_integral_sga_cd/inventario/
-?? verificaciones/auditoria_integral_sga_cd/pruebas/
+Comando de verificación ejecutado:
+md5sum SGA-CD-WEB.git/js/views/admin_general.js SGA-CD-FASTAPI-BACKEND/app/api/v1/endpoints/admin_general.py SGA-CD-WEB.git/index.html SGA-CD-WEB.git/css/vanguard.css SGA-CD-WEB.git/css/style.css
+Resultado: COINCIDENCIA EXACTA AL 100%.
+===============================================================================

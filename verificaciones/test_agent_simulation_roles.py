@@ -14,6 +14,7 @@ from sqlalchemy.pool import StaticPool
 
 from app.main import app
 from app.api import deps
+from app.models.base import Base as AppBase
 from models.base import Base
 from models.user import Usuario, RolesEnum
 from models.tenancy import Inquilino
@@ -29,21 +30,31 @@ engine = create_engine(
 )
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-def override_get_db():
-    db = TestingSessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-app.dependency_overrides[deps.get_db] = override_get_db
-
 def test_agent_troop_interaction_simulation():
+    def override_get_db():
+        db = TestingSessionLocal()
+        try:
+            yield db
+        finally:
+            db.close()
+
+    old_override = app.dependency_overrides.get(deps.get_db)
+    app.dependency_overrides[deps.get_db] = override_get_db
+    try:
+        _run_agent_simulation()
+    finally:
+        if old_override is not None:
+            app.dependency_overrides[deps.get_db] = old_override
+        else:
+            app.dependency_overrides.pop(deps.get_db, None)
+
+def _run_agent_simulation():
     print("=" * 80)
     print("🤖 PRUEBA DE INTERACCIÓN DE TROPA DE AGENTES IA (GENERAL A SARGENTOS)")
     print("   SIMULACIÓN: Profesores, Alumnos y Administradores (Comandos Texto / Voz)")
     print("=" * 80)
 
+    AppBase.metadata.create_all(bind=engine)
     Base.metadata.create_all(bind=engine)
     db = TestingSessionLocal()
 

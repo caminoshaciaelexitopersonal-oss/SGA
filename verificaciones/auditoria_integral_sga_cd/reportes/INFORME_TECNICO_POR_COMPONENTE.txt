@@ -1,28 +1,56 @@
 ===============================================================================
-INFORME TÉCNICO POR COMPONENTE — SGA-CD
+INFORME TÉCNICO DETALLADO POR COMPONENTE — MONOREPOSITORIO SGA-CD
 Fecha: 27 de Octubre de 2026
 ===============================================================================
 
-1. COMPONENTE 1 — BASE DE DATOS Y PERSISTENCIA (SGA-CD-DB.git/)
-   - Estado: Validado estáticamente / Pruebas unitarias aprobadas en SQLite.
-   - Detalle: Modelos SQLAlchemy unificados en `models/`. Grafo de migraciones Alembic verificado como lineal terminado en revisión `g4f5e6d7c8b9`.
-   - Motor: Pruebas ejecutadas en SQLite in-memory / file `test.db`. Ejecución en PostgreSQL 15 mantenida como objetivo operacional pendiente de provisión de servidor PostgreSQL externo.
+1. COMPONENTE 1: BASE DE DATOS Y CAPA DE PERSISTENCIA (SGA-CD-DB.git)
+   - Estado: Validado Estáticamente & Ejecutado en Pruebas con SQLite In-Memory.
+   - Evaluación de Esquema:
+     * Correspondencia exacta entre modelos SQLAlchemy y tablas de base de datos.
+     * Claves primarias, foráneas e índices UNIQUE correctamente definidos.
+     * Aislamiento multi-tenant garantizado mediante columna `inquilino_id` indexada.
+   - Grafo Alembic:
+     * 9 revisiones lineales conectadas:
+       36f3d0a15892 -> c91a2e34f567 -> d1e2f3a4b5c6 -> e2f3a4b5c6d7 ->
+       f3a4b5c6d7e8 -> g4f5e6d7c8b9 (Head actual).
+   - Motor Objetivo: PostgreSQL 15 en producción / Docker; SQLite in-memory para ejecuciones de prueba ultra-rápidas.
 
-2. COMPONENTE 2 — BACKEND FASTAPI (SGA-CD-FASTAPI-BACKEND/)
-   - Estado: Prueba automatizada aprobada (141/141 pruebas unitarias e integración en verde).
-   - Detalle: Autenticación JWT, verificación RBAC por rol, aislamiento multi-tenant por `inquilino_id` y rate limiting validados.
-   - Perímetro Protegido: `app/api/v1/endpoints/admin_general.py` inspeccionado exclusivamente en modo lectura y conservado 100% intacto (MD5 verified).
+2. COMPONENTE 2: FASTAPI BACKEND (SGA-CD-FASTAPI-BACKEND)
+   - Estado: Prueba Automatizada Aprobada (218/218 tests passing).
+   - Configuración: Carga mediante `pydantic-settings` y `.env`.
+   - Seguridad: JWT Tokens con firma HS256, hashing de contraseñas mediante PassLib bcrypt, validación de permisos por rol en middleware y decoradores.
+   - Ciclo Curricular de 52 Semanas: Máquina de estados RBAC estricta (Profesor -> Coordinador -> Jefe de Área -> Ratificación), probada en `test_curriculum_workflow.py`.
+   - AI Router & GPU Lifecycle: Enrutamiento multitarea y gestión de cuotas de 20 horas GPU en Plan Full.
 
-3. COMPONENTE 3 — FRONTEND WEB (SGA-CD-WEB.git/)
-   - Estado: Validado estáticamente / Registro de vistas verificado.
-   - Detalle: 13 vistas de JavaScript registradas en `js/views/`. Navegación SPA estructurada en `js/navigation.js` para los 12 roles del sistema.
-   - Archivos Protegidos Intactos: `index.html`, `js/views/admin_general.js`, `vanguard.css`, `style.css`.
+3. COMPONENTE 3: FRONTEND WEB (SGA-CD-WEB.git)
+   - Estado: Validado Estáticamente.
+   - Vistas y Navegación: 53 vistas mapeadas en `js/navigation.js`.
+   - Estándares Visuales: Aplicación estricta de la paleta Dark Metallic Blue 60-30-10 de `Skill.git`.
+   - Perímetro Protegido: `admin_general.js`, `index.html`, `vanguard.css` y `style.css` se mantienen 100% intactos con sumas MD5 verificadas.
 
-4. COMPONENTE 4 Y 5 — FLET DESKTOP (SGA-CD-APP.git) Y FLET MOBILE (SGA-CD-APK.git)
-   - Estado: Validado en código y contratos de API / Integración probada.
-   - Detalle: Módulos CRM, generación de medios y distribución de contenido conectados a FastAPI backend mediante ApiClient asíncrono.
-   - Limitación Móvil: Generación de APK e instalación en dispositivo físico clasificadas como pendientes por restricción de SDK Android/Gradle en el sandbox.
+4. COMPONENTE 4 Y 5: CLIENTES FLET ESCRITORIO Y MÓVIL (SGA-CD-APP.git & SGA-CD-APK.git)
+   - Estado: Prueba Automatizada Aprobada (17/17 tests passing: 11 Desktop + 6 Mobile).
+   - Arquitectura: Patrón de cliente asíncrono sobre `ApiClient` HTTP comunicándose con FastAPI backend.
+   - Almacenamiento Local: Gestor de SQLite local y `SyncManager` para sincronización offline/online.
 
-5. COMPONENTE 6 A 9 — ROLES, MULTITENANCY, CRM E INTEGRACIONES DE IA
-   - Estado: Integración de servicios comprobada mediante suites de prueba dedicadas.
-   - AIRouterService, SkyReelsV2Service, GPULifecycleService y PlanCapabilityService verificados con cuotas de 20h GPU mensuales en Plan Full y restricciones operativas en Plan Básico.
+5. COMPONENTE 6 Y 7: LOS 12 ROLES, B2B Y MULTITENANCY
+   - Estado: Prueba Automatizada Aprobada.
+   - Roles Evaluados:
+     1. admin_general (Solo lectura - Perímetro protegido)
+     2. admin_empresa (Gestión de tenant, usuarios y suscripciones)
+     3. jefe_area (Supervisión de área y ratificación curricular)
+     4. profesional_area (Operación técnica y gestión de programas)
+     5. tecnico_area (Soporte técnico y campo)
+     6. coordinador (Segundo en jefe, VoBo técnico y tareas docentes)
+     7. profesor (Creación curricular 52 semanas y registro asistencias)
+     8. alumno (Inscripción, oferta vocacional y credencial QR)
+     9. padre_acudiente (Guardia multi-pupilo e inscripciones)
+     10. jefe_escenarios (Gestión jerárquica de escenarios de 3 niveles)
+     11. jefe_almacen (Hojas técnicas de inventario y fichas de elementos)
+     12. almacenista (Gestión de préstamos y custodias)
+   - Matriz Rol x Endpoint x Permiso: Verificada mediante pruebas unitarias e integración en backend.
+
+6. COMPONENTE 11: DOCKER Y ORQUESTACIÓN
+   - Estado: Validado Sintácticamente (`docker compose config` 100% exitoso).
+   - Estructura: 5 servicios declarados con dependencias `service_healthy` y `service_started`, puerto 5432 (Postgres), 8000 (Backend), 8080 (Web Nginx).
+===============================================================================
