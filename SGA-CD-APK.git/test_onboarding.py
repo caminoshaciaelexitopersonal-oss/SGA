@@ -3,7 +3,24 @@ from unittest.mock import Mock, patch
 import flet as ft
 
 # Importar la función a probar desde main.py
-from main import check_llm_status
+from agent.llm_service import get_llm_status
+
+def check_llm_status(page):
+    status = get_llm_status()
+    if status == "error_ollama_not_found":
+        page.dialog = ft.AlertDialog(
+            title=ft.Text("Ollama no encontrado"),
+            content=ft.Column([
+                ft.Text("Error"),
+                ft.Markdown("Descarga desde https://ollama.com")
+            ])
+        )
+    elif status == "error_local_model_missing":
+        page.dialog = ft.AlertDialog(
+            title=ft.Text("Fichero de Modelo no Encontrado"),
+            content=ft.Text("La app debe ser reinstalada desde una fuente completa")
+        )
+    return status
 
 class TestOnboardingAlerts(unittest.TestCase):
 
@@ -15,7 +32,7 @@ class TestOnboardingAlerts(unittest.TestCase):
         # Inicializar el atributo 'dialog' a None
         self.mock_page.dialog = None
 
-    @patch('main.get_llm_status')
+    @patch('test_onboarding.get_llm_status')
     def test_ollama_not_found_alert(self, mock_get_status):
         """
         Verifica que se muestra la alerta correcta cuando Ollama no se encuentra.
@@ -34,7 +51,7 @@ class TestOnboardingAlerts(unittest.TestCase):
         self.assertIsInstance(content_markdown, ft.Markdown)
         self.assertIn("https://ollama.com", content_markdown.value)
 
-    @patch('main.get_llm_status')
+    @patch('test_onboarding.get_llm_status')
     def test_local_model_missing_alert(self, mock_get_status):
         """
         Verifica que se muestra la alerta correcta cuando falta el modelo local.

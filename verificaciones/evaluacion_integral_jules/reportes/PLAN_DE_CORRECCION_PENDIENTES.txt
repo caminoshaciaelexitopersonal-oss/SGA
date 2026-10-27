@@ -1,0 +1,11 @@
+=================================================================================
+PLAN DE CORRECCIÓN DE PENDIENTES Y RECOMENDACIONES FUTURAS
+=================================================================================
+Fecha / Hora: Tue Oct 27 16:40:30 UTC 2026
+
+1. DEPOSITARIO DE INFRAESTRUCTURA DE BASE DE DATOS POSTGRESQL (Bloqueado por entorno)
+   - Ejecutar la suite de pruebas contra una instancia viva de PostgreSQL 15 en entorno CI/CD.
+
+2. MIGRACIÓN FUTURA DE ADVERTENCIAS DE DEPRECACIÓN (Python 3.13 / Pydantic V2)
+   - Sustituir datetime.utcnow() por datetime.now(timezone.utc).
+   - Actualizar esquemas de Pydantic V1 Config class a Pydantic V2 ConfigDict en backend.

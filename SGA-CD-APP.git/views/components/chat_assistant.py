@@ -66,8 +66,8 @@ class ChatAssistant(ft.Stack):
             border_radius=50, # Make it circular
             padding=3,  # This creates the border effect
             gradient=ft.LinearGradient(
-                begin=ft.alignment.top_left,
-                end=ft.alignment.bottom_right,
+                begin=ft.alignment.Alignment(-1, -1),
+                end=ft.alignment.Alignment(1, 1),
                 colors=["#00f", "#0ff", "#0f0", "#ff0", "#f00", "#f0f", "#00f"],
             ),
             # This is the key property for the animation

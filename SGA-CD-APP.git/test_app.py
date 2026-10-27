@@ -5,7 +5,7 @@ from unittest.mock import MagicMock
 import os
 
 # Import functions to test
-from main import setup_database
+from database.database_setup import setup_database
 # We need to re-define add_dummy_user here to control the connection
 from views.login import hash_password
 
@@ -16,8 +16,8 @@ def add_dummy_user_with_conn(conn, username, password, role, name):
         if cursor.fetchone():
             return # User already exists
 
-        cursor.execute("INSERT INTO usuarios (nombre_usuario, password_hash, rol, nombre_completo, correo) VALUES (?, ?, ?, ?, ?)",
-                       (username, hash_password(password), role, name, f"{username}@test.com"))
+        cursor.execute("INSERT INTO usuarios (nombre_usuario, password_hash, rol, nombre_completo, correo, inquilino_id) VALUES (?, ?, ?, ?, ?, ?)",
+                       (username, hash_password(password), role, name, f"{username}@test.com", 1))
         user_id = cursor.lastrowid
 
         if role == 'profesor':
@@ -43,8 +43,9 @@ class TestAppViews(unittest.TestCase):
             os.remove("formacion_test.db")
 
         cls.conn = sqlite3.connect("formacion_test.db")
-        # We need to read the setup script and execute it on our test DB
-        with open("database/database_setup.py", "r") as f:
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        db_setup_path = os.path.join(base_dir, "database", "database_setup.py")
+        with open(db_setup_path, "r") as f:
             setup_script = f.read()
 
         # The setup script connects to 'formacion.db', we need to adapt it
@@ -69,7 +70,7 @@ class TestAppViews(unittest.TestCase):
         print("Running test: test_01_login_view_creation")
         from views.login import login_view
         mock_page = MagicMock(spec=ft.Page)
-        view = login_view(mock_page)
+        view = login_view(mock_page, google_provider=None, microsoft_provider=None)
         self.assertIsInstance(view, ft.View)
         print("OK: test_01_login_view_creation")
 
@@ -78,7 +79,7 @@ class TestAppViews(unittest.TestCase):
         print("Running test: test_02_profesor_principal_view_creation")
         from views.profesor_principal import profesor_principal
         mock_page = MagicMock(spec=ft.Page)
-        view = profesor_principal(mock_page)
+        view = profesor_principal(mock_page, user_id=1, tenant_id=1)
         self.assertIsInstance(view, ft.View)
         print("OK: test_02_profesor_principal_view_creation")
 
@@ -93,18 +94,18 @@ class TestAppViews(unittest.TestCase):
         mock_page.client_storage = MagicMock()
 
         views_to_test = {
-            "admin_reporte_asistencia": (admin_reporte_asistencia.admin_reporte_asistencia, [mock_page]),
-            "admin_reporte_demografico": (admin_reporte_demografico.admin_reporte_demografico, [mock_page]),
-            "almacenista_gestion_elementos": (almacenista_gestion_elementos.almacenista_gestion_elementos, [mock_page, 1]),
-            "alumno_clases": (alumno_clases.alumno_clases, [mock_page, 1]),
-            "alumno_inscripcion": (alumno_inscripcion.alumno_inscripcion, [mock_page, 1]),
-            "instructor_gestion_elementos": (instructor_gestion_elementos.instructor_gestion_elementos, [mock_page, 1]),
-            "profesor_clases": (profesor_clases.profesor_clases, [mock_page, 1]),
-            "profesor_escenarios": (profesor_escenarios.profesor_escenarios, [mock_page]),
-            "profesor_eventos": (profesor_eventos.profesor_eventos, [mock_page, 1]),
-            "profesor_horarios": (profesor_horarios.profesor_horarios, [mock_page]),
-            "profesor_perfil": (profesor_perfil.profesor_perfil, [mock_page, 1]),
-            "profesor_procesos_formacion": (profesor_procesos_formacion.profesor_procesos_formacion, [mock_page]),
+            "admin_reporte_asistencia": (admin_reporte_asistencia.admin_reporte_asistencia, [mock_page, 1]),
+            "admin_reporte_demografico": (admin_reporte_demografico.admin_reporte_demografico, [mock_page, 1]),
+            "almacenista_gestion_elementos": (almacenista_gestion_elementos.almacenista_gestion_elementos, [mock_page, 1, 1]),
+            "alumno_clases": (alumno_clases.alumno_clases, [mock_page, 1, 1]),
+            "alumno_inscripcion": (alumno_inscripcion.alumno_inscripcion, [mock_page, 1, 1]),
+            "instructor_gestion_elementos": (instructor_gestion_elementos.instructor_gestion_elementos, [mock_page, 1, 1]),
+            "profesor_clases": (profesor_clases.profesor_clases, [mock_page, 1, 1]),
+            "profesor_escenarios": (profesor_escenarios.profesor_escenarios, [mock_page, 1]),
+            "profesor_eventos": (profesor_eventos.profesor_eventos, [mock_page, 1, 1]),
+            "profesor_horarios": (profesor_horarios.profesor_horarios, [mock_page, 1]),
+            "profesor_perfil": (profesor_perfil.profesor_perfil, [mock_page, 1, 1]),
+            "profesor_procesos_formacion": (profesor_procesos_formacion.profesor_procesos_formacion, [mock_page, 1]),
         }
 
         for name, (view_func, args) in views_to_test.items():

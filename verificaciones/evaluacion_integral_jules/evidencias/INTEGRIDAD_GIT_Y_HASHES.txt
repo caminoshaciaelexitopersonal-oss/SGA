@@ -1,0 +1,15 @@
+=== RECALCULO Y VERIFICACIÓN PROBATORIA DE HASHES MD5 (PERÍMETRO PROTEGIDO) ===
+Fecha / Hora: Tue Oct 27 17:50:51 UTC 2026
+
+52c83cfca2ba094b060661bdf259b51c  SGA-CD-WEB.git/js/views/admin_general.js
+b396d65984216013b45fd006e4eeffe8  SGA-CD-FASTAPI-BACKEND/app/api/v1/endpoints/admin_general.py
+132c63fe3220bf746fe24b8d5a8fc2a8  SGA-CD-WEB.git/index.html
+256e0b2ae110280c1d94d4842bef4c8d  SGA-CD-WEB.git/css/vanguard.css
+35e60be9613c955b76e37c036f53063c  SGA-CD-WEB.git/css/style.css
+
+COMPARACIÓN DE INTEGRIDAD CONTRA REFERENCIAS OFICIALES:
+1. SGA-CD-WEB.git/js/views/admin_general.js: 52c83cfca2ba094b060661bdf259b51c [100% MATCH]
+2. SGA-CD-FASTAPI-BACKEND/app/api/v1/endpoints/admin_general.py: b396d65984216013b45fd006e4eeffe8 [100% MATCH]
+3. SGA-CD-WEB.git/index.html: 132c63fe3220bf746fe24b8d5a8fc2a8 [100% MATCH]
+4. SGA-CD-WEB.git/css/vanguard.css: 256e0b2ae110280c1d94d4842bef4c8d [100% MATCH]
+5. SGA-CD-WEB.git/css/style.css: 35e60be9613c955b76e37c036f53063c [100% MATCH]

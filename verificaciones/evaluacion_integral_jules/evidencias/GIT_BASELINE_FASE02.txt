@@ -1,0 +1,39 @@
+=== BASELINE GIT FASE SUBSANACIÓN-POST-EVALUACIÓN-02 ===
+Fecha / Hora: Tue Oct 27 17:42:30 UTC 2026
+Raíz Monorepo: /app
+Rama Física Activa: jules-16552522226947204135-76e2a606
+HEAD SHA: 9c18d425ea2d404a7ec9922ffc9df66e89f13475
+Git Status:
+On branch jules-16552522226947204135-76e2a606
+Changes to be committed:
+  (use "git restore --staged <file>..." to unstage)
+	modified:   SGA-CD-APK.git/agent/llm_service.py
+	modified:   SGA-CD-APK.git/test_app.py
+	modified:   SGA-CD-APK.git/test_onboarding.py
+	modified:   SGA-CD-APK.git/views/admin_principal.py
+	modified:   SGA-CD-APK.git/views/components/chat_assistant.py
+	modified:   SGA-CD-APK.git/views/jefe_area/jefe_area_principal.py
+	modified:   SGA-CD-APK.git/views/profesor_horarios.py
+	modified:   SGA-CD-APK.git/views/profesor_principal.py
+	modified:   SGA-CD-APK.git/views/profesor_procesos_formacion.py
+	modified:   SGA-CD-APP.git/agent/llm_service.py
+	modified:   SGA-CD-APP.git/test_app.py
+	modified:   SGA-CD-APP.git/test_onboarding.py
+	modified:   SGA-CD-APP.git/views/admin_principal.py
+	modified:   SGA-CD-APP.git/views/components/chat_assistant.py
+	modified:   SGA-CD-APP.git/views/jefe_area/jefe_area_principal.py
+	modified:   SGA-CD-APP.git/views/profesor_horarios.py
+	modified:   SGA-CD-APP.git/views/profesor_principal.py
+	modified:   SGA-CD-APP.git/views/profesor_procesos_formacion.py
+	new file:   verificaciones/evaluacion_integral_jules/evidencias/GIT_BASELINE.txt
+	new file:   verificaciones/evaluacion_integral_jules/evidencias/INTEGRIDAD_GIT_Y_HASHES.txt
+	new file:   verificaciones/evaluacion_integral_jules/hallazgos/MATRIZ_HALLAZGOS_PRIORIZADOS.txt
+	new file:   verificaciones/evaluacion_integral_jules/inventario/INVENTARIO_COMPONENTES.txt
+	new file:   verificaciones/evaluacion_integral_jules/pruebas/REGISTRO_EJECUCION_PRUEBAS.txt
+	new file:   verificaciones/evaluacion_integral_jules/reportes/INFORME_EJECUTIVO_INTEGRAL.txt
+	new file:   verificaciones/evaluacion_integral_jules/reportes/INFORME_TECNICO_POR_COMPONENTE.txt
+	new file:   verificaciones/evaluacion_integral_jules/reportes/PLAN_DE_CORRECCION_PENDIENTES.txt
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	verificaciones/evaluacion_integral_jules/evidencias/GIT_BASELINE_FASE02.txt

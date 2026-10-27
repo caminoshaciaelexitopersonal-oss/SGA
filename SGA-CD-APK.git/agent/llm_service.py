@@ -75,6 +75,19 @@ def get_llm_instance() -> Any:
     """Returns the singleton LLM instance."""
     return _llm_instance
 
+def get_llm() -> Any:
+    """Alias for get_llm_instance for compatibility with legacy squad graphs."""
+    return _llm_instance
+
 def get_llm_status() -> str:
     """Returns the current status of the LLM initialization."""
     return _llm_status
+
+def _load_config() -> Dict[str, Any]:
+    """Helper to load config for tests/integrations if config.json exists."""
+    import json
+    config_path = "config.json"
+    if os.path.exists(config_path):
+        with open(config_path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return {"llm_provider": "local", "providers": {}}

@@ -57,8 +57,8 @@ class ChatAssistant(ft.Stack):
             border_radius=50,
             padding=3,
             gradient=ft.LinearGradient(
-                begin=ft.alignment.top_left,
-                end=ft.alignment.bottom_right,
+                begin=ft.alignment.Alignment(-1, -1),
+                end=ft.alignment.Alignment(1, 1),
                 colors=["#00f", "#0ff", "#0f0", "#ff0", "#f00", "#f0f", "#00f"],
             ),
             animate_rotation=ft.animation.Animation(duration=4000, curve=ft.AnimationCurve.LINEAR),

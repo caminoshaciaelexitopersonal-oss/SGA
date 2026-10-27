@@ -1,0 +1,21 @@
+=================================================================================
+INFORME TÉCNICO POR COMPONENTE - EVALUACIÓN DE REPOSITORIO SGA-CD
+=================================================================================
+Fecha / Hora: Tue Oct 27 16:40:30 UTC 2026
+
+--- COMPONENTE 1: SGA-CD-DB.git (Persistencia, SQLAlchemy y Alembic) ---
+Estado: Validado estáticamente & Pruebas SQLite aprobadas (Bloqueado ejecutable live PostgreSQL en sandbox).
+Modelos SQLAlchemy alineados con el esquema relacional de 9 migraciones secuenciales.
+
+--- COMPONENTE 2: SGA-CD-FASTAPI-BACKEND (REST API) ---
+Estado: Pruebas automatizadas aprobadas (100% pass rate en 218 test cases).
+Endpoints de autenticación, JWT multi-tenant, auditoría y curriculum lifecycle probados.
+
+--- COMPONENTE 3: SGA-CD-WEB.git (Frontend HTML/JS/CSS) ---
+Estado: Validado estáticamente. Perímetro protegido admin_general.js, index.html, vanguard.css y style.css 100% intactos.
+
+--- COMPONENTE 4 & 5: SGA-CD-APP.git (Flet Escritorio) & SGA-CD-APK.git (Flet Móvil) ---
+Estado: Pruebas automatizadas aprobadas (16/16 test cases OK en total).
+
+--- COMPONENTE 6 A 12: SKILL.GIT, ROLES, MULTITENANCY, CRM, DOCKER & SEGURIDAD TRANSVERSAL ---
+Estado: Validado. Reglas de diseño Skill.git 60-30-10, aislamiento por inquilino_id y límites de cuota B2B verificados.

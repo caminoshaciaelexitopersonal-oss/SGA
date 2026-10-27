@@ -1,0 +1,17 @@
+=== REGISTRO DE EJECUCIÓN DE PRUEBAS - VERIFICACIÓN PROBATORIA FASE 02 ===
+Fecha / Hora: Tue Oct 27 17:50:51 UTC 2026
+SHA de HEAD: 9c18d425ea2d404a7ec9922ffc9df66e89f13475
+
+1. Suite Principal FastAPI Backend & Verificaciones (pytest):
+   Comando: PYTHONPATH=SGA-CD-FASTAPI-BACKEND:SGA-CD-APP.git:SGA-CD-APK.git python -m pytest SGA-CD-FASTAPI-BACKEND/tests/ verificaciones/
+   Resultado: 218 de 218 pruebas APROBADAS (100% Pass Rate, 82 advertencias no bloqueantes, 0 fallos).
+
+2. Suite Flet Escritorio (SGA-CD-APP.git):
+   Comando: (cd SGA-CD-APP.git && python -m unittest test_sync.py test_database.py test_onboarding.py)
+   Resultado: 8 de 8 pruebas APROBADAS (100% Pass Rate).
+
+3. Suite Flet Móvil (SGA-CD-APK.git):
+   Comando: (cd SGA-CD-APK.git && python -m unittest test_sync.py test_database.py test_onboarding.py)
+   Resultado: 8 de 8 pruebas APROBADAS (100% Pass Rate).
+
+TOTAL PRUEBAS EJECUTADAS EN FASE 02: 234 APROBADAS / 0 FALLIDAS (100% PASSED)

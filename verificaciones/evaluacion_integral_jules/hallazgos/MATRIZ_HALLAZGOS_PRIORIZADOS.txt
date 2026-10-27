@@ -1,0 +1,39 @@
+=== MATRIZ DE HALLAZGOS PRIORIZADOS Y VERIFICACIÓN PROBATORIA (FASE 02) — SGA-CD ===
+Fecha / Hora: Tue Oct 27 17:50:51 UTC 2026
+SHA de HEAD: 9c18d425ea2d404a7ec9922ffc9df66e89f13475
+Rama Física: jules-16552522226947204135-76e2a606
+
+--------------------------------------------------------------------------------
+HALLAZGO P0-00: EVALUACIÓN Y VERIFICACIÓN DE SEGURIDAD
+--------------------------------------------------------------------------------
+  Prioridad: Crítico (P0)
+  Estado Final: VERIFICADO SIN HALLAZGOS EN EL ALCANCE
+  Detalle: Revisión focalizada de lectura sobre los cambios staged. No se detectaron
+           claves secretas expuestas, modificaciones de tokens, ni vulnerabilidades de elevación de privilegios.
+
+--------------------------------------------------------------------------------
+HALLAZGO P1-01: INCOMPATIBILIDAD DE IMPORTACIONES Y SINTAXIS EN FLET DESKTOP/MOBILE
+--------------------------------------------------------------------------------
+  Prioridad: Alto (P1)
+  Estado Final: CORREGIDO Y VERIFICADO
+  Componentes: SGA-CD-APP.git (Escritorio) y SGA-CD-APK.git (Móvil)
+  Causa Raíz: Importaciones obsoletas desde main.py y sintaxis ft.alignment en views.
+  Pruebas Ejecutadas:
+    1. (cd SGA-CD-APP.git && python -m unittest test_sync.py test_database.py test_onboarding.py) -> 8/8 PASADAS
+    2. (cd SGA-CD-APK.git && python -m unittest test_sync.py test_database.py test_onboarding.py) -> 8/8 PASADAS
+  Resultado: 16 de 16 pruebas aprobadas (100% Pass Rate).
+
+--------------------------------------------------------------------------------
+HALLAZGO P2-01: PRUEBAS EN ENTORNO POSTGRESQL REAL
+--------------------------------------------------------------------------------
+  Prioridad: Medio (P2)
+  Estado Final: BLOQUEADO — INFRAESTRUCTURA NO DISPONIBLE
+  Detalle: Inspección de sandbox confirmó ausencia de demonio/servicio psql activo.
+           Alembic y psycopg2 están configurados correctamente. Pendiente para CI/CD con servidor real.
+
+--------------------------------------------------------------------------------
+HALLAZGO P3-01: ADVERTENCIAS DE DEPRECACIÓN (datetime.utcnow y Pydantic V2)
+--------------------------------------------------------------------------------
+  Prioridad: Bajo (P3)
+  Estado Final: PENDIENTE
+  Detalle: 82 advertencias no bloqueantes. Se preserva el comportamiento actual para evitar romper contratos.

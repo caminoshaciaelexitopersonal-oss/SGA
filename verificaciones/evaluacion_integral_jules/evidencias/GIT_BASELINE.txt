@@ -1,0 +1,19 @@
+=== BASELINE GIT Y ENTORNOS DE EVALUACION INTEGRAL ===
+Fecha / Hora: Tue Oct 27 16:15:07 UTC 2026
+Ruta Raíz Real: /app
+Rama Activa:
+jules-16552522226947204135-76e2a606
+HEAD Commit:
+9c18d425ea2d404a7ec9922ffc9df66e89f13475
+Remotos Disponibles:
+origin	https://github.com/caminoshaciaelexitopersonal-oss/SGA (fetch)
+origin	https://github.com/caminoshaciaelexitopersonal-oss/SGA (push)
+Salida Completa de Git Status:
+On branch jules-16552522226947204135-76e2a606
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	verificaciones/evaluacion_integral_jules/
+
+nothing added to commit but untracked files present (use "git add" to track)
+Historial Reciente (5 commits):
+9c18d425 Merge pull request #32 from caminoshaciaelexitopersonal-oss/jules-5336486463467977840-2fb3b597

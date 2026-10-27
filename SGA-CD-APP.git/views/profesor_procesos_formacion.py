@@ -84,8 +84,8 @@ def profesor_procesos_formacion(page: ft.Page, tenant_id: int):
         ft.Container(
             padding=20,
             gradient=ft.LinearGradient(
-                begin=ft.alignment.top_left,
-                end=ft.alignment.bottom_right,
+                begin=ft.alignment.Alignment(-1, -1),
+                end=ft.alignment.Alignment(1, 1),
                 colors=[COLOR1_HEX, COLOR2_HEX]
             ),
             content=ft.Column([

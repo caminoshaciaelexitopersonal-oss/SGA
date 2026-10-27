@@ -1,0 +1,210 @@
+=== INVENTARIO DE COMPONENTES DEL MONOREPOSITORIO SGA-CD ===
+Fecha / Hora: Tue Oct 27 16:16:10 UTC 2026
+
+1. Estructura de Directorios Raíz:
+total 1380
+drwxr-xr-x 20 jules root    4096 Oct 27 16:12 .
+drwxr-xr-x  1 root  root    4096 Oct 27 15:58 ..
+-rw-rw-r--  1 jules jules   1733 Oct 27 16:06 .env
+-rw-rw-r--  1 jules jules   1733 Oct 27 15:59 .env.example
+drwxrwxr-x  7 jules jules   4096 Oct 27 16:15 .git
+drwxrwxr-x  3 jules jules   4096 Oct 27 15:59 .github
+-rw-rw-r--  1 jules jules    142 Oct 27 15:59 .gitignore
+drwxrwxr-x  3 jules jules   4096 Oct 27 16:01 .pytest_cache
+-rw-rw-r--  1 jules jules   1514 Oct 27 15:59 AGENTS.md
+drwxrwxr-x 14 jules jules   4096 Oct 27 15:59 OpenJarvis
+drwxrwxr-x  3 jules jules   4096 Oct 27 15:59 SGA
+drwxrwxr-x 15 jules jules   4096 Oct 27 16:01 SGA-CD-APK.git
+drwxrwxr-x 15 jules jules   4096 Oct 27 16:01 SGA-CD-APP.git
+drwxrwxr-x  5 jules jules   4096 Oct 27 15:59 SGA-CD-DB.git
+drwxrwxr-x  4 jules jules   4096 Oct 27 15:59 SGA-CD-FASTAPI-BACKEND
+drwxrwxr-x  5 jules jules   4096 Oct 27 15:59 SGA-CD-WEB.git
+drwxrwxr-x  8 jules jules   4096 Oct 27 15:59 Skill.git
+drwxrwxr-x 12 jules jules   4096 Oct 27 16:00 Soup
+drwxrwxr-x  3 jules jules   4096 Oct 27 16:06 app
+drwxrwxr-x  6 jules jules   4096 Oct 27 16:00 audittor
+-rw-rw-r--  1 jules jules   2563 Oct 27 16:00 docker-compose.yml
+drwxrwxr-x  8 jules jules   4096 Oct 27 16:00 fish-speech
+-rw-r--r--  1 jules jules 651264 Oct 27 16:12 test_enrollment_coverage.db
+drwxrwxr-x  3 jules jules   4096 Oct 27 16:11 test_sync_data
+-rw-r--r--  1 jules jules 651264 Oct 27 16:12 test_teacher_spec.db
+drwxrwxr-x  3 jules jules   4096 Oct 27 16:11 test_user_data
+drwxrwxr-x 24 jules jules   4096 Oct 27 16:14 verificaciones
+
+2. SGA-CD-DB.git (Persistencia y Migraciones):
+total 56
+drwxrwxr-x  5 jules jules  4096 Oct 27 15:59 .
+drwxr-xr-x 20 jules root   4096 Oct 27 16:12 ..
+drwxrwxr-x  3 jules jules  4096 Oct 27 15:59 alembic
+-rw-rw-r--  1 jules jules  4868 Oct 27 15:59 alembic.ini
+-rw-rw-r--  1 jules jules 21890 Oct 27 15:59 database_setup.py
+drwxrwxr-x  3 jules jules  4096 Oct 27 16:06 models
+-rw-rw-r--  1 jules jules   219 Oct 27 15:59 pyproject.toml
+drwxrwxr-x  2 jules jules  4096 Oct 27 15:59 sga_cd_db.egg-info
+total 72
+drwxrwxr-x 3 jules jules 4096 Oct 27 16:06 .
+drwxrwxr-x 5 jules jules 4096 Oct 27 15:59 ..
+-rw-rw-r-- 1 jules jules 1166 Oct 27 15:59 __init__.py
+drwxrwxr-x 2 jules jules 4096 Oct 27 16:06 __pycache__
+-rw-rw-r-- 1 jules jules 6110 Oct 27 15:59 academic.py
+-rw-rw-r-- 1 jules jules  719 Oct 27 15:59 area.py
+-rw-rw-r-- 1 jules jules  138 Oct 27 15:59 base.py
+-rw-rw-r-- 1 jules jules 2490 Oct 27 15:59 billing.py
+-rw-rw-r-- 1 jules jules 2704 Oct 27 15:59 communication.py
+-rw-rw-r-- 1 jules jules 2971 Oct 27 15:59 curriculum.py
+-rw-rw-r-- 1 jules jules 1323 Oct 27 15:59 dropdowns.py
+-rw-rw-r-- 1 jules jules 3865 Oct 27 15:59 gamification.py
+-rw-rw-r-- 1 jules jules 1469 Oct 27 15:59 inventory.py
+-rw-rw-r-- 1 jules jules  217 Oct 27 15:59 settings.py
+-rw-rw-r-- 1 jules jules  900 Oct 27 15:59 tenancy.py
+-rw-rw-r-- 1 jules jules 7176 Oct 27 15:59 user.py
+total 92
+drwxrwxr-x 2 jules jules  4096 Oct 27 15:59 .
+drwxrwxr-x 3 jules jules  4096 Oct 27 15:59 ..
+-rw-rw-r-- 1 jules jules  1101 Oct 27 15:59 0461d6bd6272_add_settings_table.py
+-rw-rw-r-- 1 jules jules 45827 Oct 27 15:59 36f3d0a15892_create_gateway_agnostic_billing_models.py
+-rw-rw-r-- 1 jules jules  1660 Oct 27 15:59 378b95eb277b_create_roles_and_user_roles_tables_for_.py
+-rw-rw-r-- 1 jules jules  2039 Oct 27 15:59 85b0514d24af_add_padre_acudiente_role_and_parent_.py
+-rw-rw-r-- 1 jules jules  2478 Oct 27 15:59 c91a2e34f567_add_performance_indexes_v1.py
+-rw-rw-r-- 1 jules jules  1981 Oct 27 15:59 d1e2f3a4b5c6_add_consumo_inquilinos_unique_constraint.py
+-rw-rw-r-- 1 jules jules  4629 Oct 27 15:59 e2f3a4b5c6d7_add_master_catalog_and_specialties.py
+-rw-rw-r-- 1 jules jules   381 Oct 27 15:59 f3a4b5c6d7e8_merge_heads.py
+-rw-rw-r-- 1 jules jules  2163 Oct 27 15:59 g4f5e6d7c8b9_add_curriculum_approval_columns.py
+
+3. SGA-CD-FASTAPI-BACKEND (Backend REST API & Agentes):
+total 56
+drwxrwxr-x  4 jules jules 4096 Oct 27 15:59 .
+drwxr-xr-x 20 jules root  4096 Oct 27 16:12 ..
+-rw-rw-r--  1 jules jules  472 Oct 27 15:59 Dockerfile
+-rw-rw-r--  1 jules jules 3113 Oct 27 15:59 INFORME_ROLES.md
+-rw-rw-r--  1 jules jules 5726 Oct 27 15:59 ROLES_Y_PERMISOS.md
+drwxrwxr-x 16 jules jules 4096 Oct 27 16:05 app
+-rw-rw-r--  1 jules jules 1321 Oct 27 15:59 create_gamification_tables.py
+-rw-rw-r--  1 jules jules 2981 Oct 27 15:59 create_test_users.py
+-rw-rw-r--  1 jules jules 3773 Oct 27 15:59 database_migration_script.sql
+-rw-rw-r--  1 jules jules 2854 Oct 27 15:59 diagnose_imports.py
+-rw-rw-r--  1 jules jules 2886 Oct 27 15:59 generate_youtube_refresh_token.py
+-rw-rw-r--  1 jules jules  748 Oct 27 15:59 requirements.txt
+drwxrwxr-x  5 jules jules 4096 Oct 27 16:01 tests
+
+4. SGA-CD-WEB.git (Frontend Web):
+total 148
+drwxrwxr-x  5 jules jules  4096 Oct 27 15:59 .
+drwxr-xr-x 20 jules root   4096 Oct 27 16:12 ..
+-rw-rw-r--  1 jules jules  3940 Oct 27 15:59 404.html
+-rw-rw-r--  1 jules jules  6511 Oct 27 15:59 INFORME_TECNICO.md
+-rw-rw-r--  1 jules jules  5718 Oct 27 15:59 ROLES_ANALISIS.md
+-rw-rw-r--  1 jules jules  3764 Oct 27 15:59 api_test.html
+-rw-rw-r--  1 jules jules  7529 Oct 27 15:59 app.html
+drwxrwxr-x  4 jules jules  4096 Oct 27 16:06 assets
+drwxrwxr-x  2 jules jules  4096 Oct 27 15:59 css
+-rw-rw-r--  1 jules jules   973 Oct 27 15:59 favicon.svg
+-rw-rw-r--  1 jules jules 23076 Oct 27 15:59 index.html
+drwxrwxr-x  5 jules jules  4096 Oct 27 15:59 js
+-rw-rw-r--  1 jules jules  4995 Oct 27 15:59 login.html
+-rw-rw-r--  1 jules jules   444 Oct 27 15:59 manifest.json
+-rw-rw-r--  1 jules jules  3086 Oct 27 15:59 offline.html
+-rw-rw-r--  1 jules jules   541 Oct 27 15:59 payment_cancel.html
+-rw-rw-r--  1 jules jules   495 Oct 27 15:59 payment_success.html
+-rw-rw-r--  1 jules jules  7015 Oct 27 15:59 privacy.html
+-rw-rw-r--  1 jules jules  8483 Oct 27 15:59 register.html
+-rw-rw-r--  1 jules jules   310 Oct 27 15:59 robots.txt
+-rw-rw-r--  1 jules jules  1626 Oct 27 15:59 service-worker.js
+-rw-rw-r--  1 jules jules   912 Oct 27 15:59 sitemap.xml
+-rw-rw-r--  1 jules jules 10660 Oct 27 15:59 terms.html
+
+5. SGA-CD-APP.git (Cliente Flet Escritorio):
+total 160
+drwxrwxr-x 15 jules jules  4096 Oct 27 16:01 .
+drwxr-xr-x 20 jules root   4096 Oct 27 16:12 ..
+-rw-rw-r--  1 jules jules   144 Oct 27 15:59 .gitignore
+-rw-rw-r--  1 jules jules   427 Oct 27 15:59 Dockerfile
+-rw-rw-r--  1 jules jules  3878 Oct 27 15:59 README.md
+-rw-rw-r--  1 jules jules  3889 Oct 27 15:59 ROLES.md
+drwxrwxr-x  2 jules jules  4096 Oct 27 16:11 __pycache__
+drwxrwxr-x  3 jules jules  4096 Oct 27 16:01 agent
+drwxrwxr-x  4 jules jules  4096 Oct 27 15:59 agents
+drwxrwxr-x  2 jules jules  4096 Oct 27 15:59 analysis
+drwxrwxr-x  2 jules jules  4096 Oct 27 15:59 api
+drwxrwxr-x  3 jules jules  4096 Oct 27 15:59 assets
+-rw-rw-r--  1 jules jules  4560 Oct 27 15:59 create_test_users.py
+drwxrwxr-x  3 jules jules  4096 Oct 27 16:07 database
+-rw-rw-r--  1 jules jules  2076 Oct 27 15:59 debug_view.py
+-rw-rw-r--  1 jules jules  1395 Oct 27 15:59 debug_view_2.py
+drwxrwxr-x  2 jules jules  4096 Oct 27 15:59 docs
+-rw-rw-r--  1 jules jules   164 Oct 27 15:59 flet_test.py
+drwxrwxr-x  3 jules jules  4096 Oct 27 16:10 gamification
+drwxrwxr-x  2 jules jules  4096 Oct 27 15:59 i18n
+-rw-rw-r--  1 jules jules  5830 Oct 27 15:59 init_db.py
+-rw-rw-r--  1 jules jules 10157 Oct 27 15:59 load_test.py
+-rw-rw-r--  1 jules jules  4914 Oct 27 15:59 main.py
+-rw-rw-r--  1 jules jules   205 Oct 27 15:59 requirements.txt
+-rw-rw-r--  1 jules jules  1828 Oct 27 15:59 test_agent_integration.py
+-rw-rw-r--  1 jules jules  5776 Oct 27 15:59 test_app.py
+-rw-rw-r--  1 jules jules  3812 Oct 27 15:59 test_database.py
+-rw-rw-r--  1 jules jules  2873 Oct 27 15:59 test_onboarding.py
+-rw-rw-r--  1 jules jules  2342 Oct 27 15:59 test_security_flet.py
+-rw-rw-r--  1 jules jules  7033 Oct 27 15:59 test_sync.py
+drwxrwxr-x  2 jules jules  4096 Oct 27 15:59 tools
+drwxrwxr-x  3 jules jules  4096 Oct 27 16:01 utils
+drwxrwxr-x 12 jules jules  4096 Oct 27 16:10 views
+
+6. SGA-CD-APK.git (Cliente Flet Móvil):
+total 156
+drwxrwxr-x 15 jules jules  4096 Oct 27 16:01 .
+drwxr-xr-x 20 jules root   4096 Oct 27 16:12 ..
+-rw-rw-r--  1 jules jules   144 Oct 27 15:59 .gitignore
+-rw-rw-r--  1 jules jules   427 Oct 27 15:59 Dockerfile
+-rw-rw-r--  1 jules jules  3878 Oct 27 15:59 README.md
+-rw-rw-r--  1 jules jules  3889 Oct 27 15:59 ROLES.md
+drwxrwxr-x  2 jules jules  4096 Oct 27 16:11 __pycache__
+drwxrwxr-x  3 jules jules  4096 Oct 27 16:01 agent
+drwxrwxr-x  4 jules jules  4096 Oct 27 15:59 agents
+drwxrwxr-x  2 jules jules  4096 Oct 27 15:59 analysis
+drwxrwxr-x  2 jules jules  4096 Oct 27 15:59 api
+drwxrwxr-x  3 jules jules  4096 Oct 27 15:59 assets
+-rw-rw-r--  1 jules jules  4560 Oct 27 15:59 create_test_users.py
+drwxrwxr-x  3 jules jules  4096 Oct 27 16:11 database
+-rw-rw-r--  1 jules jules  2076 Oct 27 15:59 debug_view.py
+-rw-rw-r--  1 jules jules  1395 Oct 27 15:59 debug_view_2.py
+drwxrwxr-x  2 jules jules  4096 Oct 27 15:59 docs
+-rw-rw-r--  1 jules jules   164 Oct 27 15:59 flet_test.py
+drwxrwxr-x  3 jules jules  4096 Oct 27 16:11 gamification
+drwxrwxr-x  2 jules jules  4096 Oct 27 15:59 i18n
+-rw-rw-r--  1 jules jules  5830 Oct 27 15:59 init_db.py
+-rw-rw-r--  1 jules jules 10157 Oct 27 15:59 load_test.py
+-rw-rw-r--  1 jules jules  4995 Oct 27 15:59 main.py
+-rw-rw-r--  1 jules jules   215 Oct 27 15:59 requirements.txt
+-rw-rw-r--  1 jules jules  3457 Oct 27 15:59 test_agent_integration.py
+-rw-rw-r--  1 jules jules  5776 Oct 27 15:59 test_app.py
+-rw-rw-r--  1 jules jules  3812 Oct 27 15:59 test_database.py
+-rw-rw-r--  1 jules jules  2141 Oct 27 15:59 test_onboarding.py
+-rw-rw-r--  1 jules jules  7033 Oct 27 15:59 test_sync.py
+drwxrwxr-x  3 jules jules  4096 Oct 27 16:07 tools
+drwxrwxr-x  3 jules jules  4096 Oct 27 16:01 utils
+drwxrwxr-x 12 jules jules  4096 Oct 27 16:11 views
+
+7. Skill.git (Estándares de Diseño y UI/UX):
+total 32
+drwxrwxr-x  8 jules jules 4096 Oct 27 15:59 .
+drwxr-xr-x 20 jules root  4096 Oct 27 16:12 ..
+drwxrwxr-x  4 jules jules 4096 Oct 27 15:59 Animaciones y Efectos Visuales (Frontend)
+drwxrwxr-x  5 jules jules 4096 Oct 27 15:59 Base de Núcleo y Estructuras (Core & Frameworks)
+drwxrwxr-x  3 jules jules 4096 Oct 27 15:59 Creador de Skill
+drwxrwxr-x  7 jules jules 4096 Oct 27 15:59 Diseño de Interfaz y Experiencia de Usuario UIUX
+drwxrwxr-x  4 jules jules 4096 Oct 27 15:59 Inteligencia Artificial y Agentes
+drwxrwxr-x 14 jules jules 4096 Oct 27 16:00 Marketing
+
+8. Componentes Auxiliares y Monorepo Utilities (audittor):
+total 24
+drwxrwxr-x  6 jules jules 4096 Oct 27 16:00 .
+drwxr-xr-x 20 jules root  4096 Oct 27 16:12 ..
+drwxrwxr-x  2 jules jules 4096 Oct 27 16:00 ECC
+drwxrwxr-x 10 jules jules 4096 Oct 27 16:00 agent-thermos
+drwxrwxr-x 15 jules jules 4096 Oct 27 16:00 anti-slop
+drwxrwxr-x  8 jules jules 4096 Oct 27 16:00 graphify
+
+9. Orquestación y Entorno:
+-rw-rw-r-- 1 jules jules 1733 Oct 27 16:06 .env
+-rw-rw-r-- 1 jules jules 1733 Oct 27 15:59 .env.example
+-rw-rw-r-- 1 jules jules 2563 Oct 27 16:00 docker-compose.yml

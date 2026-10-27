@@ -16,8 +16,8 @@ def admin_principal(page: ft.Page, tenant_id: int, user_id: int):
                 padding=20,
                 # The gradient now uses colors from the theme's color scheme
                 gradient=ft.LinearGradient(
-                    begin=ft.alignment.top_left,
-                    end=ft.alignment.bottom_right,
+                    begin=ft.alignment.Alignment(-1, -1),
+                    end=ft.alignment.Alignment(1, 1),
                     colors=[
                         page.theme.color_scheme.primary_container,
                         page.theme.color_scheme.primary,
