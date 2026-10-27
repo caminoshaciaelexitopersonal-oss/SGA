@@ -1,0 +1,63 @@
+===============================================================================
+INFORME FINAL DE ESTABILIZACIÓN Y ENTREGA DEL REPOSITORIO SGA-CD
+PUNTO DE PARTIDA TÉCNICO PARA LA AUDITORÍA INTEGRAL INDEPENDIENTE DEL SISTEMA
+===============================================================================
+
+1. IDENTIDAD Y ESTADO DE GIT
+-------------------------------------------------------------------------------
+- Rama Git Activa: jules-18205847841856323206-01804b7a
+- Commit HEAD: 4f3ce08775963f2bc2901972a51caf79c7c25383
+- Estado del Árbol de Trabajo (Git Status):
+  * Archivos Modificados (Unstaged):
+    - SGA-CD-APP.git/views/admin_empresa/crm_marketing_view.py
+    - SGA-CD-APK.git/views/admin_empresa/crm_marketing_view.py
+  * Archivos Añadidos (Untracked / Staged):
+    - verificaciones/auditoria_independiente_fase_8_14_8/reportes/INFORME_AUDITORIA_INDEPENDIENTE_FASE_8_14_8.txt
+    - verificaciones/fase_8_14_9/reportes/INFORME_FINAL_FASE_8_14_9.txt
+    - verificaciones/fase_8_14_9/tests/test_fase_8_14_9_integration.py
+    - verificaciones/auditoria_final_fase_8_14_9/reportes/INFORME_AUDITORIA_FORENSE_FASE_8_14_9.txt
+    - verificaciones/entrega_final_repositorio/reportes/INFORME_FINAL_ESTABILIZACION_REPOSITORIO.txt
+
+-------------------------------------------------------------------------------
+2. INTEGRIDAD DEL PERÍMETRO PROTEGIDO (100% FROZEN)
+-------------------------------------------------------------------------------
+[OK] SGA-CD-WEB.git/js/views/admin_general.js         (MD5: 52c83cfca2ba094b060661bdf259b51c) - INTACTO
+[OK] SGA-CD-FASTAPI-BACKEND/app/api/v1/endpoints/admin_general.py (MD5: b396d65984216013b45fd006e4eeffe8) - INTACTO
+[OK] SGA-CD-WEB.git/index.html                         (MD5: 132c63fe3220bf746fe24b8d5a8fc2a8) - INTACTO
+[OK] SGA-CD-WEB.git/css/vanguard.css                   (MD5: 256e0b2ae110280c1d94d4842bef4c8d) - INTACTO
+[OK] SGA-CD-WEB.git/css/style.css                      (MD5: 35e60be9613c955b76e37c036f53063c) - INTACTO
+
+-------------------------------------------------------------------------------
+3. MATRIZ DE PARIDAD DE LOS TRES CLIENTES (WEB, DESKTOP, MOBILE)
+-------------------------------------------------------------------------------
+
+| Funcionalidad | Web (`SGA-CD-WEB.git`) | Desktop (`SGA-CD-APP.git`) | Mobile (`SGA-CD-APK.git`) | Endpoint Invocado | Permisos / Rol | Tipo de Prueba | Resultado | Brecha Pendiente |
+|---|---|---|---|---|---|---|---|---|
+| **Generación IA** | `fetch()` activo | `ApiClient.post` | `ApiClient.post` | `/api/v1/crm/generate_predis_media` | Roles Admin (`admin_empresa`, `jefe_area`, etc.) | Mock HTTP / Integración | PASSED | Proveedores externos en fallback por puertos cerrados |
+| **Campaña CRM** | `fetch()` activo | `ApiClient.post` | `ApiClient.post` | `/api/v1/crm/campaigns` | Roles Admin | Mock HTTP / Integración | PASSED | Requiere persistencia en DB PostgreSQL live |
+| **Publicación Social** | `fetch()` activo | `ApiClient.post` | `ApiClient.post` | `/api/v1/video_distribution/publish` | Roles Admin + Plan Full | Mock HTTP / Integración | PASSED | Tokens OAuth reales no configurados en sandbox |
+| **Gating Plan Básico** | Bloqueo `.card-locked` | Pantalla Bloqueo | Pantalla Bloqueo | `/api/v1/tenancy/my-plan-capabilities` | Todos los roles | Integración Local Real | PASSED | Ninguna |
+| **Aislamiento Multitanante** | JWT `inquilino_id` | SyncManager check | SyncManager check | `deps.verify_resource_tenant_and_owner` | Todos los roles | Integración Local Real | PASSED | Ninguna |
+
+-------------------------------------------------------------------------------
+4. RESULTADOS DE LA SUITE COMPLETA DE RECONCILIACIÓN Y REGRESIÓN
+-------------------------------------------------------------------------------
+- Suite Fase 8.14.9 (`verificaciones/fase_8_14_9/tests/test_fase_8_14_9_integration.py`): 12/12 Tests OK (0.011s)
+- Suite Fase 8.14.8 (`verificaciones/fase_8_14_8/tests/`): 8/8 Tests OK (0.065s)
+- Suite Verificaciones General (`verificaciones/tests/`): 26/26 Tests OK (0.088s)
+- Suite Backend Pura (`SGA-CD-FASTAPI-BACKEND/tests/`): 18/18 Tests OK
+TOTAL EJECUTADO: 64/64 Pruebas Pasando 100% OK.
+
+-------------------------------------------------------------------------------
+5. DICTAMEN OFICIAL Y CLASIFICACIÓN DE LA ENTREGA
+-------------------------------------------------------------------------------
+
+DICTAMEN FINAL: **OPCIÓN B. ACEPTADO CON LIMITACIONES DOCUMENTADAS.**
+
+Declaración de Transparencia Probatoria:
+1. ALCANCE CUMPLIDO: La entrega es 100% reproducible en el entorno actual. Las vistas Flet Desktop y Mobile sustituyeron sus respuestas simuladas por llamadas HTTP reales con `ApiClient` hacia los endpoints `/crm/generate_predis_media` y `/video_distribution/publish`, manejando la prevención de doble clic y capturando códigos de error HTTP (402, 403, 429, 503).
+2. LIMITACIÓN 1 (Infraestructura de DB): El entorno sandbox no cuenta con PostgreSQL activo ni daemon `psql`, ejecutando las verificaciones sobre SQLite in-memory / `test.db`.
+3. LIMITACIÓN 2 (Servicios IA Externos): Los microservicios de Colibrí (8080), Open Generative AI (3000) y SkyReels (8090) retornan `Connection refused`, por lo cual el router de IA actúa mediante respuestas estructuradas de fallback.
+4. LIMITACIÓN 3 (Nivel de Pruebas): Las pruebas client-side 8, 9, 10 y 11 de la Fase 8.14.9 operan mediante mocks sobre el objeto `ApiClient.post` (Pruebas de Contrato / Mock HTTP).
+
+===============================================================================

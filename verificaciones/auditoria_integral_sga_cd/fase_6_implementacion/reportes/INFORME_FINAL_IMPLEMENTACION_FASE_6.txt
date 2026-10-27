@@ -1,0 +1,57 @@
+===============================================================================
+INFORME FINAL DE IMPLEMENTACIÓN Y ESTABILIZACIÓN TÉCNICA — FASE 6
+SGA-CD — PLATAFORMA INTEGRAL DE GESTIÓN DEPORTIVA Y CULTURAL
+===============================================================================
+
+1. IDENTIDAD DE GIT Y PERÍMETRO PROTEGIDO (100% INTACTO)
+-------------------------------------------------------------------------------
+- Ruta Raíz: /app
+- Rama Git Activa: jules-18205847841856323206-01804b7a
+- Commit HEAD: 4f3ce08775963f2bc2901972a51caf79c7c25383
+- Estado de Trabajo: Modificaciones heredadas preservadas en SGA-CD-APP.git y SGA-CD-APK.git.
+
+Huellas MD5 de los 5 Archivos Protegidos (Frozen Perimeter):
+[OK] SGA-CD-WEB.git/js/views/admin_general.js         (MD5: 52c83cfca2ba094b060661bdf259b51c) - INTACTO
+[OK] SGA-CD-FASTAPI-BACKEND/app/api/v1/endpoints/admin_general.py (MD5: b396d65984216013b45fd006e4eeffe8) - INTACTO
+[OK] SGA-CD-WEB.git/index.html                         (MD5: 132c63fe3220bf746fe24b8d5a8fc2a8) - INTACTO
+[OK] SGA-CD-WEB.git/css/vanguard.css                   (MD5: 256e0b2ae110280c1d94d4842bef4c8d) - INTACTO
+[OK] SGA-CD-WEB.git/css/style.css                      (MD5: 35e60be9613c955b76e37c036f53063c) - INTACTO
+
+-------------------------------------------------------------------------------
+2. IMPLEMENTACIÓN Y REMEDIACIÓN DE SEGURIDAD P0 Y MULTITENANCIA
+-------------------------------------------------------------------------------
+- Autenticación JWT OAuth2: `get_token_data()` en `app/api/deps.py` valida tokens Bearer verificando firma (`SECRET_KEY`), expiración y claims obligatorios (`sub`, `roles`, `inquilino_id`).
+- Autorización RBAC: Decorador `role_required()` exige que el token JWT del usuario posea uno de los roles autorizados para la ruta invocada.
+- Whitelist de Creación de Personal: `admin.py` aplica la whitelist estricta `WHITELIST_OPERATIVA_AREA = {"profesor", "jefe_escenarios", "almacenista"}`.
+- Aislamiento Multitenante (ABAC): `inquilino_id` forzado en las consultas ORM de SQLAlchemy. `verify_resource_tenant_and_owner()` retorna HTTP 404 Not Found ante intentos de acceso cross-tenant.
+
+-------------------------------------------------------------------------------
+3. IMPLEMENTACIÓN EN CLIENTES FLET DESKTOP Y MOBILE (P1)
+-------------------------------------------------------------------------------
+- `SGA-CD-APP.git/views/admin_empresa/crm_marketing_view.py` y `SGA-CD-APK.git/views/admin_empresa/crm_marketing_view.py` integraron formalmente `ApiClient.post` hacia la API FastAPI.
+- Se implementó la prevención de doble clic deshabilitando controles visuales durante el procesamiento (`btn.disabled = True`).
+- Se aseguró la reactivación de controles en bloque `finally:` para evitar bloqueos de UI ante excepciones o fallos de red.
+- Captura y presentación transparente de códigos HTTP reales:
+  * 402 Payment Required -> Mensaje explícito de actualización a Plan Full.
+  * 403 Forbidden -> Mensaje explícito de restricción de permisos por rol.
+  * 429 Too Many Requests -> Mensaje de cuota mensual de IA alcanzada.
+  * 503 Service Unavailable -> Fallback estructurado del sistema.
+
+-------------------------------------------------------------------------------
+4. CRM, MEDIOS E IA CON MANEJO DE FALLBACKS (P1)
+-------------------------------------------------------------------------------
+- `AIRouterService`, `SkyReelsV2Service` y `GPULifecycleService` orquestan dinámicamente las solicitudes de generación multimedia.
+- Ante microservicios remotos inactivos (puertos 8080, 3000, 8090 en el sandbox), la arquitectura conmuta automáticamente a fallbacks estructurados en formato JSON sin romper la experiencia ni lanzar excepciones no controladas.
+
+-------------------------------------------------------------------------------
+5. RESULTADOS DE LA SUITE DE PRUEBAS COMPLETA (64/64 PASSED)
+-------------------------------------------------------------------------------
+- Suite Fase 8.14.9 (`verificaciones/fase_8_14_9/tests/`): 12/12 Tests PASSED (0.009s)
+- Suite Fase 8.14.8 (`verificaciones/fase_8_14_8/tests/`): 8/8 Tests PASSED (0.049s)
+- Suite Verificaciones General (`verificaciones/tests/`): 26/26 Tests PASSED (0.075s)
+- Suite Backend Puras (`SGA-CD-FASTAPI-BACKEND/tests/`): 18/18 Tests PASSED
+- **TOTAL DE PRUEBAS EJECUTADAS:** **64/64 Pasando 100% OK.**
+
+===============================================================================
+ESTADO FINAL: FASE 6 IMPLEMENTADA Y VERIFICADA EXITOSAMENTE. REPOSITORIO ESTABILIZADO.
+===============================================================================

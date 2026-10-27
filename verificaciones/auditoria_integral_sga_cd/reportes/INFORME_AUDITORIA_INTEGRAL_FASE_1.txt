@@ -1,0 +1,85 @@
+===============================================================================
+INFORME DE AUDITORÍA FORENSE INTEGRAL — FASE 1: DESCUBRIMIENTO Y LÍNEA BASE SGA-CD
+SISTEMA DE GESTIÓN DE ESTUDIANTES, PROFESORES, ACTIVIDADES CULTURALES Y DEPORTIVAS
+===============================================================================
+
+1. ESTADO DE GIT Y PERÍMETRO DE ARCHIVOS PROTEGIDOS
+-------------------------------------------------------------------------------
+- Ruta Raíz: /app
+- Rama Git Activa: jules-18205847841856323206-01804b7a
+- Commit HEAD: 4f3ce08775963f2bc2901972a51caf79c7c25383
+- Estado de Trabajo (Git Status):
+  * M  SGA-CD-APK.git/views/admin_empresa/crm_marketing_view.py
+  * M  SGA-CD-APP.git/views/admin_empresa/crm_marketing_view.py
+  * A  verificaciones/
+- Huellas MD5 de los 5 Archivos Protegidos (100% Intactos):
+  1. SGA-CD-WEB.git/js/views/admin_general.js         (52c83cfca2ba094b060661bdf259b51c) - INTACTO
+  2. SGA-CD-FASTAPI-BACKEND/app/api/v1/endpoints/admin_general.py (b396d65984216013b45fd006e4eeffe8) - INTACTO
+  3. SGA-CD-WEB.git/index.html                         (132c63fe3220bf746fe24b8d5a8fc2a8) - INTACTO
+  4. SGA-CD-WEB.git/css/vanguard.css                   (256e0b2ae110280c1d94d4842bef4c8d) - INTACTO
+  5. SGA-CD-WEB.git/css/style.css                      (35e60be9613c955b76e37c036f53063c) - INTACTO
+
+-------------------------------------------------------------------------------
+2. ARQUITECTURA GENERAL DEL MONOREPOSITORIO
+-------------------------------------------------------------------------------
+El monorepositorio contiene 6 componentes principales y 5 utilidades/subproyectos:
+1. SGA-CD-WEB.git: SPA en HTML5/JS ES6 + CSS3 Vanguard con Service Worker PWA v2.
+2. SGA-CD-FASTAPI-BACKEND: API RESTful en Python/FastAPI con SQLAlchemy 2.0 y Pydantic.
+3. SGA-CD-APP.git: Aplicación de Escritorio en Python con Flet framework y SQLite local (`local_sga.db`).
+4. SGA-CD-APK.git: Aplicación Móvil en Python con Flet framework y SQLite local.
+5. SGA-CD-DB.git: Migraciones de base de datos relacional gestionadas por Alembic (9 revisiones).
+6. Skill.git: Design System, Tokens, Animaciones GSAP/Lenis y Guías UI/UX Dark Metallic Blue (60-30-10).
+7. Submódulos Auxiliares: `audittor/` (anti-slop, graphify), `Soup/`, `fish-speech/`, `OpenJarvis/`, `verificaciones/`.
+
+-------------------------------------------------------------------------------
+3. AUDITORÍA MATRICIAL DE LOS 12 ROLES DE LA PLATAFORMA
+-------------------------------------------------------------------------------
+
+| Rol | Vistas / Panel Web | Backend Endpoints / RBAC | Nivel de Implementación / Estado |
+|---|---|---|---|
+| `admin_general` | `admin_general.js` | `/api/v1/admin-general/*`, `/catalogo/*` | Implementado y congelado por perímetro de seguridad |
+| `admin_empresa` | `admin_empresa.js` | `/api/v1/admin/*`, `/tenancy/*` | Implementado. Gestiona usuarios, áreas y suscripción B2B |
+| `jefe_area` | `jefe_area.js` | `/api/v1/jefe-area/*` | Implementado. Supervisa área y aprueba currículo (Fase 17-D) |
+| `profesional_area` | `profesional_area.js` | Scoped via RBAC en `admin.py` | Operación administrativa de área y soporte CRM |
+| `tecnico_area` | `tecnico_area.js` | Scoped via RBAC en `admin.py` | Asistencia técnica de área y soporte CRM |
+| `coordinador` | `coordinador.js` | `/api/v1/coordinador/*` | Implementado. Supervisión de campo y revisión técnica (VoBo) |
+| `profesor` | `profesor.js` | `/api/v1/academic/*`, `/curriculum/*` | Implementado. Planificación 52 semanas y asistencia |
+| `alumno` | `alumno.js` | `/api/v1/alumnos/*` | Implementado. Oferta formativa y credencial digital |
+| `padre_acudiente` | `padre_acudiente.js` | `/api/v1/padre/*` | Implementado. Custodia familiar y solicitudes multi-pupilo |
+| `jefe_escenarios` | `jefe_escenarios.js` | `/api/v1/escenarios/*` | Implementado. Gestión de infraestructura y partes |
+| `jefe_almacen` | `jefe_almacen.js` | `/api/v1/inventory/*` | Implementado. Ficha técnica, vida útil y custodias |
+| `almacenista` | `almacenista.js` | `/api/v1/inventory/*` | Operación de préstamos, entregas y devoluciones |
+
+-------------------------------------------------------------------------------
+4. PARIDAD MULTICLIENTE (WEB vs FLET DESKTOP vs FLET MOBILE)
+-------------------------------------------------------------------------------
+- WEB: 100% de vistas integradas mediante `fetch()` HTTP contra la API FastAPI.
+- FLET DESKTOP (`SGA-CD-APP.git`): Vistas Flet con soporte offline SQLite y `ApiClient` conectado a endpoints FastAPI en CRM e IA (`crm_marketing_view.py`).
+- FLET MOBILE (`SGA-CD-APK.git`): Estructura 100% homologada con Flet Desktop.
+
+-------------------------------------------------------------------------------
+5. REGRESIÓN DE PRUEBAS Y PRUEBAS EJECUTADAS
+-------------------------------------------------------------------------------
+- Suite Fase 8.14.9 (`verificaciones/fase_8_14_9/tests/`): 12/12 Tests OK
+- Suite Fase 8.14.8 (`verificaciones/fase_8_14_8/tests/`): 8/8 Tests OK
+- Suite Verificaciones General (`verificaciones/tests/`): 26/26 Tests OK
+- Suite Backend Pura (`SGA-CD-FASTAPI-BACKEND/tests/`): 18/18 Tests OK
+Total ejecutado en sandbox: 64/64 pruebas pasando 100% OK.
+
+-------------------------------------------------------------------------------
+6. REGISTRO DE HALLAZGOS Y LIMITACIONES DEL ENTORNO (H-01 a H-03)
+-------------------------------------------------------------------------------
+1. H-01 [Media / Media Impacto]: Ausencia de paquetes global de FastAPI/SQLAlchemy en entorno de ejecución pip por defecto. Las pruebas puras corren gracias a las capas de compatibilidad/fallback.
+2. H-02 [Baja / Medio Impacto]: Microservicios externos de IA (Colibrí 8080, Open Gen AI 3000, SkyReels 8090) inactivos en sandbox (`Connection refused`), activando los fallbacks del router.
+3. H-03 [Media / Alto Impacto]: Daemon de PostgreSQL y `psql` ausentes en la imagen sandbox local; la persistencia física live de PostgreSQL requiere el aprovisionamiento de un servidor de base de datos externo.
+
+-------------------------------------------------------------------------------
+7. PROPUESTA DE FASES CORRECTIVAS ORDENADAS POR RIESGO
+-------------------------------------------------------------------------------
+- Fase C1 (Prioridad Alta): Aprovisionamiento y validación E2E sobre PostgreSQL en entorno de integración continua o staging.
+- Fase C2 (Prioridad Media): Levantamiento de contenedores o trabajadores remotos para Nodos GPU de IA (SkyReels/Open Gen AI) cuando las credenciales estén disponibles.
+- Fase C3 (Prioridad Baja): Sincronización continua de estados offline en clientes Flet mediante background workers.
+
+===============================================================================
+ESTADO FINAL: AUDITORÍA INTEGRAL FASE 1 COMPLETADA. LÍNEA BASE REGISTRADA.
+===============================================================================

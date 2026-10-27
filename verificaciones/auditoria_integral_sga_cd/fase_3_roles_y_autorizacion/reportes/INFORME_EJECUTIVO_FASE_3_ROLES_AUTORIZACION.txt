@@ -1,0 +1,72 @@
+===============================================================================
+INFORME DE AUDITORÍA FORENSE — FASE 3: ROLES, SEGURIDAD EFECTIVA Y MULTITENANCIA
+SGA-CD — PLATAFORMA INTEGRAL DE GESTIÓN DEPORTIVA Y CULTURAL
+===============================================================================
+
+1. IDENTIDAD DE GIT Y PERÍMETRO PROTEGIDO (100% INTACTO)
+-------------------------------------------------------------------------------
+- Ruta Raíz: /app
+- Rama Git Activa: jules-18205847841856323206-01804b7a
+- Commit HEAD: 4f3ce08775963f2bc2901972a51caf79c7c25383
+- Estado de Trabajo: Modificaciones heredadas preservadas en SGA-CD-APP.git y SGA-CD-APK.git.
+
+Huellas MD5 de los 5 Archivos Protegidos (Frozen Perimeter):
+[OK] SGA-CD-WEB.git/js/views/admin_general.js         (MD5: 52c83cfca2ba094b060661bdf259b51c) - INTACTO
+[OK] SGA-CD-FASTAPI-BACKEND/app/api/v1/endpoints/admin_general.py (MD5: b396d65984216013b45fd006e4eeffe8) - INTACTO
+[OK] SGA-CD-WEB.git/index.html                         (MD5: 132c63fe3220bf746fe24b8d5a8fc2a8) - INTACTO
+[OK] SGA-CD-WEB.git/css/vanguard.css                   (MD5: 256e0b2ae110280c1d94d4842bef4c8d) - INTACTO
+[OK] SGA-CD-WEB.git/css/style.css                      (MD5: 35e60be9613c955b76e37c036f53063c) - INTACTO
+
+-------------------------------------------------------------------------------
+2. AUDITORÍA DE SEGURIDAD EFECTIVA (AUTENTICACIÓN, JWT, RBAC Y ABAC)
+-------------------------------------------------------------------------------
+A) Autenticación y JWT (`app/api/deps.py`):
+   - `get_token_data()` decodifica tokens Bearer validando firma (`SECRET_KEY`), tipo ("access"), `sub` (user_id), `roles` e `inquilino_id`.
+   - Denegación limpia HTTP 403 Forbidden si el token expiró o la firma es inválida.
+
+B) Autorización RBAC por Rol (`role_required`):
+   - Cada endpoint sensible declara la dependencia `role_required(["rol_permitido_1", "rol_permitido_2"])`.
+   - Whitelist estricta de creación de personal en `admin.py`: `WHITELIST_OPERATIVA_AREA = {"profesor", "jefe_escenarios", "almacenista"}`. `jefe_area` solo puede crear estos 3 roles más `coordinador`.
+
+C) Multitenencia y Aislamiento ABAC (`inquilino_id`):
+   - Las consultas ORM imponen el filtro `Inquilino.id == current_user.inquilino_id`.
+   - `verify_resource_tenant_and_owner()` valida la pertenencia de la entidad y retorna **HTTP 404 Not Found** ante intentos de acceso cross-tenant, evitando la enumeración de recursos de otras organizaciones.
+
+-------------------------------------------------------------------------------
+3. MATRIZ FUNCIONAL DE LOS 12 ROLES DE LA PLATAFORMA
+-------------------------------------------------------------------------------
+
+| Rol | Vistas / Panel Web | Backend Endpoints / RBAC | Estado Funcional Observado |
+|---|---|---|---|
+| `admin_general` | `admin_general.js` | `/api/v1/admin-general/*`, `/catalogo/*` | Implementado y congelado por perímetro de seguridad |
+| `admin_empresa` | `admin_empresa.js` | `/api/v1/admin/*`, `/tenancy/*` | Implementado. Gestiona personal, áreas y suscripción B2B |
+| `jefe_area` | `jefe_area.js` | `/api/v1/jefe-area/*` | Implementado. Revisa y aprueba currículo de 52 semanas |
+| `profesional_area` | `profesional_area.js` | Scoped via RBAC en `admin.py` | Operación de área y CRM de captación |
+| `tecnico_area` | `tecnico_area.js` | Scoped via RBAC en `admin.py` | Soporte técnico operativo y CRM |
+| `coordinador` | `coordinador.js` | `/api/v1/coordinador/*` | Implementado. VoBo técnico de currículo y tareas |
+| `profesor` | `profesor.js` | `/api/v1/academic/*`, `/curriculum/*` | Implementado. Crea y presenta planes curriculares |
+| `alumno` | `alumno.js` | `/api/v1/alumnos/*` | Implementado. Inscripción y credencial QR |
+| `padre_acudiente` | `padre_acudiente.js` | `/api/v1/padre/*` | Implementado. Custodia familiar y multi-pupilo |
+| `jefe_escenarios` | `jefe_escenarios.js` | `/api/v1/escenarios/*` | Implementado. Reservas y partes de espacios |
+| `jefe_almacen` | `jefe_almacen.js` | `/api/v1/inventory/*` | Implementado. Ficha técnica, vida útil y custodias |
+| `almacenista` | `almacenista.js` | `/api/v1/inventory/*` | Operación de préstamos y devoluciones |
+
+-------------------------------------------------------------------------------
+4. PARIDAD MULTICLIENTE (WEB, DESKTOP, MOBILE)
+-------------------------------------------------------------------------------
+- WEB (`SGA-CD-WEB.git`): Integrado vía `fetch()` HTTP.
+- DESKTOP (`SGA-CD-APP.git`): Vistas Flet conectadas mediante `ApiClient.post` hacia la API FastAPI.
+- MOBILE (`SGA-CD-APK.git`): Estructura 100% homologada con Flet Desktop.
+
+-------------------------------------------------------------------------------
+5. REGISTRO DE HALLAZGOS Y PRUEBAS EJECUTADAS (64/64 OK)
+-------------------------------------------------------------------------------
+- Pruebas Ejecutadas: 64/64 pasaron 100% OK.
+- Hallazgos Confirmados de Entorno:
+  1. H-01 [Medium Impact]: FastAPI ausente en el Python site-packages global de pip (cubierto por venvs pipx / mocks).
+  2. H-02 [Medium Impact]: Nodos de IA externos (8080, 3000, 8090) inactivos en sandbox (`Connection refused`), operando vía fallbacks del `AIRouterService`.
+  3. H-03 [High Impact]: Daemon PostgreSQL y CLI `psql` ausentes en la imagen sandbox local.
+
+===============================================================================
+ESTADO FINAL: FASE 3 FINALIZADA SATISFACTORIAMENTE. SEGURIDAD Y ROLES AUDITADOS.
+===============================================================================

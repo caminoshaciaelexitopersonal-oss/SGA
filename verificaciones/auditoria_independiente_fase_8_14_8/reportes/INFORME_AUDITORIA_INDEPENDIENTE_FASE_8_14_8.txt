@@ -1,0 +1,75 @@
+===============================================================================
+DIAGNÓSTICO E INFORME DE AUDITORÍA INDEPENDIENTE — FASE 8.14.8
+SGA-CD — ENTORNO DE AUDITORÍA Y VERIFICACIÓN INDEPENDIENTE
+===============================================================================
+
+1. INSPECCIÓN INICIAL DE GIT Y PERÍMETRO DE ARCHIVOS PROTEGIDOS
+-------------------------------------------------------------------------------
+- Rama Git activa: jules-18205847841856323206-01804b7a
+- Commit HEAD: 4f3ce08775963f2bc2901972a51caf79c7c25383
+- Estado del árbol de trabajo: Completamente limpio (working tree clean, 0 archivos modificados).
+
+HUELLAS MD5 DE LOS 5 ARCHIVOS PROTEGIDOS (FROZEN PERIMETER):
+1. SGA-CD-WEB.git/js/views/admin_general.js:         52c83cfca2ba094b060661bdf259b51c (100% INTACTO)
+2. SGA-CD-FASTAPI-BACKEND/app/api/v1/endpoints/admin_general.py: b396d65984216013b45fd006e4eeffe8 (100% INTACTO)
+3. SGA-CD-WEB.git/index.html:                         132c63fe3220bf746fe24b8d5a8fc2a8 (100% INTACTO)
+4. SGA-CD-WEB.git/css/vanguard.css:                   256e0b2ae110280c1d94d4842bef4c8d (100% INTACTO)
+5. SGA-CD-WEB.git/css/style.css:                      35e60be9613c955b76e37c036f53063c (100% INTACTO)
+
+-------------------------------------------------------------------------------
+2. HALLAZGOS TÉCNICOS DE LA AUDITORÍA INDEPENDIENTE
+-------------------------------------------------------------------------------
+
+A) PLAN CAPABILITY SERVICE Y APLICACIÓN DE CUOTAS PLAN FULL EN EL BACKEND REAL
+   - `PlanCapabilityService` (`SGA-CD-FASTAPI-BACKEND/app/services/plan_capability_service.py`) resuelve correctamente las capacidades y cuotas cuantitativas para las 12 combinaciones B2B (4 Naturalezas Jurídicas x 3 Alcances Territoriales).
+   - APLICACIÓN EN ENDPOINTS REALES: Se identificó que las cuotas cuantitativas del Plan Full (y su protección vía `check_and_consume_quota` / `require_plan_capability`) están aplicadas y conectadas explícitamente en dos endpoints backend:
+     1. `POST /api/v1/crm/generate_predis_media` (`SGA-CD-FASTAPI-BACKEND/app/api/v1/endpoints/admin_general.py`): Protegido con `require_plan_capability(required_cap)` y `check_and_consume_quota(...)` con decremento/liberación en bloque `finally`.
+     2. `POST /api/v1/video_distribution/publish` (`SGA-CD-FASTAPI-BACKEND/app/api/v1/endpoints/video_distribution.py`): Protegido con `require_plan_capability("social_publishing")` y `check_and_consume_quota(...)`.
+   - BRECHA / GAP EN OTROS ENDPOINTS: Otros endpoints operativos (como creación de usuarios, gestión de escenarios, curriculum, inventario, etc.) dependen del control RBAC de roles o pertenencia al inquilino, pero no invocan derivaciones cuantitativas de cuota de `PlanCapabilityService`. La gestión de cuotas se concentra en la suite multimedia e Inteligencia Artificial (CRM/Social/IA).
+
+B) DERECHO EMPRESARIAL COMPARTIDO ENTRE USUARIOS ADMINISTRATIVOS
+   - La suscripción y las capacidades pertenecen a la entidad (`Inquilino.id` / `inquilino_id`), no al usuario individual.
+   - Tanto `require_plan_capability` en `deps.py` como `check_and_consume_quota` en `PlanCapabilityService` obtienen el `inquilino_id` desde el token JWT del usuario autenticado (`current_user.inquilino_id`) y consultan la tabla `Suscripcion` de esa organización (`Suscripcion.inquilino_id == tenant.id`).
+   - Por lo tanto, todos los usuarios autorizados de una misma organización (p. ej. `admin_empresa`, `jefe_area`, `profesional_area`, `tecnico_area`) comparten automáticamente el derecho empresarial de Plan Full o Plan Básico sin requerir suscripciones individuales duplicadas.
+
+C) AUTORIZACIÓN INDIVIDUAL POR ROL Y AISLAMIENTO MULTIINQUILINO
+   - AISLAMIENTO MULTIINQUILINO: Verificado mediante el decorador/función `verify_resource_tenant_and_owner` en `deps.py`, la inyección de `inquilino_id` obligatoria en las consultas ORM de SQLAlchemy y la validación en `SyncManager` de Flet (donde se rechazan sobrescrituras cross-tenant).
+   - AUTORIZACIÓN POR ROL:
+     * En el backend, `role_required(...)` valida estrictamente los `role_codes` del JWT. En `crm_permissions` (Fase 8.14.9), la suite CRM está restringida a los 4 roles administrativos (`admin_empresa`, `jefe_area`, `profesional_area`, `tecnico_area`).
+     * En el frontend Web (`navigation.js`), el menú CRM solo se renderiza para dichos 4 roles.
+     * En Flet Desktop (`SGA-CD-APP.git/views/admin_empresa/crm_marketing_view.py`) y Mobile (`SGA-CD-APK.git/views/admin_empresa/crm_marketing_view.py`), existe una lista explícita `FORBIDDEN_CRM_ROLES` que bloquea la vista si el usuario pertenece a roles operativos o formativos.
+
+D) ANÁLISIS INDEPENDIENTE DE FRONTENDS: WEB vs FLET MÓVIL vs FLET ESCRITORIO
+   1. FRONTEND WEB (`SGA-CD-WEB.git`):
+      - Conectado funcionalmente al backend FastAPI mediante llamadas `fetch()` en Vistas SPA (`admin_empresa.js`, `profesor.js`, `coordinador.js`, etc.).
+      - Bloqueo visual de tarjetas (`.card-locked`, candado, opacidad reducida) implementado en `admin_empresa.js` cuando el tenant responde con `Plan Básico` desde `GET /api/v1/tenancy/my-plan-capabilities`.
+   2. FLET ESCRITORIO (`SGA-CD-APP.git`) Y FLET MÓVIL (`SGA-CD-APK.git`):
+      - Estructura y código de vistas son 100% idénticos entre App y APK.
+      - Poseen un `DatabaseManager` SQLite local (`local_sga.db`) y un `SyncManager` (`utils/sync_manager.py`) para sincronizar datos con el backend HTTP.
+      - VISTA CRM (`views/admin_empresa/crm_marketing_view.py`): La interfaz inspecciona `user_data.get("plan")` y `user_data.get("role")`. Presenta formularios interactivos con Flet controls (TextFields, ElevatedButtons), pero los botones de "Generar Contenido IA" y "Lanzar Campaña Masiva" actualmente renderizan únicamente la interfaz de usuario en el cliente sin realizar peticiones HTTP activas al backend `admin_general.py` o `video_distribution.py` (son vistas UI/simuladas en el cliente desktop/móvil).
+
+-------------------------------------------------------------------------------
+3. MATRIZ DE EVIDENCIA DE CAPACIDADES SGA-CD (FASE 8.14.8)
+-------------------------------------------------------------------------------
+
+| Capacidad / Componente | Clasificación de Evidencia | Detalle / Evidencia Probatoria |
+|---|---|---|
+| Resolución de 12 combinaciones B2B en PlanCapabilityService | Integración Local Real / Prueba con Mocks | `app/services/plan_capability_service.py` pasa 100% de los 8 test cases en `verificaciones/fase_8_14_8/tests/test_fase_8_14_8_leveling.py` |
+| Bloqueo Plan Básico vs Desbloqueo Plan Full (Capacidades y Cuotas) | Código Existente / Integración Local Real | `resolve_capabilities()` asigna `FULL_QUOTAS` o `BASIC_QUOTAS` según `canonical_plan` y `subscription_status` |
+| Control y consumo de cuota atómica (`check_and_consume_quota`) | Código Existente / Integración Local Real | Evaluado en `test_quota_persistence_and_concurrency.py` (7/7 OK) usando SQLite. Conectado en backend real en `admin_general.py` y `video_distribution.py`. |
+| Liberación de cuota ante fallos (`release_quota`) | Código Existente / Integración Local Real | Evaluado en `test_quota_persistence_and_concurrency.py`. Conectado en bloque `finally` de `POST /crm/generate_predis_media`. |
+| Exigencia de capacidad en endpoints backend (`require_plan_capability`) | Código Existente / Integración Local Real | Implementado en `app/api/deps.py`. Retorna HTTP 402 Payment Required si la capacidad no está activa en la suscripción del tenant. Pasa 14/14 tests en `test_require_plan_capability.py`. |
+| Derecho empresarial compartido entre usuarios de la organización | Código Existente / Integración Local Real | El backend valida la suscripción por `current_user.inquilino_id`. Todos los usuarios de la entidad comparten el mismo plan. |
+| Restricción de suite CRM por rol (`FORBIDDEN_CRM_ROLES`) | Código Existente / Prueba con Mocks | Verificado en `test_fase_8_14_9_crm_permissions.py` (8/8 OK) y en vistas Flet/Web. |
+| UI Gating en Frontend Web (`admin_empresa.js`) | Integración Local Real | Renderiza insignias y candados dinámicos consumiendo `GET /api/v1/tenancy/my-plan-capabilities`. |
+| UI CRM Flet Desktop / Móvil (`crm_marketing_view.py`) | Código Existente / Simulación Frontend | Muestra vistas bloqueadas o activas según rol/plan, pero los botones de acción IA en Flet son visuales y no disparan peticiones HTTP al backend real. |
+| Infraestructura de persistencia PostgreSQL real | Bloqueada / No Demostrada | Ausente en el sandbox actual (PostgreSQL daemon / `psql` no disponibles, Docker overlayfs error). Pruebas ejecutadas sobre SQLite in-memory / test.db. |
+| Servicios IA Externos Reales (Colibrí, Open Gen AI, SkyReels remotos) | Prueba con Mocks / Fallback Estructurado | Durante la prueba, los servicios HTTP en puertos 8080, 3000 y 8090 retornan `Connection refused`, activando correctamente los fallbacks estructurados de `AIRouterService`. |
+
+-------------------------------------------------------------------------------
+4. CONCLUSIONES Y RECOMENDACIONES DE LA AUDITORÍA
+-------------------------------------------------------------------------------
+1. El motor de resolución de derechos comerciales (`PlanCapabilityService`), la protección de endpoints backend (`require_plan_capability`), y la gestión de cuotas de consumo (`ConsumoInquilino`) están construidos de forma sólida y cuentan con cobertura de pruebas unitarias/de integración local completas.
+2. El perímetro de archivos congelados (5/5 archivos) se encuentra 100% intacto, sin alteraciones en las huellas MD5 oficiales.
+3. El frontend Web se encuentra funcionalmente integrado con la API de capacidades. Los clientes Flet (Desktop y Mobile) cuentan con la lógica de control de permisos por rol y plan, pero sus botones de generación IA multimedia operan a nivel visual/simulado.
+===============================================================================

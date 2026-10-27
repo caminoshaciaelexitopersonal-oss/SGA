@@ -1,0 +1,93 @@
+===============================================================================
+INFORME TÉCNICO Y AUDITORÍA FORENSE — FASE 2: BACKEND, API, SEGURIDAD Y MULTITENANCIA
+SGA-CD — PLATAFORMA INTEGRAL DE GESTIÓN DEPORTIVA Y CULTURAL
+===============================================================================
+
+1. IDENTIDAD DE GIT Y PERÍMETRO PROTEGIDO (100% INTACTO)
+-------------------------------------------------------------------------------
+- Ruta Raíz: /app
+- Rama Git Activa: jules-18205847841856323206-01804b7a
+- Commit HEAD: 4f3ce08775963f2bc2901972a51caf79c7c25383
+- Estado de Trabajo: Modificaciones heredadas preservadas en SGA-CD-APP.git y SGA-CD-APK.git.
+
+Huellas MD5 de los 5 Archivos Protegidos (Frozen Perimeter):
+[OK] SGA-CD-WEB.git/js/views/admin_general.js         (MD5: 52c83cfca2ba094b060661bdf259b51c) - INTACTO
+[OK] SGA-CD-FASTAPI-BACKEND/app/api/v1/endpoints/admin_general.py (MD5: b396d65984216013b45fd006e4eeffe8) - INTACTO
+[OK] SGA-CD-WEB.git/index.html                         (MD5: 132c63fe3220bf746fe24b8d5a8fc2a8) - INTACTO
+[OK] SGA-CD-WEB.git/css/vanguard.css                   (MD5: 256e0b2ae110280c1d94d4842bef4c8d) - INTACTO
+[OK] SGA-CD-WEB.git/css/style.css                      (MD5: 35e60be9613c955b76e37c036f53063c) - INTACTO
+
+-------------------------------------------------------------------------------
+2. INVESTIGACIÓN DE ENTORNO Y DEPENDENCIAS (HALLAZGO H-01)
+-------------------------------------------------------------------------------
+- SGA-CD-FASTAPI-BACKEND/requirements.txt declara 28 paquetes oficiales:
+  * Web/ASGI: fastapi, uvicorn[standard]
+  * ORM/DB: sqlalchemy, alembic, psycopg2-binary
+  * Auth/Security: passlib[bcrypt], python-jose[cryptography], python-multipart
+  * AI/Agents: langchain, langgraph, langchain-openai, langchain-community
+  * Pruebas: pytest, httpx
+- Situación de Ejecución Sandbox:
+  * Entorno global Python 3.12.13 no tiene instaladas en site-packages principales librerías como FastAPI o Starlette (disponibles vía pipx venvs para Pytest).
+  * Las suites de prueba ejecutan 100% OK gracias a las capas de compatibilidad/fallback (Pydantic / Mocks).
+
+-------------------------------------------------------------------------------
+3. INVENTARIO DE LA API BACKEND Y ROUTERS REGISTRADOS
+-------------------------------------------------------------------------------
+El router principal `api_router` (`app/api/v1/api.py`) registra 29 sub-routers bajo el prefijo `/api/v1`:
+- Auth & SSO: `/auth` (Auth JWT, Meta SSO, Google OAuth2)
+- Tenancy & B2B: `/tenants` (Planes B2B, capacidades)
+- Especialidades: `/catalogo` (Master Catalog 1,000 ítems)
+- CRM & IA: `/admin_general` (Media IA), `/sales_agent`
+- Usuarios & Roles: `/admin` (Creación usuarios B2B)
+- Formación & Roles: `/padre`, `/profesor`, `/jefe_area`, `/coordinador`, `/alumnos`, `/procesos`, `/clases`
+- Operatividad & Recursos: `/inventory` (Inventario/Custodia), `/escenarios` (Espacios/Partes), `/eventos`, `/academic` (Asistencias)
+- Comunicaciones & Gamificación: `/communication` (Foros/Mensajería), `/gamification` (Puntos/Insignias), `/notificaciones`, `/video_distribution` (Redes)
+- Auditoría & Control: `/audit` (Log de eventos), `/billing` (Suscripciones), `/dropdowns`
+
+-------------------------------------------------------------------------------
+4. AUTENTICACIÓN, JWT, RBAC Y AISLAMIENTO MULTIINQUILINO
+-------------------------------------------------------------------------------
+A) Autenticación y JWT (`app/api/deps.py`):
+   - `get_token_data()` decodifica tokens Bearer validando tipo ("access"), `sub` (user_id), `roles` e `inquilino_id`.
+   - Soporte opcional de autenticación `X-API-KEY` para integración de clientes.
+
+B) Autorización RBAC (`role_required`):
+   - Decorador de fábrica `role_required(required_roles)` valida la intersección entre los roles del token JWT y la lista permitida.
+   - Restricción estricta de jerarquía en `POST /api/v1/admin/users/by-empresa`:
+     * `jefe_area` restringido exclusivamente a `WHITELIST_OPERATIVA_AREA = {"profesor", "jefe_escenarios", "almacenista"}` más `coordinador`.
+
+C) Multitenencia y ABAC (`inquilino_id`):
+   - Inyección obligatoria de `inquilino_id` derivado del JWT del usuario en todas las consultas de SQLAlchemy.
+   - Función auxiliar `verify_resource_tenant_and_owner(db_obj, current_user)` retorna HTTP 404 Not Found si el objeto pertenece a otro tenant, impidiendo enumeración de recursos cruzados.
+
+-------------------------------------------------------------------------------
+5. MODELOS ORM, ALEMBIC, PLANES, CUOTAS Y SERVICIOS IA (HALLAZGO H-02)
+-------------------------------------------------------------------------------
+- Grafo de Migraciones Alembic (`SGA-CD-DB.git`):
+  * 9 revisiones ordenadas iniciando en `36f3d0a15892` y convergiendo en la cabeza única `g4f5e6d7c8b9`.
+- Planes y Cuotas (`PlanCapabilityService`):
+  * Resuelve capacidades para 12 combinaciones B2B (4 Naturalezas Jurídicas x 3 Alcances Territoriales).
+  * `check_and_consume_quota()` gestiona consumos atómicos con bloqueo de fila (`with_for_update`) sobre `ConsumoInquilino`.
+  * `release_quota()` libera consumo en bloque `finally` ante fallos de generación.
+- Servicios de IA (`AIRouterService`, `SkyReelsV2Service`, `GPULifecycleService`):
+  * `AIRouterService` orquesta Ollama, Colibrí, Open Generative AI, OpenAI y Gemini.
+  * Si los puertos remotos 8080, 3000 u 8090 retornan `Connection refused` (Hallazgo H-02 en sandbox), el router ejecuta fallbacks estructurados sin interrumpir la experiencia del usuario.
+
+-------------------------------------------------------------------------------
+6. EVALUACIÓN DE REGRESIÓN DE SUITES DE PRUEBAS (64/64 OK)
+-------------------------------------------------------------------------------
+- Suite Fase 8.14.9 (`verificaciones/fase_8_14_9/tests/`): 12/12 Tests PASSED
+- Suite Fase 8.14.8 (`verificaciones/fase_8_14_8/tests/`): 8/8 Tests PASSED
+- Suite Verificaciones General (`verificaciones/tests/`): 26/26 Tests PASSED
+- Suite Backend Pura (`SGA-CD-FASTAPI-BACKEND/tests/`): 18/18 Tests PASSED
+
+-------------------------------------------------------------------------------
+7. INVENTARIO DE HALLAZGOS Y RECOMENDACIONES TÉCNICAS
+-------------------------------------------------------------------------------
+1. H-01 [Sistemas / Impacto Medio]: Ausencia de instalación global de paquetes FastAPI/Starlette en site-packages (cubierto por capas de compatibilidad/pipx en pruebas).
+2. H-02 [Servicios / Impacto Medio]: Microservicios externos de IA (8080, 3000, 8090) inactivos en sandbox (`Connection refused`), operando mediante fallbacks.
+3. H-03 [Persistencia / Impacto Alto]: Ausencia de PostgreSQL live daemon y CLI `psql` en el sandbox local; pruebas validadas sobre SQLite in-memory / `test.db`.
+
+===============================================================================
+ESTADO FINAL: FASE 2 FINALIZADA SATISFACTORIAMENTE. LÍNEA BASE Y DERECHOS BACKEND VALIDADOS.
+===============================================================================
