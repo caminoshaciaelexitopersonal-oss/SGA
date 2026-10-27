@@ -58,7 +58,7 @@ def initialize_llm(page: ft.Page, config: Dict[str, Any]) -> None:
     else:
         _llm_status = "error_unknown_provider"
 
-    if llm:
+    if llm and _llm_status != "error_ollama_not_found":
         _llm_instance = llm
         _llm_status = "initialized"
         print(f"--- ✅ LLM del proveedor '{provider}' inicializado correctamente. ---")
