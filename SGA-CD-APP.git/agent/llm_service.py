@@ -48,9 +48,12 @@ def initialize_llm(page: ft.Page, config: Dict[str, Any]) -> None:
                 llm = LlamaCpp(model_path=model_path, n_ctx=2048, n_gpu_layers=0, verbose=False)
         else: # Desktop
             try:
-                llm = ChatOllama(model="llama3")
+                ollama_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+                model_name = os.getenv("OLLAMA_MODEL", "gemma3:4b")
+                llm = ChatOllama(model=model_name, base_url=ollama_url)
                 llm.invoke("test")
-            except Exception:
+            except Exception as e:
+                print(f"--- ⚠️ Error de conexión con Ollama ({model_name}): {e} ---")
                 _llm_status = "error_ollama_not_found"
     else:
         _llm_status = "error_unknown_provider"
