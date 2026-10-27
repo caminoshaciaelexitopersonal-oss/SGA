@@ -1,0 +1,25 @@
+===============================================================================
+SGA-CD FASE 8 — DEFECTOS CORREGIDOS
+Fecha: 27 de Octubre de 2026
+===============================================================================
+
+1. HALLAZGO: AUD-P1-001 (Instalación de Dependencias del Entorno)
+   - Archivo afectado: Global Environment / SGA-CD-FASTAPI-BACKEND/requirements.txt
+   - Causa: Falta de paquetes en site-packages (FastAPI, Pydantic Settings, LangChain, etc.).
+   - Corrección: Instalación limpia de la pila de backend según requisitos.
+   - Prueba: `python3 -m pytest` funcional sin ModuleNotFoundError.
+   - Resultado: Exitoso.
+
+2. HALLAZGO: AUD-P1-002 (Resolución de Rutas en Suite de Pruebas Módulo 16)
+   - Archivo afectado: SGA-CD-FASTAPI-BACKEND/tests/test_modulo_16_suite.py
+   - Causa: Búsqueda estática de `../SGA-CD-WEB.git/index.html` fallaba al correr pytest desde la raíz del monorepositorio.
+   - Corrección: Búsqueda dinámica con fallback en `test_13_navegacion_movil_accesibilidad`.
+   - Prueba: `pytest SGA-CD-FASTAPI-BACKEND/tests/test_modulo_16_suite.py` pasando 15/15.
+   - Resultado: Exitoso.
+
+3. HALLAZGO: AUD-P1-003 (Limpieza de Metadatos en Fixtures de Base de Datos)
+   - Archivo afectado: SGA-CD-FASTAPI-BACKEND/tests/conftest.py
+   - Causa: Fixture `db` ejecutaba `Base.metadata.drop_all(bind=engine)` pero omitía `AppBase.metadata.drop_all(bind=engine)`, contaminando tablas en ejecuciones de pruebas.
+   - Corrección: Inclusión de `AppBase.metadata.drop_all(bind=engine)` en el teardown del fixture `db`.
+   - Prueba: Ejecución individual de test suites con aislamiento completo de tablas por prueba.
+   - Resultado: Exitoso.

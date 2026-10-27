@@ -1,0 +1,32 @@
+===============================================================================
+SGA-CD FASE 8 — INTEGRIDAD DE ARCHIVOS PROTEGIDOS Y HASHES MD5
+Fecha: 27 de Octubre de 2026
+===============================================================================
+
+1. VERIFICACIÓN DE HASHES MD5 DEL PERÍMETRO PROTEGIDO:
+52c83cfca2ba094b060661bdf259b51c  SGA-CD-WEB.git/js/views/admin_general.js
+b396d65984216013b45fd006e4eeffe8  SGA-CD-FASTAPI-BACKEND/app/api/v1/endpoints/admin_general.py
+132c63fe3220bf746fe24b8d5a8fc2a8  SGA-CD-WEB.git/index.html
+256e0b2ae110280c1d94d4842bef4c8d  SGA-CD-WEB.git/css/vanguard.css
+35e60be9613c955b76e37c036f53063c  SGA-CD-WEB.git/css/style.css
+
+TABLA DE REFERENCIA (ESPERADOS):
+52c83cfca2ba094b060661bdf259b51c  SGA-CD-WEB.git/js/views/admin_general.js
+b396d65984216013b45fd006e4eeffe8  SGA-CD-FASTAPI-BACKEND/app/api/v1/endpoints/admin_general.py
+132c63fe3220bf746fe24b8d5a8fc2a8  SGA-CD-WEB.git/index.html
+256e0b2ae110280c1d94d4842bef4c8d  SGA-CD-WEB.git/css/vanguard.css
+35e60be9613c955b76e37c036f53063c  SGA-CD-WEB.git/css/style.css
+
+RESULTADO: 100% INTACTOS Y CONSERVADOS
+
+2. ESTADO GIT RESUMIDO:
+M  SGA-CD-FASTAPI-BACKEND/tests/conftest.py
+M  SGA-CD-FASTAPI-BACKEND/tests/test_modulo_16_suite.py
+A  verificaciones/auditoria_integral_sga_cd/evidencias/INTEGRIDAD_GIT_Y_HASHES.txt
+A  verificaciones/auditoria_integral_sga_cd/hallazgos/MATRIZ_HALLAZGOS_PRIORIZADOS.txt
+A  verificaciones/auditoria_integral_sga_cd/inventario/INVENTARIO_COMPONENTES.txt
+A  verificaciones/auditoria_integral_sga_cd/pruebas/REGISTRO_EJECUCION_PRUEBAS.txt
+A  verificaciones/auditoria_integral_sga_cd/reportes/INFORME_EJECUTIVO_INTEGRAL.txt
+A  verificaciones/auditoria_integral_sga_cd/reportes/INFORME_TECNICO_POR_COMPONENTE.txt
+A  verificaciones/auditoria_integral_sga_cd/reportes/PLAN_DE_CORRECCION_PENDIENTES.txt
+?? verificaciones/fase_8_subsanacion_prorizada/

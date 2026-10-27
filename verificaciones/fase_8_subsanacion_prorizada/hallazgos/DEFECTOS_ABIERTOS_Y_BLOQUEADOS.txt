@@ -1,0 +1,28 @@
+===============================================================================
+SGA-CD FASE 8 — DEFECTOS ABIERTOS Y BLOQUEADOS POR ENTORNO
+Fecha: 27 de Octubre de 2026
+===============================================================================
+
+1. HALLAZGO: AUD-P2-001 (Restricción de Montaje OverlayFS en Docker Compose)
+   - Prioridad: P2 (Media)
+   - Componente: Docker / Sandbox Kernel Environment
+   - Estado: BLOQUEADO POR ENTORNO
+   - Causa: Error de kernel en sandbox al montar OverlayFS (`fstype: overlay err: invalid argument`).
+   - Impacto: Imposibilidad de levantar contenedores Docker activos dentro del contenedor sandbox de evaluación.
+   - Próximo paso: Despliegue y prueba funcional en servidor de staging/producción con soporte nativo de kernel Linux.
+
+2. HALLAZGO: AUD-P2-002 (Ausencia de Demonio e Instancia PostgreSQL 15)
+   - Prioridad: P2 (Media)
+   - Componente: Base de Datos / SGA-CD-DB.git
+   - Estado: BLOQUEADO POR ENTORNO
+   - Causa: Ausencia de ejecutable `psql` y demonio de PostgreSQL activo en la máquina sandbox.
+   - Impacto: Las pruebas locales se ejecutan sobre SQLite (`test.db` / in-memory).
+   - Próximo paso: Ejecución de `alembic upgrade head` y suite de pruebas en instancia externa de PostgreSQL 15.
+
+3. HALLAZGO: AUD-P3-001 (Advertencias de Depreciación Pydantic V1 / Python 3.12)
+   - Prioridad: P3 (Baja)
+   - Componente: Backend Schemas y Servicios de Seguridad
+   - Estado: ABIERTO / REGISTRADO (Mantenimiento Futuro)
+   - Causa: Sintaxis de `@validator` Pydantic V1 y uso de `datetime.utcnow()`.
+   - Impacto: Advertencias no bloqueantes en logs durante la ejecución de pruebas.
+   - Próximo paso: Refactorización progresiva en fases de mantenimiento de código.

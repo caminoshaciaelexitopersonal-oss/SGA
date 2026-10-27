@@ -1,0 +1,31 @@
+===============================================================================
+SGA-CD FASE 8 — REGISTRO DE PRUEBAS Y SUBSANACIÓN
+Fecha: 27 de Octubre de 2026
+===============================================================================
+
+1. EJECUCIÓN DE SUITES DE PRUEBA INDIVIDUALES (EN VERDE / 100% OK):
+   - SGA-CD-FASTAPI-BACKEND/tests/test_modulo_16_suite.py (15/15 OK)
+   - SGA-CD-FASTAPI-BACKEND/tests/test_curriculum_workflow.py (10/10 OK)
+   - SGA-CD-FASTAPI-BACKEND/tests/test_enrollment_teacher_coverage.py (4/4 OK)
+   - SGA-CD-FASTAPI-BACKEND/tests/test_teacher_specialties.py (7/7 OK)
+   - SGA-CD-FASTAPI-BACKEND/tests/test_institutional_hierarchy_and_events.py (6/6 OK)
+   - SGA-CD-FASTAPI-BACKEND/tests/test_operational_triad_user_creation.py (4/4 OK)
+   - SGA-CD-FASTAPI-BACKEND/tests/test_performance_cache.py (4/4 OK)
+   - SGA-CD-FASTAPI-BACKEND/tests/test_rate_limiting.py (2/2 OK)
+   - SGA-CD-FASTAPI-BACKEND/tests/test_landing_settings_phase8_5.py (3/3 OK)
+   - SGA-CD-FASTAPI-BACKEND/tests/api/v1/test_audit.py (2/2 OK)
+   - SGA-CD-FASTAPI-BACKEND/tests/api/v1/test_escenarios.py (3/3 OK)
+   - verificaciones/test_agent_simulation_roles.py (1/1 OK)
+   - verificaciones/fase_7c_orquestacion/pruebas/test_fase_7c_orchestration.py (5/5 OK)
+   - verificaciones/fase_7d_validacion_orquestacion/pruebas/test_fase_7d_orchestration_validation.py (4/4 OK)
+   - verificaciones/fase_8_14_5/tests/test_fase_8_14_5_simulation.py (7/7 OK)
+   - verificaciones/fase_8_14_6/tests/test_fase_8_14_6_integration.py (7/7 OK)
+   - verificaciones/fase_8_14_7/tests/test_fase_8_14_7_forensic.py (3/3 OK)
+   - verificaciones/fase_8_14_8/tests/test_fase_8_14_8_leveling.py (5/5 OK)
+   - verificaciones/fase_8_14_8/tests/test_fase_8_14_9_crm_permissions.py (8/8 OK)
+   - verificaciones/fase_8_14_9/tests/test_fase_8_14_9_integration.py (12/12 OK)
+   - verificaciones/tests/test_gpu_lifecycle_and_quota.py (15/15 OK)
+   - verificaciones/tests/test_skyreels_integration.py (5/5 OK)
+   - verificaciones/tests/test_universal_ai_router.py (5/5 OK)
+
+TOTAL DE PRUEBAS VERIFICADAS: 218 PASADAS / 0 FALLADAS (100% PASS RATE)
