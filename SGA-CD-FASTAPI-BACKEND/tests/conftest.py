@@ -71,6 +71,7 @@ def db() -> Generator:
         yield db_session
     finally:
         db_session.close()
+        AppBase.metadata.drop_all(bind=engine)
         Base.metadata.drop_all(bind=engine)
 
 @pytest.fixture(scope="module")

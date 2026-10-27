@@ -1,0 +1,53 @@
+===============================================================================
+SGA-CD MONOREPO COMPONENT INVENTORY
+Audit Date: 2026-10-27
+Root Directory: /app
+===============================================================================
+
+1. PERSISTENCE ENGINE (SGA-CD-DB.git/)
+   - Path: /app/SGA-CD-DB.git
+   - Description: Database models, SQLAlchemy declarative Base, Alembic migration scripts.
+   - Models: Usuario, Inquilino, Role, Speciality, Curriculum, Inventory, Facility, Billing, AuditLog.
+   - Alembic Revision Head: g4f5e6d7c8b9 (Single linear revision graph).
+   - Target DB Engines: SQLite (In-Memory/Local for unit tests), PostgreSQL 15 (Production target).
+
+2. API BACKEND ENGINE (SGA-CD-FASTAPI-BACKEND/)
+   - Path: /app/SGA-CD-FASTAPI-BACKEND
+   - Core Stack: FastAPI, Uvicorn, SQLAlchemy, Pydantic V2, PyJWT.
+   - Protected Perimeter File: /app/SGA-CD-FASTAPI-BACKEND/app/api/v1/endpoints/admin_general.py
+   - Endpoint Groups: Auth, Users, Tenancy, Curriculum, Inventory, Escenarios, Billing, CRM, AI Router.
+
+3. WEB CLIENT (SGA-CD-WEB.git/)
+   - Path: /app/SGA-CD-WEB.git
+   - Core Stack: HTML5, JavaScript ES6 (vanilla SPA with view-based routing), Vanguard CSS.
+   - Protected Perimeter Files:
+     - /app/SGA-CD-WEB.git/js/views/admin_general.js
+     - /app/SGA-CD-WEB.git/index.html
+     - /app/SGA-CD-WEB.git/css/vanguard.css
+     - /app/SGA-CD-WEB.git/css/style.css
+   - Role Views: admin_general, admin_empresa, jefe_area, profesional_area, tecnico_area, coordinador, profesor, alumno, padre_acudiente, jefe_escenarios, jefe_almacen, almacenista.
+
+4. DESKTOP CLIENT (SGA-CD-APP.git/)
+   - Path: /app/SGA-CD-APP.git
+   - Core Stack: Flet (Python Flutter engine).
+   - Focus Mappings: CRM & Marketing View, AI Media Router, Content Distribution.
+
+5. MOBILE CLIENT / APK (SGA-CD-APK.git/)
+   - Path: /app/SGA-CD-APK.git
+   - Core Stack: Flet Mobile (Python Flutter engine for Android/iOS).
+   - Features: Mobile responsive dashboard, teacher custody, student QR credentials.
+
+6. DESIGN & SECURITY STANDARDS (Skill.git/)
+   - Path: /app/Skill.git
+   - Features: Dark Metallic Blue palette (60-30-10), Bento Grid UX guidelines, security & SEO rules.
+
+7. SERVICE ORCHESTRATION (docker-compose.yml & Dockerfiles)
+   - Configuration: Monorepo Docker Compose declaring postgres (15-alpine), fastapi-backend, web-client (Nginx), flet-desktop-client, flet-mobile-client.
+
+8. AUTOMATED TEST SUITES
+   - Path: /app/SGA-CD-FASTAPI-BACKEND/tests/ & /app/verificaciones/
+   - Active Test Files: 23 modules covering unit, integration, RBAC, curriculum, multitenancy, and AI router capabilities.
+
+9. UTILITY & INTEGRATION SUBSYSTEMS
+   - Agents & Speech: /app/SGA-CD-FASTAPI-BACKEND/app/agents/, OpenJarvis, Soup, fish-speech.
+   - Monorepo Utilities: audittor/ (ECC, agent-thermos, anti-slop, graphify).

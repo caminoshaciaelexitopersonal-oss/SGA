@@ -1,0 +1,46 @@
+===============================================================================
+SGA-CD FINDINGS MATRIX
+Audit Date: 2026-10-27
+===============================================================================
+
+FINDING ID: AUD-P1-001
+Priority: P1 (High) - Test Execution Blocker
+Component: Environment Dependencies
+Status: RESOLVED
+Description: Pytest and core backend dependencies (FastAPI, Pydantic Settings, LangChain, etc.) were absent from global python site-packages.
+Remediation: Installed all requirements from SGA-CD-FASTAPI-BACKEND/requirements.txt.
+
+FINDING ID: AUD-P1-002
+Priority: P1 (High) - Test Suite Failure
+Component: SGA-CD-FASTAPI-BACKEND/tests/test_modulo_16_suite.py
+Status: RESOLVED
+Description: Hardcoded relative path '../SGA-CD-WEB.git/index.html' failed when pytest executed from repository root.
+Remediation: Added dynamic path verification checking both relative to root ('SGA-CD-WEB.git/index.html') and parent directory.
+
+FINDING ID: AUD-P1-003
+Priority: P1 (High) - Test Fixture Pollution
+Component: SGA-CD-FASTAPI-BACKEND/tests/conftest.py
+Status: RESOLVED
+Description: Fixture teardown dropped `Base.metadata` but omitted `AppBase.metadata`, causing table accumulation across sequential test runs.
+Remediation: Added `AppBase.metadata.drop_all(bind=engine)` to `conftest.py` db fixture teardown.
+
+FINDING ID: AUD-P2-001
+Priority: P2 (Medium) - Docker OverlayFS Sandbox Limitation
+Component: Docker Compose / Sandbox Environment
+Status: BLOCKED BY ENVIRONMENT
+Description: `docker run` fails in sandbox due to OverlayFS mount restrictions on kernel level (`fstype: overlay err: invalid argument`).
+Impact: Docker containers cannot be run live inside sandbox; static syntax and configuration verified via `docker compose config`.
+
+FINDING ID: AUD-P2-002
+Priority: P2 (Medium) - PostgreSQL Environment Provision
+Component: Database Layer (SGA-CD-DB.git)
+Status: BLOCKED BY ENVIRONMENT
+Description: `psql` CLI and active PostgreSQL daemon are absent in sandbox environment.
+Impact: Local test suites utilize SQLite in-memory engine. PostgreSQL operational execution remains pending external database environment provision.
+
+FINDING ID: AUD-P3-001
+Priority: P3 (Low) - Deprecation Warnings
+Component: Backend Schemas & Security Services
+Status: OPEN / DOCUMENTED
+Description: Pydantic V1 class Config style triggers Pydantic V2 deprecation warnings; `datetime.utcnow()` triggers Python 3.12 deprecation warnings.
+Impact: Non-breaking runtime warnings during test suite execution.
