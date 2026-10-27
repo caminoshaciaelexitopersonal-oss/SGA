@@ -1,0 +1,46 @@
+===============================================================================
+INFORME FINAL FASE 8 — SUBSANACIÓN PRIORIZADA Y VALIDACIÓN FUNCIONAL SGA-CD
+Fecha: 27 de Octubre de 2026
+Proyecto: SGA-CD (Sistema de Gestión Académica, Cultural y Deportiva)
+Autor: Jules (Software Engineer Sandbox Remediation)
+===============================================================================
+
+1. ATENCIÓN A HALLAZGOS ORIGINALES Y CAUSA RAÍZ
+En estricto cumplimiento de la Directriz Oficial de la Fase 8, se tomaron como insumo exclusivo los informes de la auditoría integral previa (`verificaciones/auditoria_integral_sga_cd/`).
+
+Se atendieron y remediaron de forma directa los siguientes defectos priorizados:
+- AUD-P1-001 (Falta de dependencias en entorno Python): Se instalaron todos los paquetes requeridos desde `SGA-CD-FASTAPI-BACKEND/requirements.txt`.
+- AUD-P1-002 (Error de resolución de ruta en `test_modulo_16_suite.py`): Se corrigió la búsqueda estática a una resolución dinámica que soporta la ejecución desde la raíz del monorepositorio y desde subdirectorios.
+- AUD-P1-003 (Acumulación de tablas en teardown de fixtures de BD): Se actualizó `conftest.py` para incluir `AppBase.metadata.drop_all(bind=engine)` asegurando aislamiento limpio entre ejecuciones.
+
+2. ARCHIVOS Y FUNCIONES MODIFICADOS
+- `SGA-CD-FASTAPI-BACKEND/tests/test_modulo_16_suite.py` (`test_13_navegacion_movil_accesibilidad`)
+- `SGA-CD-FASTAPI-BACKEND/tests/conftest.py` (Fixture `db`)
+
+3. PRUEBAS EJECUTADAS Y REGRESIONES VERIFICADAS
+- Total de pruebas en la suite: 218 pasadas / 0 falladas (100% de éxito).
+- Cobertura de regresión:
+  * Backend API endpoints y RBAC (141 pruebas OK).
+  * Orquestación Docker, CRM, AIRouter, SkyReels-V2, GPULifecycle, B2B Capabilities y Multitenancy (77 pruebas OK en `verificaciones/`).
+
+4. DEFECTOS PENDIENTES Y BLOQUEOS DE ENTORNO
+- AUD-P2-001 (Docker OverlayFS Mount): Bloqueado por restricción de kernel en sandbox (`fstype: overlay err: invalid argument`). Sintaxis verificada mediante `docker compose config`.
+- AUD-P2-002 (PostgreSQL 15): Instancia real y cliente `psql` ausentes en el entorno sandbox. Pruebas validadas en SQLite.
+- AUD-P3-001 (Advertencias de Depreciación): Mantenimiento secundario de sintaxis Pydantic V1 y `datetime.utcnow()` no bloqueante.
+
+5. INTEGRIDAD Y PERÍMETRO PROTEGIDO
+Los 5 archivos congelados permanecieron 100% intactos con sus hashes MD5 verificados antes y después de los trabajos:
+- `SGA-CD-WEB.git/js/views/admin_general.js` (`52c83cfca2ba094b060661bdf259b51c`)
+- `SGA-CD-FASTAPI-BACKEND/app/api/v1/endpoints/admin_general.py` (`b396d65984216013b45fd006e4eeffe8`)
+- `SGA-CD-WEB.git/index.html` (`132c63fe3220bf746fe24b8d5a8fc2a8`)
+- `SGA-CD-WEB.git/css/vanguard.css` (`256e0b2ae110280c1d94d4842bef4c8d`)
+- `SGA-CD-WEB.git/css/style.css` (`35e60be9613c955b76e37c036f53063c`)
+
+6. UBICACIÓN DE ARTEFACTOS Y EVIDENCIAS
+Todos los artefactos de la Fase 8 fueron registrados de forma independiente en:
+`verificaciones/fase_8_subsanacion_prorizada/`
+- `hallazgos/DEFECTOS_CORREGIDOS.txt`
+- `hallazgos/DEFECTOS_ABIERTOS_Y_BLOQUEADOS.txt`
+- `pruebas/REGISTRO_PRUEBAS_CORRECCION.txt`
+- `evidencias/INTEGRIDAD_GIT_Y_HASHES.txt`
+- `reportes/INFORME_FINAL_FASE_8.txt`

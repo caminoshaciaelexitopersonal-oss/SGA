@@ -1,0 +1,28 @@
+===============================================================================
+INFORME TÉCNICO POR COMPONENTE — SGA-CD
+Fecha: 27 de Octubre de 2026
+===============================================================================
+
+1. COMPONENTE 1 — BASE DE DATOS Y PERSISTENCIA (SGA-CD-DB.git/)
+   - Estado: Validado estáticamente / Pruebas unitarias aprobadas en SQLite.
+   - Detalle: Modelos SQLAlchemy unificados en `models/`. Grafo de migraciones Alembic verificado como lineal terminado en revisión `g4f5e6d7c8b9`.
+   - Motor: Pruebas ejecutadas en SQLite in-memory / file `test.db`. Ejecución en PostgreSQL 15 mantenida como objetivo operacional pendiente de provisión de servidor PostgreSQL externo.
+
+2. COMPONENTE 2 — BACKEND FASTAPI (SGA-CD-FASTAPI-BACKEND/)
+   - Estado: Prueba automatizada aprobada (141/141 pruebas unitarias e integración en verde).
+   - Detalle: Autenticación JWT, verificación RBAC por rol, aislamiento multi-tenant por `inquilino_id` y rate limiting validados.
+   - Perímetro Protegido: `app/api/v1/endpoints/admin_general.py` inspeccionado exclusivamente en modo lectura y conservado 100% intacto (MD5 verified).
+
+3. COMPONENTE 3 — FRONTEND WEB (SGA-CD-WEB.git/)
+   - Estado: Validado estáticamente / Registro de vistas verificado.
+   - Detalle: 13 vistas de JavaScript registradas en `js/views/`. Navegación SPA estructurada en `js/navigation.js` para los 12 roles del sistema.
+   - Archivos Protegidos Intactos: `index.html`, `js/views/admin_general.js`, `vanguard.css`, `style.css`.
+
+4. COMPONENTE 4 Y 5 — FLET DESKTOP (SGA-CD-APP.git) Y FLET MOBILE (SGA-CD-APK.git)
+   - Estado: Validado en código y contratos de API / Integración probada.
+   - Detalle: Módulos CRM, generación de medios y distribución de contenido conectados a FastAPI backend mediante ApiClient asíncrono.
+   - Limitación Móvil: Generación de APK e instalación en dispositivo físico clasificadas como pendientes por restricción de SDK Android/Gradle en el sandbox.
+
+5. COMPONENTE 6 A 9 — ROLES, MULTITENANCY, CRM E INTEGRACIONES DE IA
+   - Estado: Integración de servicios comprobada mediante suites de prueba dedicadas.
+   - AIRouterService, SkyReelsV2Service, GPULifecycleService y PlanCapabilityService verificados con cuotas de 20h GPU mensuales en Plan Full y restricciones operativas en Plan Básico.

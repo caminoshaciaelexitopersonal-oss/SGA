@@ -1,0 +1,27 @@
+===============================================================================
+PLAN DE CORRECCIÓN Y PENDIENTES DE DESPLIEGUE OPERATIVO — SGA-CD
+Fecha: 27 de Octubre de 2026
+===============================================================================
+
+1. TAREAS PENDIENTES DE ENTORNO E INFRAESTRUCTURA (BLOQUEADAS POR SANDBOX)
+
+   [ ] 1.1 Provisión y Validación en PostgreSQL 15 Real:
+       - Descripción: Ejecutar `alembic upgrade head` sobre una instancia activa de PostgreSQL 15.
+       - Razón de Pendiente: Daemon de PostgreSQL y binario `psql` no disponibles en el entorno sandbox.
+       - Acción Requerida: Configurar `DATABASE_URL=postgresql://...` en entorno staging con PostgreSQL y ejecutar la suite completa de 218 pruebas.
+
+   [ ] 1.2 Validación de Orquestación Docker Live:
+       - Descripción: Ejecutar `docker compose up -d` y verificar healthchecks de contenedores en tiempo de ejecución.
+       - Razón de Pendiente: `docker run` bloqueado por error de montaje de OverlayFS en el kernel del contenedor sandbox (`fstype: overlay err: invalid argument`).
+       - Acción Requerida: Desplegar en máquina virtual o servidor Linux de producción con soporte OverlayFS completo.
+
+   [ ] 1.3 Compilación y Generación de APK Flet Mobile:
+       - Descripción: Compilar paquete APK con `flet build apk` para SGA-CD-APK.git.
+       - Razón de Pendiente: Ausencia de Android SDK, Java NDK y herramientas Gradle en la imagen del sandbox.
+       - Acción Requerida: Configurar pipeline CI/CD con runner de Android o entorno de compilación Flet móvil.
+
+2. MANTENIMIENTO FUTURO DE CÓDIGO (P3 - OPCIONAL)
+
+   [ ] 2.1 Migración de Sintaxis Pydantic V1 a V2:
+       - Actualizar `@validator` a `@field_validator` en schemas y en `admin_general.py` (cuando se autorice la apertura del perímetro protegido).
+       - Reemplazar `datetime.utcnow()` por `datetime.now(timezone.utc)`.
